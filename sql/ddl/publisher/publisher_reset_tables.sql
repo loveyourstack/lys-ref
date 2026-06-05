@@ -5,3 +5,6 @@ TRUNCATE TABLE publisher.author_archived;
 DELETE FROM publisher.author;
 
 ALTER SEQUENCE publisher.author_id_seq RESTART WITH 1;
+
+-- remove fake updates
+TRUNCATE lyspgmon.audit_update;
