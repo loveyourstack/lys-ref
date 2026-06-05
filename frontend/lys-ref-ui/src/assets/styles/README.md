@@ -1,0 +1,1 @@
+The flag CSS and icons are from https://github.com/alexerlandsson/flag-icons.

@@ -1,0 +1,24 @@
+[general]
+appName = "LoveYourStack Supplier API"
+env     = "dev"
+debug   = true
+
+[database]
+host   = "localhost"
+port   = "5432"
+database = "lysref"
+
+[dbOwnerUser]
+userName = "lysref_owner" # this PG user owns all database objects
+password = ""
+
+[dbServerUser]
+userName = "lysref_supplier" # this PG user only has the db access needed for the HTTP server
+password = ""
+
+[api]
+port = "8001"
+useAuthentication = true # may only be false if env = dev above
+
+[ui]
+url = "http://localhost:3000" # same as main UI: would normally be a different one

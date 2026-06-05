@@ -1,0 +1,47 @@
+[general]
+appName = "LoveYourStack Reference App"
+env     = "dev"
+debug   = true
+downloadsPath = "/home/<user>/downloads"
+
+[database]
+host   = "localhost"
+port   = "5432"
+database = "lysref"
+schemaCreationOrder = ["public", "system", "geo", "core", "digmark", "ecb", "maxmind", "process", "publisher", "supplier"] # must be updated when schemas are added / removed. Also need to add to schemas.sql
+
+[dbSuperUser]
+userName = "postgres" # only fill in dev environment: is used for local db creation
+password = ""
+
+[dbOwnerUser]
+userName = "lysref_owner" # this PG user owns all database objects
+password = ""
+
+[dbServerUser]
+userName = "lysref_server" # this PG user only has the db access needed for the HTTP server
+password = ""
+
+[dbCliUser]
+userName = "lysref_cli" # this PG user only has the db access needed for CLI commands
+password = ""
+
+[api]
+port = "8000"
+useAuthentication = true # may only be false if env = dev above
+
+[ui]
+url = "http://localhost:3000"
+
+[developer]
+givenName = ""
+familyName = ""
+email = ""
+password = ""
+
+[maxmind]
+accountId = ""
+licenseKey = ""
+
+[process]
+cliCmdPrefix = "/home/<user>/go/bin/refcli fake " # path to refcli and mandatory "fake" arg to prevent accidental execution of real commands
