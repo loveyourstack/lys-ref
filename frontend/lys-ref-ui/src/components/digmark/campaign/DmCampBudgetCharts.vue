@@ -56,7 +56,8 @@ const myStyles = {
   position: 'relative',
 }
 
-const baseOptions: ChartOptions<'pie'> = {
+// compute options so that theme value is properly reactive
+const baseOptions = computed<ChartOptions<'pie'>>(() => ({
   responsive: true,
   maintainAspectRatio: false, // needed for container size override
   plugins: {
@@ -74,13 +75,19 @@ const baseOptions: ChartOptions<'pie'> = {
       padding: { top: 8, bottom: 12 },
     },
   },
-}
+}))
 
-const managerChartOptions: ChartOptions<'pie'> = structuredClone(baseOptions)
-managerChartOptions.plugins!.title!.text = 'By manager'
+const managerChartOptions = computed<ChartOptions<'pie'>>(() => {
+  const options = structuredClone(baseOptions.value)
+  options.plugins!.title!.text = 'By manager'
+  return options
+})
 
-const verticalChartOptions: ChartOptions<'pie'> = structuredClone(baseOptions)
-verticalChartOptions.plugins!.title!.text = 'By vertical'
+const verticalChartOptions = computed<ChartOptions<'pie'>>(() => {
+  const options = structuredClone(baseOptions.value)
+  options.plugins!.title!.text = 'By vertical'
+  return options
+})
 
 function refreshItems() {
   isLoading.value = true
