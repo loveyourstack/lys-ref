@@ -92,8 +92,7 @@
           <v-text-field v-model.number="item.daily_budget_eur" hide-details density="compact" style="min-width: 110px;"
             :append-inner-icon="item.patch_daily_budget_icon"
             autofocus @focus="(e: any) => (e.target as HTMLInputElement)?.select()"
-            @keydown.enter.prevent="patchDailyBudget(item)"
-            @keydown.escape.prevent="refreshItems()"
+            @keydown="onDailyBudgetKeydown(item, $event)"
             :rules="[(v: number) => v >= 0 && v <= 2000 || 'Daily budget must be between 0 and 2,000']"
           ></v-text-field>
         </v-form>
@@ -331,6 +330,19 @@ function loadItems(options: { page: number, itemsPerPage: number, sortBy: SortIt
     // update totals
     refreshTotals.value = String(Date.now())
   } })
+}
+
+function onDailyBudgetKeydown(item: CampaignOptimizer, event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    patchDailyBudget(item)
+    return
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    refreshItems()
+  }
 }
 
 async function patchDailyBudget(item: CampaignOptimizer) {
