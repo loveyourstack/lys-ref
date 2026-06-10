@@ -2,6 +2,21 @@
 -- schemas and default privileges
 -- new schemas also need to be added to the config toml file
 
+----------------
+
+CREATE SCHEMA aws AUTHORIZATION lysref_owner;
+COMMENT ON SCHEMA aws IS 'shortname: aws';
+
+GRANT USAGE ON SCHEMA aws TO lysref_server;
+ALTER DEFAULT PRIVILEGES IN SCHEMA aws GRANT SELECT, UPDATE, INSERT, DELETE ON TABLES TO lysref_server;
+ALTER DEFAULT PRIVILEGES IN SCHEMA aws GRANT USAGE, SELECT ON SEQUENCES TO lysref_server;
+
+GRANT USAGE ON SCHEMA aws TO lysref_cli;
+ALTER DEFAULT PRIVILEGES IN SCHEMA aws GRANT SELECT, UPDATE, INSERT, DELETE ON TABLES TO lysref_cli;
+ALTER DEFAULT PRIVILEGES IN SCHEMA aws GRANT USAGE, SELECT ON SEQUENCES TO lysref_cli;
+
+----------------
+
 CREATE SCHEMA core AUTHORIZATION lysref_owner;
 -- no shortname for core schema
 

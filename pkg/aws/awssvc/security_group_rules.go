@@ -40,7 +40,7 @@ func (svc Service) UpdateUserSecurityGroupRules(ctx context.Context, userShortna
 
 		desc := *rule.Description
 		if !strings.Contains(strings.ToLower(desc), strings.ToLower(userShortname)) {
-			return fmt.Errorf("the description (%s) of rule: %v does not contain the shortname: %s", desc, *rule.SecurityGroupRuleId, userShortname)
+			return fmt.Errorf("the description (%s) of rule: %v does not contain the shortname: '%s'", desc, *rule.SecurityGroupRuleId, userShortname)
 		}
 	}
 

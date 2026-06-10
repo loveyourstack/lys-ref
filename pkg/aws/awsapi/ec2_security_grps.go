@@ -20,9 +20,12 @@ func (c Client) GetApiEc2SecGroups(ctx context.Context) (secGroups []awsTypes.Se
 	// page through security groups
 	nextToken := new(string)
 	for {
-		secGrpsOutput, err := ec2Client.DescribeSecurityGroups(ctx, &ec2.DescribeSecurityGroupsInput{
-			NextToken: nextToken,
-		})
+		input := &ec2.DescribeSecurityGroupsInput{}
+		if nextToken != nil && *nextToken != "" {
+			input.NextToken = nextToken
+		}
+
+		secGrpsOutput, err := ec2Client.DescribeSecurityGroups(ctx, input)
 		if err != nil {
 			return nil, fmt.Errorf("ec2Client.DescribeSecurityGroups failed: %w", err)
 		}
@@ -48,10 +51,14 @@ func (c Client) getApiEc2SecGroupRules(ctx context.Context, filter awsTypes.Filt
 	// page through security group rules
 	nextToken := new(string)
 	for {
-		secGrpsRulesOutput, err := ec2Client.DescribeSecurityGroupRules(ctx, &ec2.DescribeSecurityGroupRulesInput{
-			Filters:   []awsTypes.Filter{filter},
-			NextToken: nextToken,
-		})
+		input := &ec2.DescribeSecurityGroupRulesInput{
+			Filters: []awsTypes.Filter{filter},
+		}
+		if nextToken != nil && *nextToken != "" {
+			input.NextToken = nextToken
+		}
+
+		secGrpsRulesOutput, err := ec2Client.DescribeSecurityGroupRules(ctx, input)
 		if err != nil {
 			return nil, fmt.Errorf("ec2Client.DescribeSecurityGroupRules failed: %w", err)
 		}

@@ -9,6 +9,8 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
 )
 
 // Application contains the fields common to all commands
@@ -20,7 +22,11 @@ type Application struct {
 	OwnerDb  *pgxpool.Pool // db owner connection for monitoring
 	Validate *validator.Validate
 
+	// clients
+	AwsClient awsapi.Client
+
 	// services
+	AwsSvc  awssvc.Service
 	ProcSvc procsvc.Service
 	SysSvc  syssvc.Service
 }

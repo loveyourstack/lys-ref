@@ -26,6 +26,8 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
@@ -99,9 +101,10 @@ func main() {
 	srvApp.UserStore = sysuser.Store{Db: srvApp.Db}
 
 	// attach clients
-	// ...
+	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.InfoLog, srvApp.ErrorLog)
 
 	// attach services
+	srvApp.AwsSvc = awssvc.NewService(srvApp.Db, srvApp.AwsClient, srvApp.InfoLog, srvApp.ErrorLog)
 	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.InfoLog, srvApp.ErrorLog)
 	srvApp.SysSvc = syssvc.NewService(srvApp.InfoLog, srvApp.ErrorLog)
 

@@ -111,6 +111,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute {
 
 	return []lys.SubRoute{
+		{Url: "/aws", RouteAdder: srvApp.awsRoutes()},
 		{Url: "/core", RouteAdder: srvApp.coreRoutes(apiEnv)},
 		{Url: "/digmark", RouteAdder: srvApp.digmarkRoutes(apiEnv)},
 		{Url: "/ecb", RouteAdder: srvApp.ecbRoutes(apiEnv)},
@@ -122,6 +123,21 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/supplier", RouteAdder: srvApp.supplierRoutes(apiEnv)},
 		{Url: "/system", RouteAdder: srvApp.systemRoutes(apiEnv)},
 		{Url: "/tech", RouteAdder: srvApp.techRoutes(apiEnv)},
+	}
+}
+
+func (srvApp *httpServerApplication) awsRoutes() lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+
+		// restrict data change routes to writer roles
+		writeR := r.NewRoute().Subrouter()
+		writeR.Use(authorizeRole(sysrole.Writer[:]))
+
+		endpoint := "/update-user-security-group-rules"
+		writeR.HandleFunc(endpoint, srvApp.awsUpdateUserSecurityGroupRules).Methods("PATCH")
+
+		return r
 	}
 }
 

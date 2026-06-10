@@ -16,6 +16,7 @@ import (
 	appCmd "github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/admincli"
+	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/awspcli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/dmcli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/ecbcli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/fakecli"
@@ -25,6 +26,8 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/pubcli"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
 	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/spf13/cobra"
@@ -50,6 +53,7 @@ func addSubCommands() {
 	rootCmd.AddCommand(SleepCmd(cliApp))
 
 	rootCmd.AddCommand(admincli.NewCmd(cliApp))
+	rootCmd.AddCommand(awspcli.NewCmd(cliApp))
 	rootCmd.AddCommand(dmcli.NewCmd(cliApp))
 	rootCmd.AddCommand(ecbcli.NewCmd(cliApp))
 	rootCmd.AddCommand(fakecli.NewCmd(cliApp))
@@ -92,10 +96,12 @@ func Execute() {
 	defer cliApp.Db.Close()
 
 	// attach API clients
+	cliApp.AwsClient = awsapi.NewClient(conf.Aws, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.EcbClient = ecbapi.NewClient(cliApp.Db, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.InfoLog, cliApp.ErrorLog)
 
 	// attach services
+	cliApp.AwsSvc = awssvc.NewService(cliApp.Db, cliApp.AwsClient, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.EcbSvc = ecbsvc.NewService(cliApp.EcbClient, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.MaxMindSvc = mmsvc.NewService(cliApp.MaxMindClient, cliApp.Config.General.DownloadsPath, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.ProcSvc = procsvc.NewService(conf.Process, cliApp.InfoLog, cliApp.ErrorLog)

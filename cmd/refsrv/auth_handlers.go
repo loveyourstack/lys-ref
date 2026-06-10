@@ -98,7 +98,9 @@ func (srvApp *httpServerApplication) authGetSessions(w http.ResponseWriter, r *h
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-func authGetSignInResponse(forcePasswordChange bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string, ip netip.Addr, sessToken, userName string) loginResponse {
+func authGetSignInResponse(forcePasswordChange bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
+	ip netip.Addr, sessToken, userName string) loginResponse {
+
 	loginResp := loginResponse{
 		ForcePasswordChange: forcePasswordChange,
 		GeoIpCountryIsoCode: geoIpCountryIsoCode,

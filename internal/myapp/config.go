@@ -7,6 +7,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
+	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -84,8 +85,10 @@ type Config struct {
 	API          api
 	UI           ui
 	Developer    developer
-	MaxMind      mmapi.Conf
-	Process      Process
+
+	Aws     awsapi.Conf
+	MaxMind mmapi.Conf
+	Process Process
 }
 
 func (c *Config) LoadFromFile(configFilePath string) (err error) {
