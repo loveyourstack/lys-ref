@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/loveyourstack/connectors/aws/awsapi"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
 	"github.com/loveyourstack/lys/lysmail"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"golang.org/x/crypto/bcrypt"

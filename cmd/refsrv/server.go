@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/loveyourstack/connectors/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
@@ -18,7 +19,6 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
-	"github.com/loveyourstack/lys-ref/pkg/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/lys/lysauth"
 )
 

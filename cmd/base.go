@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/loveyourstack/connectors/aws/awsapi"
+	"github.com/loveyourstack/connectors/aws/awssvc"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
 )
 
 // Application contains the fields common to all commands
@@ -23,7 +23,7 @@ type Application struct {
 	Validate *validator.Validate
 
 	// clients
-	AwsClient awsapi.Client
+	AwsClient *awsapi.Client
 
 	// services
 	AwsSvc  awssvc.Service

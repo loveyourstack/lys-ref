@@ -12,6 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/loveyourstack/connectors/aws/awsapi"
+	"github.com/loveyourstack/connectors/aws/awssvc"
+	"github.com/loveyourstack/connectors/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
@@ -26,9 +29,6 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
-	"github.com/loveyourstack/lys-ref/pkg/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
@@ -103,7 +103,7 @@ func main() {
 	srvApp.UserStore = sysuser.Store{Db: srvApp.Db}
 
 	// attach clients
-	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.InfoLog, srvApp.ErrorLog)
+	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.InfoLog, srvApp.ErrorLog)
 
 	// attach services
 	srvApp.AwsSvc = awssvc.NewService(srvApp.Db, srvApp.AwsClient, srvApp.InfoLog, srvApp.ErrorLog)

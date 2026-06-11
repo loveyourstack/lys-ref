@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/loveyourstack/connectors/aws/awsapi"
+	"github.com/loveyourstack/connectors/aws/awssvc"
 	"github.com/loveyourstack/connectors/ecb/ecbapi"
 	"github.com/loveyourstack/connectors/ecb/ecbsvc"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
@@ -26,8 +28,6 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/pubcli"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
-	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
 	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/spf13/cobra"
@@ -96,7 +96,7 @@ func Execute() {
 	defer cliApp.Db.Close()
 
 	// attach API clients
-	cliApp.AwsClient = awsapi.NewClient(conf.Aws, cliApp.InfoLog, cliApp.ErrorLog)
+	cliApp.AwsClient = awsapi.NewClient(conf.Aws, cliApp.Db, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.EcbClient = ecbapi.NewClient(cliApp.Db, cliApp.InfoLog, cliApp.ErrorLog)
 	cliApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.InfoLog, cliApp.ErrorLog)
 
