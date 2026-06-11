@@ -18,6 +18,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys-ref/pkg/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/lys/lysauth"
 )
 
@@ -38,14 +39,15 @@ type httpServerApplication struct {
 	UnauthedRateLimits *lysauth.AppRateLimits
 
 	// stores
-	BlockedIPStore    sysblockedip.Store
-	GeoLocationStore  mmlocation.Store
-	GeoNetworkStore   mmnetwork.Store
-	LoginAttemptStore sysloginattempt.Store
-	SessionStore      syssession.Store
-	SessionHistStore  syssessionhist.Store
-	SrvLogStore       syssrvreq.Store
-	UserStore         sysuser.Store
+	AwsUserSgRuleStore awsusersgrule.Store
+	BlockedIPStore     sysblockedip.Store
+	GeoLocationStore   mmlocation.Store
+	GeoNetworkStore    mmnetwork.Store
+	LoginAttemptStore  sysloginattempt.Store
+	SessionStore       syssession.Store
+	SessionHistStore   syssessionhist.Store
+	SrvLogStore        syssrvreq.Store
+	UserStore          sysuser.Store
 }
 
 // limitAuthed is middleware that applies rate limiting to authenticated users based on user ID
@@ -130,7 +132,10 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		}
 
 		// log to db for activity monitoring
-		_, err = srvApp.SrvLogStore.Insert(ctx, syssrvreq.Input{
+
+		// use separate context to ensure logging happens even if request context is cancelled
+		logCtx := context.Background()
+		_, err = srvApp.SrvLogStore.Insert(logCtx, syssrvreq.Input{
 			DurationMs: duration.Milliseconds(),
 			Endpoint:   endpoint,
 			Ip:         remoteHostIP,
@@ -139,7 +144,7 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 			UserName:   userInfo.UserName,
 		})
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: failed to insert log: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(logCtx, fmt.Errorf("logAuthedRequest: failed to insert log: %w", err), srvApp.ErrorLog, w)
 			return
 		}
 	})
