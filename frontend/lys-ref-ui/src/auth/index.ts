@@ -10,6 +10,7 @@ export default {
   user: {
     authenticated: false,
     force_password_change: false,
+    has_aws_sg_rules: false,
     geo_ip_country_iso_code: '',
     geo_ip_location: '',
     id: 0,
@@ -21,6 +22,7 @@ export default {
   assignUser (data: AuthUserData) {
     this.user.authenticated = true
     this.user.force_password_change = data.force_password_change
+    this.user.has_aws_sg_rules = data.has_aws_sg_rules
     this.user.geo_ip_country_iso_code = data.geo_ip_country_iso_code
     this.user.geo_ip_location = data.geo_ip_location
     this.user.id = data.user_id
@@ -31,6 +33,7 @@ export default {
   revokeUser () {
     this.user.authenticated = false
     this.user.force_password_change = false
+    this.user.has_aws_sg_rules = false
     this.user.geo_ip_country_iso_code = ''
     this.user.geo_ip_location = ''
     this.user.id = 0

@@ -85,6 +85,10 @@ func (s Store) UpdatePartial(ctx context.Context, assignmentsMap map[string]any,
 	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, inputPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
+func (s Store) UserHasRules(ctx context.Context, userShortname string) (bool, error) {
+	return lyspg.Exists(ctx, s.Db, schemaName, tableName, "user_shortname", userShortname)
+}
+
 func (s Store) Validate(validate *validator.Validate, input Input) error {
 	return lysmeta.Validate(validate, input)
 }

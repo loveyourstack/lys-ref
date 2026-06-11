@@ -39,6 +39,11 @@
               <v-switch label="Dark mode" color="primary" v-model="darkMode" hide-details></v-switch>
             </v-list-item>
 
+            <v-list-item v-if="auth.user.has_aws_sg_rules">
+              <v-btn prepend-icon="mdi-wall-fire" style="letter-spacing: normal !important;" 
+                :loading="updatingAwsFirewall" @click="updateAwsFirewall()">Update AWS firewall</v-btn>
+            </v-list-item>
+
           </v-list>
         </v-card>
       </v-menu>
@@ -65,7 +70,7 @@
 import { ref, watch, onBeforeMount, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
-import { fetchOnce } from 'lys-vue'
+import { fetchOnce, notify } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
 import { useAppStore } from '@/stores/app'
@@ -96,6 +101,8 @@ const storeData = ref<StoreData>()
 
 const showLeftNav = ref(true)
 const showRightNav = ref(true)
+
+const updatingAwsFirewall = ref(false)
 
 const lsKey = 'main'
 
@@ -142,6 +149,16 @@ function logout() {
       auth.logout()
       router.push({ path: '/login' })
     })
+}
+
+function updateAwsFirewall() {
+  updatingAwsFirewall.value = true
+  ax.patch('/a/aws/update-user-security-group-rules')
+    .then(resp => {
+      notify(appStore.company, resp.data.data, appStore.logoUrl)
+    })
+    .catch() // handled by interceptor
+    .finally(() => updatingAwsFirewall.value = false )
 }
 
 watch(darkMode, (newVal) => {

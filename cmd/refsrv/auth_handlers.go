@@ -19,6 +19,7 @@ import (
 
 type loginResponse struct {
 	ForcePasswordChange bool       `json:"force_password_change"`
+	HasAwsSgRules       bool       `json:"has_aws_sg_rules"`
 	GeoIpCountryIsoCode string     `json:"geo_ip_country_iso_code"`
 	GeoIpLocation       string     `json:"geo_ip_location"`
 	Ip                  netip.Addr `json:"ip"`
@@ -98,11 +99,12 @@ func (srvApp *httpServerApplication) authGetSessions(w http.ResponseWriter, r *h
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-func authGetSignInResponse(forcePasswordChange bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
+func authGetSignInResponse(forcePasswordChange, hasAwsSgRules bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
 	ip netip.Addr, sessToken, userName string) loginResponse {
 
 	loginResp := loginResponse{
 		ForcePasswordChange: forcePasswordChange,
+		HasAwsSgRules:       hasAwsSgRules,
 		GeoIpCountryIsoCode: geoIpCountryIsoCode,
 		GeoIpLocation:       geoIpLocation,
 		Ip:                  ip,
@@ -191,6 +193,13 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// check if user has AWS SG rules
+	hasAwsSgRules, err := srvApp.AwsUserSgRuleStore.UserHasRules(ctx, sysUser.Name)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		return
+	}
+
 	// create a session for this user
 	sessInput := lysauth.SessionInput{
 		AllowMultipleSessions: sysUser.AllowMultipleSessions,
@@ -212,7 +221,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	}
 
 	// build the reponse to be returned to the user
-	loginResp := authGetSignInResponse(sysUser.ForcePasswordChange, sysrole.ToStringSlice(sysUser.Roles), sysUser.Id,
+	loginResp := authGetSignInResponse(sysUser.ForcePasswordChange, hasAwsSgRules, sysrole.ToStringSlice(sysUser.Roles), sysUser.Id,
 		geoIpCountryIsoCode, geoIpLocation, remoteHostIP, sessToken, sysUser.Name)
 
 	// success
@@ -282,8 +291,15 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 		return
 	}
 
+	// check if user has AWS SG rules
+	hasAwsSgRules, err := srvApp.AwsUserSgRuleStore.UserHasRules(ctx, sess.UserName)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", sess.UserName, err), srvApp.ErrorLog, w)
+		return
+	}
+
 	// build the reponse to be returned to the UI
-	signInResp := authGetSignInResponse(sess.ForcePasswordChange, sess.Roles, sess.UserId,
+	signInResp := authGetSignInResponse(sess.ForcePasswordChange, hasAwsSgRules, sess.Roles, sess.UserId,
 		sess.GeoIpCountryIsoCode, sess.GeoIpLocation, sess.Ip, sess.Token, sess.UserName)
 
 	// success

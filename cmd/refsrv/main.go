@@ -28,6 +28,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
 	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
 	"github.com/loveyourstack/lys-ref/pkg/aws/awssvc"
+	"github.com/loveyourstack/lys-ref/pkg/aws/stores/awsusersgrule"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
@@ -91,6 +92,7 @@ func main() {
 	defer srvApp.Db.Close()
 
 	// attach stores
+	srvApp.AwsUserSgRuleStore = awsusersgrule.Store{Db: srvApp.Db}
 	srvApp.BlockedIPStore = sysblockedip.Store{Db: srvApp.Db}
 	srvApp.GeoLocationStore = mmlocation.Store{Db: srvApp.Db}
 	srvApp.GeoNetworkStore = mmnetwork.Store{Db: srvApp.Db}

@@ -8,6 +8,7 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/pkg/aws/awsapi"
+	"github.com/loveyourstack/lys/lysmail"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -89,6 +90,7 @@ type Config struct {
 	Aws     awsapi.Conf
 	MaxMind mmapi.Conf
 	Process Process
+	Smtp    lysmail.SmtpConfig
 }
 
 func (c *Config) LoadFromFile(configFilePath string) (err error) {
@@ -105,11 +107,18 @@ func (c *Config) LoadFromFile(configFilePath string) (err error) {
 		return fmt.Errorf("toml.DecodeFile failed: %w", err)
 	}
 
+	// validate conf
+
 	// enforce dev-only rules
 	if c.General.Env != appenv.Dev {
 		if !c.API.UseAuthentication {
 			return fmt.Errorf("config validation failed: API.UseAuthentication cannot be false when General.Env is not dev")
 		}
+	}
+
+	err = c.Smtp.Validate()
+	if err != nil {
+		return fmt.Errorf("c.Smtp.Validate failed: %w", err)
 	}
 
 	return nil

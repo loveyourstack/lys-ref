@@ -50,3 +50,13 @@ licenseKey = ""
 
 [process]
 cliCmdPrefix = "/home/<user>/go/bin/refcli fake " # path to refcli and mandatory "fake" arg to prevent accidental execution of real commands
+
+[smtp]
+address = "smtp.gmail.com:587" # SMTP server address, e.g. "smtp.gmail.com:587"
+bccs = [] # list of email addresses to be BCC'd on all mails
+ccs = [] # list of email addresses to be CC'd on all mails
+host = "smtp.gmail.com" # SMTP server host, e.g. "smtp.gmail.com", used for authentication
+recipientOverride = "" # if non-blank, all emails will be sent to this recipient
+senderEmail = "" # email of account which sends the mail
+senderName = "" # name which appears in the recipient's inbox
+senderPassword = "" # password of account which sends the mail
