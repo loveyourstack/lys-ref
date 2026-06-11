@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/loveyourstack/connectors/aws/stores/awsapicall"
 	"github.com/loveyourstack/connectors/ecb/stores/ecbapicall"
 	"github.com/loveyourstack/connectors/ecb/stores/ecbexchangerate"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmapicall"
@@ -111,7 +112,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute {
 
 	return []lys.SubRoute{
-		{Url: "/aws", RouteAdder: srvApp.awsRoutes()},
+		{Url: "/aws", RouteAdder: srvApp.awsRoutes(apiEnv)},
 		{Url: "/core", RouteAdder: srvApp.coreRoutes(apiEnv)},
 		{Url: "/digmark", RouteAdder: srvApp.digmarkRoutes(apiEnv)},
 		{Url: "/ecb", RouteAdder: srvApp.ecbRoutes(apiEnv)},
@@ -126,7 +127,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 	}
 }
 
-func (srvApp *httpServerApplication) awsRoutes() lys.RouteAdderFunc {
+func (srvApp *httpServerApplication) awsRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
 
 	return func(r *mux.Router) *mux.Router {
 
@@ -134,7 +135,13 @@ func (srvApp *httpServerApplication) awsRoutes() lys.RouteAdderFunc {
 		writeR := r.NewRoute().Subrouter()
 		writeR.Use(authorizeRole(sysrole.Writer[:]))
 
-		endpoint := "/update-user-security-group-rules"
+		endpoint := "/api-calls"
+
+		apiCallStore := awsapicall.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
+
+		endpoint = "/update-user-security-group-rules"
 		writeR.HandleFunc(endpoint, srvApp.awsUpdateUserSecurityGroupRules).Methods("PATCH")
 
 		return r
