@@ -14,14 +14,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const testMaxUserConnections = 5
+
 func testLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 func newTestHub() *NotificationHub {
 	return &NotificationHub{
-		conns:    make(map[int64][]*websocket.Conn),
-		errorLog: testLogger(),
+		conns:              make(map[int64][]*websocket.Conn),
+		errorLog:           testLogger(),
+		maxUserConnections: testMaxUserConnections,
 	}
 }
 
@@ -75,39 +78,59 @@ func newWebsocketPair(t *testing.T) (*websocket.Conn, *websocket.Conn, func()) {
 
 func TestNewNotificationHubValidation(t *testing.T) {
 	tests := []struct {
-		name    string
-		db      *pgxpool.Pool
-		channel string
-		logger  *slog.Logger
-		wantErr string
+		name               string
+		db                 *pgxpool.Pool
+		channel            string
+		maxUserConnections int
+		logger             *slog.Logger
+		wantErr            string
 	}{
 		{
-			name:    "nil db",
-			db:      nil,
-			channel: "chan_notifications",
-			logger:  testLogger(),
-			wantErr: "db is required",
+			name:               "nil db",
+			db:                 nil,
+			channel:            "chan_notifications",
+			maxUserConnections: testMaxUserConnections,
+			logger:             testLogger(),
+			wantErr:            "db is required",
 		},
 		{
-			name:    "empty channel",
-			db:      &pgxpool.Pool{},
-			channel: "",
-			logger:  testLogger(),
-			wantErr: "dbListenChannel is required",
+			name:               "empty channel",
+			db:                 &pgxpool.Pool{},
+			channel:            "",
+			maxUserConnections: testMaxUserConnections,
+			logger:             testLogger(),
+			wantErr:            "dbListenChannel is required",
 		},
 		{
-			name:    "nil logger",
-			db:      &pgxpool.Pool{},
-			channel: "chan_notifications",
-			logger:  nil,
-			wantErr: "errorLog is required",
+			name:               "maxUserConnections zero",
+			db:                 &pgxpool.Pool{},
+			channel:            "chan_notifications",
+			maxUserConnections: 0,
+			logger:             testLogger(),
+			wantErr:            "maxUserConnections must be greater than 0",
+		},
+		{
+			name:               "maxUserConnections negative",
+			db:                 &pgxpool.Pool{},
+			channel:            "chan_notifications",
+			maxUserConnections: -1,
+			logger:             testLogger(),
+			wantErr:            "maxUserConnections must be greater than 0",
+		},
+		{
+			name:               "nil logger",
+			db:                 &pgxpool.Pool{},
+			channel:            "chan_notifications",
+			maxUserConnections: testMaxUserConnections,
+			logger:             nil,
+			wantErr:            "errorLog is required",
 		},
 	}
 
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			hub, err := NewNotificationHub(context.Background(), tc.db, tc.channel, tc.logger)
+			hub, err := NewNotificationHub(context.Background(), tc.db, tc.channel, tc.maxUserConnections, tc.logger)
 			if err == nil {
 				t.Fatalf("expected error containing %q, got nil", tc.wantErr)
 			}
@@ -218,14 +241,14 @@ func TestRegisterEnforcesMaxUserConnections(t *testing.T) {
 	hub := newTestHub()
 	userID := int64(123)
 
-	cleanups := make([]func(), 0, MaxUserConnections+1)
+	cleanups := make([]func(), 0, testMaxUserConnections+1)
 	t.Cleanup(func() {
 		for _, cleanup := range cleanups {
 			cleanup()
 		}
 	})
 
-	for i := 0; i < MaxUserConnections; i++ {
+	for i := 0; i < testMaxUserConnections; i++ {
 		serverConn, _, cleanup := newWebsocketPair(t)
 		cleanups = append(cleanups, cleanup)
 
@@ -244,8 +267,8 @@ func TestRegisterEnforcesMaxUserConnections(t *testing.T) {
 	if !strings.Contains(err.Error(), "maximum active connections") {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got := hub.UserConnCount(userID); got != MaxUserConnections {
-		t.Fatalf("expected %d connections after max enforcement, got %d", MaxUserConnections, got)
+	if got := hub.UserConnCount(userID); got != testMaxUserConnections {
+		t.Fatalf("expected %d connections after max enforcement, got %d", testMaxUserConnections, got)
 	}
 
 	if writeErr := extraConn.WriteMessage(websocket.TextMessage, []byte("x")); writeErr == nil {

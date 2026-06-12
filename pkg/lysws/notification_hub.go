@@ -16,26 +16,24 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const MaxUserConnections int = 5
-
 // NotificationHub manages WebSocket connections for user notifications.
 // It listens for database notifications and broadcasts messages to connected clients based on user ID.
 type NotificationHub struct {
-	closed          atomic.Bool
-	conns           map[int64][]*websocket.Conn // user_id → active sockets
+	closed             atomic.Bool
+	conns              map[int64][]*websocket.Conn // user_id → active sockets
+	errorLog           *slog.Logger
+	maxUserConnections int
+	mu                 sync.RWMutex // protects conns
+
 	db              *pgxpool.Pool
 	dbListenConn    *pgxpool.Conn // single connection acquired from pool for LISTEN/UNLISTEN
 	dbListenChannel string        // database channel to LISTEN on for notifications
-	errorLog        *slog.Logger
-	listenMu        sync.Mutex         // protects listenCancel and listenDone
-	listenCancel    context.CancelFunc // used to signal ListenAndBroadcast to stop
-	listenDone      chan struct{}      // closed when ListenAndBroadcast has fully stopped
-	mu              sync.RWMutex       // protects conns
 }
 
 // NewNotificationHub creates a new NotificationHub instance.
 // It acquires a database connection for listening to notifications and initializes the connection map.
-func NewNotificationHub(ctx context.Context, db *pgxpool.Pool, dbListenChannel string, errorLog *slog.Logger) (hub *NotificationHub, err error) {
+func NewNotificationHub(ctx context.Context, db *pgxpool.Pool, dbListenChannel string, maxUserConnections int,
+	errorLog *slog.Logger) (hub *NotificationHub, err error) {
 
 	if db == nil {
 		return nil, fmt.Errorf("db is required")
@@ -43,22 +41,27 @@ func NewNotificationHub(ctx context.Context, db *pgxpool.Pool, dbListenChannel s
 	if dbListenChannel == "" {
 		return nil, fmt.Errorf("dbListenChannel is required")
 	}
+	if maxUserConnections < 1 {
+		return nil, fmt.Errorf("maxUserConnections must be greater than 0")
+	}
 	if errorLog == nil {
 		return nil, fmt.Errorf("errorLog is required")
 	}
 
 	// acquire a single connection from the pool for listening
-	dbConn, err := db.Acquire(ctx)
+	dbLisConn, err := db.Acquire(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("db.Acquire failed: %w", err)
 	}
 
 	return &NotificationHub{
+		conns:              make(map[int64][]*websocket.Conn),
+		errorLog:           errorLog,
+		maxUserConnections: maxUserConnections,
+
 		db:              db,
-		dbListenConn:    dbConn,
+		dbListenConn:    dbLisConn,
 		dbListenChannel: dbListenChannel,
-		conns:           make(map[int64][]*websocket.Conn),
-		errorLog:        errorLog,
 	}, nil
 }
 
@@ -111,29 +114,10 @@ func (h *NotificationHub) Close() (err error) {
 	h.conns = make(map[int64][]*websocket.Conn)
 	h.mu.Unlock()
 
-	// snapshot listen-related fields while holding lock
-	h.listenMu.Lock()
-	lisCancel := h.listenCancel
-	lisDone := h.listenDone
-	lisConn := h.dbListenConn
-	h.listenMu.Unlock()
-
-	// signal ListenAndBroadcast to stop and wait for it to finish
-	if lisCancel != nil {
-		lisCancel()
-	}
-	if lisDone != nil {
-		<-lisDone
-	}
-
 	// close the listen connection if it exists
-	if lisConn != nil {
-		lisConn.Release()
-		h.listenMu.Lock()
-		if h.dbListenConn == lisConn {
-			h.dbListenConn = nil
-		}
-		h.listenMu.Unlock()
+	if h.dbListenConn != nil {
+		h.dbListenConn.Release()
+		h.dbListenConn = nil
 	}
 
 	// close sockets outside the lock so slow network closes do not block remaining ops
@@ -149,61 +133,37 @@ func (h *NotificationHub) Close() (err error) {
 type NotificationSelectFunc func(ctx context.Context, db *pgxpool.Pool, notId int64) (userId int64, notType, message string, err error)
 
 // ListenAndBroadcast listens for database notifications and broadcasts messages to users based on the notification payload.
+// Only call this once per hub.
 func (h *NotificationHub) ListenAndBroadcast(ctx context.Context, selectFunc NotificationSelectFunc) (err error) {
 
 	if selectFunc == nil {
 		return fmt.Errorf("selectFunc is required")
 	}
 
-	h.listenMu.Lock()
 	if h.closed.Load() {
-		h.listenMu.Unlock()
 		return fmt.Errorf("notification hub is closed")
 	}
 
-	if h.listenDone != nil {
-		h.listenMu.Unlock()
-		return fmt.Errorf("listener already running")
-	}
-
-	// snapshot listen conn while holding lock
+	// snapshot the listen connection during lock to avoid panic if Close is called while ListenAndBroadcast is running
+	h.mu.Lock()
 	lisConn := h.dbListenConn
+	h.mu.Unlock()
+
 	if lisConn == nil {
-		h.listenMu.Unlock()
 		return fmt.Errorf("dbListenConn is not initialized")
 	}
 
-	// create listen context and done channel for signaling shutdown
-	lisCtx, cancel := context.WithCancel(ctx)
-
-	// ensure resources are cleaned up if we exit early with an error
-	defer cancel()
-
-	// set listen-related fields before starting listener loop
-	done := make(chan struct{})
-	h.listenCancel = cancel
-	h.listenDone = done
-	h.listenMu.Unlock()
-
-	// ensure we UNLISTEN and clean up listen-related fields when ListenAndBroadcast exits
-	defer func() {
-		_, unlistenErr := lisConn.Exec(context.Background(), "UNLISTEN "+pgx.Identifier{h.dbListenChannel}.Sanitize())
-		if unlistenErr != nil {
-			h.errorLog.Error("UNLISTEN failed", "channel", h.dbListenChannel, "error", unlistenErr)
-		}
-
-		h.listenMu.Lock()
-		close(done)
-		h.listenCancel = nil
-		h.listenDone = nil
-		h.listenMu.Unlock()
-	}()
-
 	// LISTEN to receive notifications on the dbListenChannel
-	_, err = lisConn.Exec(lisCtx, "LISTEN "+pgx.Identifier{h.dbListenChannel}.Sanitize())
+	_, err = lisConn.Exec(ctx, "LISTEN "+pgx.Identifier{h.dbListenChannel}.Sanitize())
 	if err != nil {
 		return fmt.Errorf("lisConn.Exec (LISTEN) failed on channel %s: %w", h.dbListenChannel, err)
 	}
+	defer func() {
+		_, unlistenErr := lisConn.Exec(context.Background(), "UNLISTEN "+pgx.Identifier{h.dbListenChannel}.Sanitize())
+		if unlistenErr != nil {
+			h.errorLog.Error("lisConn.Exec (UNLISTEN) failed", "channel", h.dbListenChannel, "error", unlistenErr)
+		}
+	}()
 
 	type messagePayload struct {
 		Type string `json:"type"`
@@ -212,9 +172,9 @@ func (h *NotificationHub) ListenAndBroadcast(ctx context.Context, selectFunc Not
 
 	// wait for notifications or context cancellation
 	for {
-		not, err := lisConn.Conn().WaitForNotification(lisCtx)
+		not, err := lisConn.Conn().WaitForNotification(ctx)
 		if err != nil {
-			if lisCtx.Err() != nil {
+			if ctx.Err() != nil {
 				return nil
 			}
 			return fmt.Errorf("lisConn.Conn().WaitForNotification failed: %w", err)
@@ -277,7 +237,7 @@ func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
 		err = fmt.Errorf("connection already registered for user %d", userID)
 
 	// reject if userID already has maximum active connections
-	case len(h.conns[userID]) >= MaxUserConnections:
+	case len(h.conns[userID]) >= h.maxUserConnections:
 		shouldClose = true
 		err = fmt.Errorf("maximum active connections reached for user %d", userID)
 

@@ -35,6 +35,8 @@ import (
 	"github.com/loveyourstack/lys/lyspgdb"
 )
 
+const maxUserWsConnections = 5
+
 func main() {
 
 	configFileName := "ref_config.toml"
@@ -93,21 +95,6 @@ func main() {
 	}
 	defer srvApp.Db.Close()
 
-	// attach ws notification hub to srvApp
-	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", srvApp.ErrorLog)
-	if err != nil {
-		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
-	}
-	defer srvApp.NotificationHub.Close()
-
-	// start ws listener
-	go func() {
-		err := srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById)
-		if err != nil {
-			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
-		}
-	}()
-
 	// attach stores
 	srvApp.AwsUserSgRuleStore = awsusersgrule.Store{Db: srvApp.Db}
 	srvApp.BlockedIPStore = sysblockedip.Store{Db: srvApp.Db}
@@ -159,6 +146,22 @@ func main() {
 	srvApp.archiveExpiredSessions(ctx)
 	go srvApp.runExpiredSessionArchiver(ctx, 5*time.Minute)
 
+	// --------------------------------
+
+	// attach ws notification hub to srvApp, listening on the same db channel found in system.notification_trigger()
+	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", maxUserWsConnections, srvApp.ErrorLog)
+	if err != nil {
+		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
+	}
+
+	// start hub listener, reading payload details from the system.notification store
+	hubListenerErrCh := make(chan error, 1)
+	go func() {
+		hubListenerErrCh <- srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById)
+	}()
+
+	// --------------------------------
+
 	// display startup message with port and debug mode if enabled
 	startupMsg := fmt.Sprintf("starting refsrv on port: %s", srvApp.Config.API.Port)
 	if conf.General.Debug {
@@ -167,28 +170,36 @@ func main() {
 	srvApp.InfoLog.Info(startupMsg)
 
 	// start server in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
-	errCh := make(chan error, 1)
+	srvErrCh := make(chan error, 1)
 	go func() {
-		errCh <- srv.ListenAndServe()
+		srvErrCh <- srv.ListenAndServe()
 	}()
 
 	// wait for shutdown signal or server error
 	select {
-	case err := <-errCh:
+	case err := <-srvErrCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("initialization: srv.ListenAndServe failed: %s", err.Error())
+			srvApp.ErrorLog.Error("srv.ListenAndServe failed", "error", err)
 		}
+	case err := <-hubListenerErrCh:
+		if err != nil {
+			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
+		}
+		stop()
+		srvApp.InfoLog.Info("hub listener exited")
 	case <-ctx.Done():
 		srvApp.InfoLog.Info("shutdown signal received")
 	}
 
+	// --------------------------------
+
 	// create context with timeout for server shutdown
-	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelShutdown()
+	srvShutdownCtx, srvCancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
+	defer srvCancelShutdown()
 
 	// gracefully shutdown server, waiting for active requests to finish or timeout before forcefully closing
-	if err := srv.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("shutdown: srv.Shutdown failed: %s", err.Error())
+	if err := srv.Shutdown(srvShutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		srvApp.ErrorLog.Error("shutdown: srv.Shutdown failed", "error", err)
 	}
 
 	// persist sessions and login attempts to db, for loading on restart
@@ -197,5 +208,18 @@ func main() {
 	}
 	if err := srvApp.persistLoginAttempts(context.Background()); err != nil {
 		srvApp.ErrorLog.Error("shutdown: srvApp.persistLoginAttempts failed", "error", err)
+	}
+
+	// --------------------------------
+
+	// gracefully shutdown notification hub, waiting for ListenAndBroadcast to exit or timeout before forcefully closing
+	select {
+	case <-hubListenerErrCh:
+		// exit: error already logged above
+	case <-time.After(3 * time.Second):
+		srvApp.ErrorLog.Error("shutdown: timeout waiting for hub listener to exit")
+	}
+	if err := srvApp.NotificationHub.Close(); err != nil {
+		srvApp.ErrorLog.Error("shutdown: srvApp.NotificationHub.Close failed", "error", err)
 	}
 }
