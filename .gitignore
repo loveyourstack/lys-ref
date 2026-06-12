@@ -1,4 +1,5 @@
 /bin
+/prompts
 /sql/migrations
 /srvconfigs
 
