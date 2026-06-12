@@ -25,10 +25,12 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssession"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys-ref/pkg/lysws"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
@@ -90,6 +92,21 @@ func main() {
 		log.Fatalf("initialization: failed to create regular db connection pool: %s", err.Error())
 	}
 	defer srvApp.Db.Close()
+
+	// attach ws notification hub to srvApp
+	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", srvApp.ErrorLog)
+	if err != nil {
+		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
+	}
+	defer srvApp.NotificationHub.Close()
+
+	// start ws listener
+	go func() {
+		err := srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById)
+		if err != nil {
+			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
+		}
+	}()
 
 	// attach stores
 	srvApp.AwsUserSgRuleStore = awsusersgrule.Store{Db: srvApp.Db}

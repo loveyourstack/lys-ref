@@ -1,6 +1,7 @@
 package lysws
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
@@ -10,10 +11,18 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func testLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
+}
+
+func newTestHub() *NotificationHub {
+	return &NotificationHub{
+		conns:    make(map[int64][]*websocket.Conn),
+		errorLog: testLogger(),
+	}
 }
 
 func newWebsocketPair(t *testing.T) (*websocket.Conn, *websocket.Conn, func()) {
@@ -64,8 +73,90 @@ func newWebsocketPair(t *testing.T) (*websocket.Conn, *websocket.Conn, func()) {
 	return serverConn, clientConn, cleanup
 }
 
+func TestNewNotificationHubValidation(t *testing.T) {
+	tests := []struct {
+		name    string
+		db      *pgxpool.Pool
+		channel string
+		logger  *slog.Logger
+		wantErr string
+	}{
+		{
+			name:    "nil db",
+			db:      nil,
+			channel: "chan_notifications",
+			logger:  testLogger(),
+			wantErr: "db is required",
+		},
+		{
+			name:    "empty channel",
+			db:      &pgxpool.Pool{},
+			channel: "",
+			logger:  testLogger(),
+			wantErr: "dbListenChannel is required",
+		},
+		{
+			name:    "nil logger",
+			db:      &pgxpool.Pool{},
+			channel: "chan_notifications",
+			logger:  nil,
+			wantErr: "errorLog is required",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			hub, err := NewNotificationHub(context.Background(), tc.db, tc.channel, tc.logger)
+			if err == nil {
+				t.Fatalf("expected error containing %q, got nil", tc.wantErr)
+			}
+			if hub != nil {
+				t.Fatal("expected nil hub on constructor validation failure")
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("unexpected error: got %q, want contains %q", err.Error(), tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestListenAndBroadcastValidation(t *testing.T) {
+	dummySelect := func(ctx context.Context, db *pgxpool.Pool, notID int64) (int64, string, string, error) {
+		return 1, "x", "y", nil
+	}
+
+	t.Run("nil select func", func(t *testing.T) {
+		hub := newTestHub()
+		err := hub.ListenAndBroadcast(context.Background(), nil)
+		if err == nil || !strings.Contains(err.Error(), "selectFunc is required") {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("closed hub", func(t *testing.T) {
+		hub := newTestHub()
+		hub.closed.Store(true)
+
+		err := hub.ListenAndBroadcast(context.Background(), dummySelect)
+		if err == nil || !strings.Contains(err.Error(), "notification hub is closed") {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("missing listen conn", func(t *testing.T) {
+		hub := newTestHub()
+		hub.dbListenChannel = "chan_notifications"
+
+		err := hub.ListenAndBroadcast(context.Background(), dummySelect)
+		if err == nil || !strings.Contains(err.Error(), "dbListenConn is not initialized") {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+}
+
 func TestRegisterRejectsNilConnection(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
+	hub := newTestHub()
 
 	err := hub.Register(1, nil)
 	if err == nil {
@@ -77,7 +168,7 @@ func TestRegisterRejectsNilConnection(t *testing.T) {
 }
 
 func TestRegisterAndUnregister(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
+	hub := newTestHub()
 	userID := int64(99)
 
 	serverConn, _, cleanup := newWebsocketPair(t)
@@ -95,17 +186,17 @@ func TestRegisterAndUnregister(t *testing.T) {
 		t.Fatalf("expected 0 connections after unregister, got %d", got)
 	}
 
-	if hub.UserExists(userID) {
+	hub.mu.RLock()
+	_, exists := hub.conns[userID]
+	hub.mu.RUnlock()
+	if exists {
 		t.Fatal("expected user entry to be removed after last connection unregister")
 	}
 }
 
 func TestRegisterRejectsWhenHubClosed(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
-
-	if err := hub.Close(); err != nil {
-		t.Fatalf("close hub: %v", err)
-	}
+	hub := newTestHub()
+	hub.closed.Store(true)
 
 	serverConn, _, cleanup := newWebsocketPair(t)
 	t.Cleanup(cleanup)
@@ -119,12 +210,12 @@ func TestRegisterRejectsWhenHubClosed(t *testing.T) {
 	}
 
 	if writeErr := serverConn.WriteMessage(websocket.TextMessage, []byte("x")); writeErr == nil {
-		t.Fatal("expected registered connection to be closed when hub is closed")
+		t.Fatal("expected rejected connection to be closed when hub is closed")
 	}
 }
 
 func TestRegisterEnforcesMaxUserConnections(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
+	hub := newTestHub()
 	userID := int64(123)
 
 	cleanups := make([]func(), 0, MaxUserConnections+1)
@@ -163,7 +254,7 @@ func TestRegisterEnforcesMaxUserConnections(t *testing.T) {
 }
 
 func TestBroadcastEUnregistersFailedConnectionAndReturnsError(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
+	hub := newTestHub()
 	userID := int64(42)
 
 	goodServerConn, goodClientConn, cleanupGood := newWebsocketPair(t)
@@ -179,7 +270,6 @@ func TestBroadcastEUnregistersFailedConnectionAndReturnsError(t *testing.T) {
 		t.Fatalf("register bad connection: %v", err)
 	}
 
-	// Force write failure for one registered connection.
 	if err := badServerConn.Close(); err != nil {
 		t.Fatalf("close bad connection: %v", err)
 	}
@@ -210,7 +300,7 @@ func TestBroadcastEUnregistersFailedConnectionAndReturnsError(t *testing.T) {
 }
 
 func TestCloseMarksHubClosedAndClearsConnections(t *testing.T) {
-	hub := NewNotificationHub(testLogger())
+	hub := newTestHub()
 	userID := int64(77)
 
 	serverConn, _, cleanup := newWebsocketPair(t)
@@ -224,14 +314,13 @@ func TestCloseMarksHubClosedAndClearsConnections(t *testing.T) {
 		t.Fatalf("close hub: %v", err)
 	}
 
-	hub.mu.RLock()
-	closed := hub.closed
-	connCount := len(hub.conns)
-	hub.mu.RUnlock()
-
-	if !closed {
+	if !hub.closed.Load() {
 		t.Fatal("expected hub to be marked closed")
 	}
+
+	hub.mu.RLock()
+	connCount := len(hub.conns)
+	hub.mu.RUnlock()
 	if connCount != 0 {
 		t.Fatalf("expected connection map to be cleared; got %d user entries", connCount)
 	}

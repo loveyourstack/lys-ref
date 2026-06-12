@@ -19,6 +19,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys-ref/pkg/lysws"
 	"github.com/loveyourstack/lys/lysauth"
 )
 
@@ -37,6 +38,9 @@ type httpServerApplication struct {
 	// rate limits
 	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
 	UnauthedRateLimits *lysauth.AppRateLimits
+
+	// ws notifications
+	NotificationHub *lysws.NotificationHub
 
 	// stores
 	AwsUserSgRuleStore awsusersgrule.Store

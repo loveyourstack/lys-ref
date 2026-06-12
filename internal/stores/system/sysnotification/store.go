@@ -70,6 +70,15 @@ func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error)
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
+// SelectDetailsById looks up the notification by ID and returns the details needed for broadcasting via WebSocket.
+func SelectDetailsById(ctx context.Context, db *pgxpool.Pool, id int64) (userId int64, notType, message string, err error) {
+	item, err := lyspg.SelectUnique[Model](ctx, db, schemaName, viewName, pkColName, id)
+	if err != nil {
+		return 0, "", "", err
+	}
+	return item.UserFk, item.NotType, item.Message, nil
+}
+
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {
 	return lyspg.Update(ctx, s.Db, schemaName, tableName, pkColName, input, id)
 }
