@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"slices"
 	"strconv"
 	"sync"
@@ -22,9 +23,12 @@ type NotificationHub struct {
 	closed             atomic.Bool
 	conns              map[int64][]*websocket.Conn // user_id → active sockets
 	errorLog           *slog.Logger
+	infoLog            *slog.Logger
 	maxUserConnections int
 	mu                 sync.RWMutex // protects conns
+	upgrader           websocket.Upgrader
 
+	// database fields for LISTEN/UNLISTEN
 	db              *pgxpool.Pool
 	dbListenConn    *pgxpool.Conn // single connection acquired from pool for LISTEN/UNLISTEN
 	dbListenChannel string        // database channel to LISTEN on for notifications
@@ -33,19 +37,25 @@ type NotificationHub struct {
 // NewNotificationHub creates a new NotificationHub instance.
 // It acquires a database connection for listening to notifications and initializes the connection map.
 func NewNotificationHub(ctx context.Context, db *pgxpool.Pool, dbListenChannel string, maxUserConnections int,
-	errorLog *slog.Logger) (hub *NotificationHub, err error) {
+	allowedOrigin string, infoLog, errorLog *slog.Logger) (hub *NotificationHub, err error) {
 
+	if allowedOrigin == "" {
+		return nil, fmt.Errorf("allowedOrigin is required")
+	}
 	if db == nil {
 		return nil, fmt.Errorf("db is required")
 	}
 	if dbListenChannel == "" {
 		return nil, fmt.Errorf("dbListenChannel is required")
 	}
-	if maxUserConnections < 1 {
-		return nil, fmt.Errorf("maxUserConnections must be greater than 0")
-	}
 	if errorLog == nil {
 		return nil, fmt.Errorf("errorLog is required")
+	}
+	if infoLog == nil {
+		return nil, fmt.Errorf("infoLog is required")
+	}
+	if maxUserConnections < 1 {
+		return nil, fmt.Errorf("maxUserConnections must be greater than 0")
 	}
 
 	// acquire a single connection from the pool for listening
@@ -54,10 +64,19 @@ func NewNotificationHub(ctx context.Context, db *pgxpool.Pool, dbListenChannel s
 		return nil, fmt.Errorf("db.Acquire failed: %w", err)
 	}
 
+	// initialize the WebSocket upgrader with CORS check based on allowedOrigin
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return r.Header.Get("Origin") == allowedOrigin
+		},
+	}
+
 	return &NotificationHub{
 		conns:              make(map[int64][]*websocket.Conn),
 		errorLog:           errorLog,
+		infoLog:            infoLog,
 		maxUserConnections: maxUserConnections,
+		upgrader:           upgrader,
 
 		db:              db,
 		dbListenConn:    dbLisConn,
@@ -75,6 +94,7 @@ func (h *NotificationHub) broadcast(userID int64, msg []byte, logFailures bool) 
 	h.mu.RUnlock()
 
 	for _, conn := range connsCopy {
+		h.infoLog.Debug("broadcasting message", "user_id", userID, "message", string(msg))
 		if connErr := conn.WriteMessage(websocket.TextMessage, msg); connErr != nil {
 			if logFailures {
 				h.errorLog.Error("conn.WriteMessage failed", "user_id", userID, "error", connErr)
@@ -128,6 +148,13 @@ func (h *NotificationHub) Close() (err error) {
 	}
 
 	return err
+}
+
+func (h *NotificationHub) GetUserConns(userID int64) []*websocket.Conn {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	return h.conns[userID]
 }
 
 type NotificationSelectFunc func(ctx context.Context, db *pgxpool.Pool, notId int64) (userId int64, notType, message string, err error)
@@ -244,6 +271,7 @@ func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
 	// register new connection
 	default:
 		h.conns[userID] = append(h.conns[userID], c)
+		h.infoLog.Debug("registered connection", "user_id", userID)
 	}
 
 	h.mu.Unlock()
@@ -255,7 +283,7 @@ func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
 	return err
 }
 
-// Unregister removes a WebSocket connection for a given user ID.
+// Unregister removes WebSocket connections for a given user ID.
 func (h *NotificationHub) Unregister(userID int64, c *websocket.Conn) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -266,10 +294,19 @@ func (h *NotificationHub) Unregister(userID int64, c *websocket.Conn) {
 			h.conns[userID] = append(conns[:i], conns[i+1:]...)
 			if len(h.conns[userID]) == 0 {
 				delete(h.conns, userID)
+				h.infoLog.Debug("unregistered connection", "user_id", userID)
 			}
 			break
 		}
 	}
+}
+
+func (h *NotificationHub) UpgradeHttpRequest(w http.ResponseWriter, r *http.Request) (c *websocket.Conn, err error) {
+	c, err = h.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return nil, fmt.Errorf("h.upgrader.Upgrade failed: %w", err)
+	}
+	return c, nil
 }
 
 // UserConnCount returns the number of active connections for a given user ID.

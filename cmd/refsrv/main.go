@@ -122,9 +122,23 @@ func main() {
 	defer srvApp.OwnerDb.Close()
 
 	// create HTTP server using srvApp's routes and handlers
+	rawHandler := srvApp.getRouter()
+	timedHttpHandler := http.TimeoutHandler(rawHandler, 5*time.Second, "request timed out")
+
 	srv := &http.Server{
-		Addr:              ":" + srvApp.Config.API.Port,
-		Handler:           http.TimeoutHandler(srvApp.getRouter(), 5*time.Second, "request timed out"),
+		Addr: ":" + srvApp.Config.API.Port,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			// http.TimeoutHandler does not implement the http.Hijacker interface, which is needed for WebSocket upgrades
+			// so allow websocket requests to skip the timeout handler
+			if lysauth.IsWebSocket(r.Header) {
+				rawHandler.ServeHTTP(w, r)
+				return
+			}
+
+			// http requests
+			timedHttpHandler.ServeHTTP(w, r)
+		}),
 		IdleTimeout:       time.Second,
 		MaxHeaderBytes:    1024 * 1024, // 1 MB
 		ReadHeaderTimeout: 500 * time.Millisecond,
@@ -149,7 +163,8 @@ func main() {
 	// --------------------------------
 
 	// attach ws notification hub to srvApp, listening on the same db channel found in system.notification_trigger()
-	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", maxUserWsConnections, srvApp.ErrorLog)
+	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", maxUserWsConnections,
+		srvApp.Config.UI.Url, srvApp.InfoLog, srvApp.ErrorLog)
 	if err != nil {
 		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
 	}

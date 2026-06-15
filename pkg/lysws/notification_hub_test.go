@@ -24,6 +24,7 @@ func newTestHub() *NotificationHub {
 	return &NotificationHub{
 		conns:              make(map[int64][]*websocket.Conn),
 		errorLog:           testLogger(),
+		infoLog:            testLogger(),
 		maxUserConnections: testMaxUserConnections,
 	}
 }
@@ -82,7 +83,8 @@ func TestNewNotificationHubValidation(t *testing.T) {
 		db                 *pgxpool.Pool
 		channel            string
 		maxUserConnections int
-		logger             *slog.Logger
+		infoLog            *slog.Logger
+		errorLog           *slog.Logger
 		wantErr            string
 	}{
 		{
@@ -90,7 +92,8 @@ func TestNewNotificationHubValidation(t *testing.T) {
 			db:                 nil,
 			channel:            "chan_notifications",
 			maxUserConnections: testMaxUserConnections,
-			logger:             testLogger(),
+			infoLog:            testLogger(),
+			errorLog:           testLogger(),
 			wantErr:            "db is required",
 		},
 		{
@@ -98,7 +101,8 @@ func TestNewNotificationHubValidation(t *testing.T) {
 			db:                 &pgxpool.Pool{},
 			channel:            "",
 			maxUserConnections: testMaxUserConnections,
-			logger:             testLogger(),
+			infoLog:            testLogger(),
+			errorLog:           testLogger(),
 			wantErr:            "dbListenChannel is required",
 		},
 		{
@@ -106,7 +110,8 @@ func TestNewNotificationHubValidation(t *testing.T) {
 			db:                 &pgxpool.Pool{},
 			channel:            "chan_notifications",
 			maxUserConnections: 0,
-			logger:             testLogger(),
+			infoLog:            testLogger(),
+			errorLog:           testLogger(),
 			wantErr:            "maxUserConnections must be greater than 0",
 		},
 		{
@@ -114,15 +119,26 @@ func TestNewNotificationHubValidation(t *testing.T) {
 			db:                 &pgxpool.Pool{},
 			channel:            "chan_notifications",
 			maxUserConnections: -1,
-			logger:             testLogger(),
+			infoLog:            testLogger(),
+			errorLog:           testLogger(),
 			wantErr:            "maxUserConnections must be greater than 0",
 		},
 		{
-			name:               "nil logger",
+			name:               "nil infoLog",
 			db:                 &pgxpool.Pool{},
 			channel:            "chan_notifications",
 			maxUserConnections: testMaxUserConnections,
-			logger:             nil,
+			infoLog:            nil,
+			errorLog:           testLogger(),
+			wantErr:            "infoLog is required",
+		},
+		{
+			name:               "nil errorLog",
+			db:                 &pgxpool.Pool{},
+			channel:            "chan_notifications",
+			maxUserConnections: testMaxUserConnections,
+			infoLog:            testLogger(),
+			errorLog:           nil,
 			wantErr:            "errorLog is required",
 		},
 	}
@@ -130,7 +146,7 @@ func TestNewNotificationHubValidation(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			hub, err := NewNotificationHub(context.Background(), tc.db, tc.channel, tc.maxUserConnections, tc.logger)
+			hub, err := NewNotificationHub(context.Background(), tc.db, tc.channel, tc.maxUserConnections, "*", tc.infoLog, tc.errorLog)
 			if err == nil {
 				t.Fatalf("expected error containing %q, got nil", tc.wantErr)
 			}

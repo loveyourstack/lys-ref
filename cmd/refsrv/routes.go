@@ -124,6 +124,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/supplier", RouteAdder: srvApp.supplierRoutes(apiEnv)},
 		{Url: "/system", RouteAdder: srvApp.systemRoutes(apiEnv)},
 		{Url: "/tech", RouteAdder: srvApp.techRoutes(apiEnv)},
+		{Url: "/ws", RouteAdder: srvApp.wsRoutes()},
 	}
 }
 
@@ -640,6 +641,21 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 
 		r.HandleFunc(endpoint, srvApp.authGetSessions).Methods("GET")
 		r.HandleFunc(endpoint+"/block-ip/{ip}", srvApp.authBlockSessionIp).Methods("POST")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) wsRoutes() lys.RouteAdderFunc {
+	return func(r *mux.Router) *mux.Router {
+
+		endpoint := "/register-for-notifications"
+
+		r.HandleFunc(endpoint, srvApp.wsRegisterForNotifications).Methods("GET")
+
+		endpoint = "/unregister-for-notifications"
+
+		r.HandleFunc(endpoint, srvApp.wsUnregisterForNotifications).Methods("GET")
 
 		return r
 	}

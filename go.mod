@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/loveyourstack/connectors v0.3.13
-	github.com/loveyourstack/lys v0.3.41
+	github.com/loveyourstack/lys v0.3.42
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.53.0

@@ -122,11 +122,22 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		next.ServeHTTP(sw, r)
 		duration := time.Since(start)
 
+		status := sw.Status
+		// default to 200 if status is not set, e.g. for websocket upgrade requests
+		if status == 0 {
+			status = http.StatusOK
+		}
+
+		// for ws: strip out token url param
+		urlVals := r.URL.Query()
+		urlVals.Del("token")
+		r.URL.RawQuery = urlVals.Encode()
+
 		// interesting: use client such as Postman to compare the logged duration with the actual duration to measure the middleware+logging overhead (c. 8-12ms on dev)
 
 		// log to file
 		srvApp.InfoLog.Info(fmt.Sprintf("%s - %s - %s %s %s - %d - %dms",
-			remoteHostIP, userInfo.UserName, r.Proto, r.Method, r.URL.RequestURI(), sw.Status, duration.Milliseconds()))
+			remoteHostIP, userInfo.UserName, r.Proto, r.Method, r.URL.RequestURI(), status, duration.Milliseconds()))
 
 		// unescape url for readability
 		endpoint, err := url.QueryUnescape(r.URL.RequestURI())
@@ -144,7 +155,7 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 			Endpoint:   endpoint,
 			Ip:         remoteHostIP,
 			Method:     r.Method,
-			StatusCode: sw.Status,
+			StatusCode: status,
 			UserName:   userInfo.UserName,
 		})
 		if err != nil {
