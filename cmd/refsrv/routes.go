@@ -41,6 +41,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/supplier/suppprodcategory"
 	"github.com/loveyourstack/lys-ref/internal/stores/supplier/suppproduct"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgauditupdate"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgbloat"
@@ -601,6 +602,13 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 		auditUpdateStore := lyspgauditupdate.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, auditUpdateStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, auditUpdateStore)).Methods("GET")
+
+		endpoint = "/notifications"
+
+		notsStore := sysnotification.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, notsStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, notsStore)).Methods("GET")
+		r.HandleFunc(endpoint+"/add-fake", srvApp.sysAddFakeNotification).Methods("POST")
 
 		endpoint = "/ui-store-data"
 

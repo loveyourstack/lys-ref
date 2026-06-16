@@ -203,6 +203,16 @@ const routes = [
           },
         ]
       },
+      {
+        path: 'websockets',
+        children: [
+          {
+            path: 'notifications',
+            name: 'Notifications',
+            component: () => import('@/pages/WsNotifications.vue'),
+          },
+        ]
+      },
     ]
   }
 ]
