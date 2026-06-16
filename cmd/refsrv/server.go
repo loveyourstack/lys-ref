@@ -19,8 +19,8 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
-	"github.com/loveyourstack/lys-ref/pkg/lysws"
 	"github.com/loveyourstack/lys/lysauth"
+	"github.com/loveyourstack/lys/lysws"
 )
 
 type httpServerApplication struct {
