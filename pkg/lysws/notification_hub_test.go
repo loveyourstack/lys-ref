@@ -194,15 +194,13 @@ func TestListenAndBroadcastValidation(t *testing.T) {
 	})
 }
 
-func TestRegisterRejectsNilConnection(t *testing.T) {
+func TestRegisterNilConnectionIsIgnored(t *testing.T) {
 	hub := newTestHub()
 
-	err := hub.Register(1, nil)
-	if err == nil {
-		t.Fatal("expected error for nil connection")
-	}
-	if !strings.Contains(err.Error(), "connection cannot be nil") {
-		t.Fatalf("unexpected error: %v", err)
+	hub.Register(1, nil)
+
+	if got := hub.UserConnCount(1); got != 0 {
+		t.Fatalf("expected nil connection to be ignored, got %d", got)
 	}
 }
 
@@ -213,9 +211,7 @@ func TestRegisterAndUnregister(t *testing.T) {
 	serverConn, _, cleanup := newWebsocketPair(t)
 	t.Cleanup(cleanup)
 
-	if err := hub.Register(userID, serverConn); err != nil {
-		t.Fatalf("register connection: %v", err)
-	}
+	hub.Register(userID, serverConn)
 	if got := hub.UserConnCount(userID); got != 1 {
 		t.Fatalf("expected 1 registered connection, got %d", got)
 	}
@@ -240,12 +236,10 @@ func TestRegisterRejectsWhenHubClosed(t *testing.T) {
 	serverConn, _, cleanup := newWebsocketPair(t)
 	t.Cleanup(cleanup)
 
-	err := hub.Register(7, serverConn)
-	if err == nil {
-		t.Fatal("expected error when registering on closed hub")
-	}
-	if !strings.Contains(err.Error(), "closed") {
-		t.Fatalf("unexpected error: %v", err)
+	hub.Register(7, serverConn)
+
+	if got := hub.UserConnCount(7); got != 0 {
+		t.Fatalf("expected no registration when hub is closed, got %d", got)
 	}
 
 	if writeErr := serverConn.WriteMessage(websocket.TextMessage, []byte("x")); writeErr == nil {
@@ -268,27 +262,37 @@ func TestRegisterEnforcesMaxUserConnections(t *testing.T) {
 		serverConn, _, cleanup := newWebsocketPair(t)
 		cleanups = append(cleanups, cleanup)
 
-		if err := hub.Register(userID, serverConn); err != nil {
-			t.Fatalf("register connection %d: %v", i, err)
-		}
+		hub.Register(userID, serverConn)
 	}
 
-	extraConn, _, cleanup := newWebsocketPair(t)
+	extraConn, extraClientConn, cleanup := newWebsocketPair(t)
 	cleanups = append(cleanups, cleanup)
 
-	err := hub.Register(userID, extraConn)
-	if err == nil {
-		t.Fatal("expected max connections error")
-	}
-	if !strings.Contains(err.Error(), "maximum active connections") {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	hub.Register(userID, extraConn)
+
 	if got := hub.UserConnCount(userID); got != testMaxUserConnections {
 		t.Fatalf("expected %d connections after max enforcement, got %d", testMaxUserConnections, got)
 	}
 
-	if writeErr := extraConn.WriteMessage(websocket.TextMessage, []byte("x")); writeErr == nil {
-		t.Fatal("expected extra connection to be closed by Register")
+	if err := extraClientConn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+		t.Fatalf("set read deadline: %v", err)
+	}
+
+	_, _, readErr := extraClientConn.ReadMessage()
+	if readErr == nil {
+		t.Fatal("expected close error from extra rejected connection")
+	}
+
+	closeErr, ok := readErr.(*websocket.CloseError)
+	if !ok {
+		t.Fatalf("expected websocket close error, got %T (%v)", readErr, readErr)
+	}
+
+	if closeErr.Code != 4429 {
+		t.Fatalf("expected close code 4429, got %d", closeErr.Code)
+	}
+	if closeErr.Text != "max connections reached" {
+		t.Fatalf("expected close text %q, got %q", "max connections reached", closeErr.Text)
 	}
 }
 
@@ -302,12 +306,8 @@ func TestBroadcastEUnregistersFailedConnectionAndReturnsError(t *testing.T) {
 	badServerConn, _, cleanupBad := newWebsocketPair(t)
 	t.Cleanup(cleanupBad)
 
-	if err := hub.Register(userID, goodServerConn); err != nil {
-		t.Fatalf("register good connection: %v", err)
-	}
-	if err := hub.Register(userID, badServerConn); err != nil {
-		t.Fatalf("register bad connection: %v", err)
-	}
+	hub.Register(userID, goodServerConn)
+	hub.Register(userID, badServerConn)
 
 	if err := badServerConn.Close(); err != nil {
 		t.Fatalf("close bad connection: %v", err)
@@ -345,9 +345,7 @@ func TestCloseMarksHubClosedAndClearsConnections(t *testing.T) {
 	serverConn, _, cleanup := newWebsocketPair(t)
 	t.Cleanup(cleanup)
 
-	if err := hub.Register(userID, serverConn); err != nil {
-		t.Fatalf("register connection: %v", err)
-	}
+	hub.Register(userID, serverConn)
 
 	if err := hub.Close(); err != nil {
 		t.Fatalf("close hub: %v", err)

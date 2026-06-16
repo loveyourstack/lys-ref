@@ -104,6 +104,19 @@ func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []M
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
 }
 
+func (s Store) SelectIdNameMap(ctx context.Context) (idNameMap map[int64]string, err error) {
+	items, _, err := s.Select(ctx, lyspg.SelectParams{})
+	if err != nil {
+		return nil, fmt.Errorf("s.Select failed: %w", err)
+	}
+
+	idNameMap = make(map[int64]string, len(items))
+	for _, item := range items {
+		idNameMap[item.Id] = item.Name
+	}
+	return idNameMap, nil
+}
+
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
@@ -129,7 +142,6 @@ func (s Store) Validate(validate *validator.Validate, input Input) error {
 func (s Store) VerifyEmail(ctx context.Context, id int64) error {
 
 	stmt := fmt.Sprintf(`UPDATE %s.%s SET email_verified = true WHERE id = $1`, schemaName, tableName)
-
 	_, err := s.Db.Exec(ctx, stmt, id)
 	if err != nil {
 		return fmt.Errorf("s.Db.Exec failed: %w", err)

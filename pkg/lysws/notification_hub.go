@@ -150,11 +150,13 @@ func (h *NotificationHub) Close() (err error) {
 	return err
 }
 
+// GetUserConns returns a slice of active WebSocket connections for a given user ID.
 func (h *NotificationHub) GetUserConns(userID int64) []*websocket.Conn {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
-	return h.conns[userID]
+	// return a clone to prevent caller manipulating the internal slice
+	return slices.Clone(h.conns[userID])
 }
 
 type NotificationSelectFunc func(ctx context.Context, db *pgxpool.Pool, notId int64) (userId int64, notType, message string, err error)
@@ -241,14 +243,16 @@ func (h *NotificationHub) ListenAndBroadcast(ctx context.Context, selectFunc Not
 }
 
 // Register adds a WebSocket connection for a given user ID.
-func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
+func (h *NotificationHub) Register(userID int64, c *websocket.Conn) {
 
 	if c == nil {
-		return fmt.Errorf("connection cannot be nil")
+		h.errorLog.Error("connection cannot be nil")
+		return
 	}
 
 	var shouldClose bool
-	var err error
+	var closeCode int
+	var closeMsg string
 
 	h.mu.Lock()
 
@@ -257,16 +261,20 @@ func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
 	// reject if hub is closed
 	case h.closed.Load():
 		shouldClose = true
-		err = fmt.Errorf("notification hub is closed")
+		h.errorLog.Error("notification hub is closed")
 
 	// reject if c is already registered for userID (shouldn't happen but just in case)
 	case slices.Contains(h.conns[userID], c):
-		err = fmt.Errorf("connection already registered for user %d", userID)
+		h.errorLog.Error("connection already registered for user", "user_id", userID)
 
 	// reject if userID already has maximum active connections
 	case len(h.conns[userID]) >= h.maxUserConnections:
 		shouldClose = true
-		err = fmt.Errorf("maximum active connections reached for user %d", userID)
+
+		// Vue app listens for this code to prevent endless reconnect loops
+		closeCode = 4429
+		closeMsg = "max connections reached"
+		h.errorLog.Error("maximum active connections reached for user", "user_id", userID)
 
 	// register new connection
 	default:
@@ -277,27 +285,55 @@ func (h *NotificationHub) Register(userID int64, c *websocket.Conn) error {
 	h.mu.Unlock()
 
 	if shouldClose {
+		if closeCode != 0 || closeMsg != "" {
+			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, closeMsg))
+			if err != nil {
+				h.errorLog.Error("c.WriteMessage failed", "user_id", userID, "error", err)
+			}
+		}
 		_ = c.Close()
 	}
-
-	return err
 }
 
-// Unregister removes WebSocket connections for a given user ID.
+// Status returns a snapshot of the number of active connections for each user ID.
+func (h *NotificationHub) Status() map[int64]int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	status := make(map[int64]int, len(h.conns))
+	for userID, conns := range h.conns {
+		status[userID] = len(conns)
+	}
+	return status
+}
+
+// Unregister removes a WebSocket connection for a given user ID.
 func (h *NotificationHub) Unregister(userID int64, c *websocket.Conn) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	conns := h.conns[userID]
 	for i, conn := range conns {
-		if conn == c {
-			h.conns[userID] = append(conns[:i], conns[i+1:]...)
-			if len(h.conns[userID]) == 0 {
-				delete(h.conns, userID)
-				h.infoLog.Debug("unregistered connection", "user_id", userID)
-			}
-			break
+		if conn != c {
+			continue
 		}
+
+		// close conn
+		err := conn.Close()
+		if err != nil {
+			h.errorLog.Error("conn.Close failed", "user_id", userID, "error", err)
+		}
+
+		// remove conn from slice
+		h.conns[userID] = append(conns[:i], conns[i+1:]...)
+
+		// if no more connections for user, remove user from map
+		if len(h.conns[userID]) == 0 {
+			delete(h.conns, userID)
+		}
+
+		h.infoLog.Debug("unregistered connection", "user_id", userID)
+		break
 	}
 }
 

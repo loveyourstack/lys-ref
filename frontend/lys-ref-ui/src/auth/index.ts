@@ -1,4 +1,5 @@
 import ax, { setAuthToken, deleteAuthToken } from '@/api'
+import { useNotsStore } from '@/stores/notifications'
 import { Role, WriterRoles, type LoginResponse } from '@/types/system'
 
 type AuthUserData = Omit<LoginResponse, 'token'>
@@ -29,6 +30,9 @@ export default {
     this.user.ip = data.ip
     this.user.name = data.user_name
     this.user.roles = data.roles
+
+    // lazy-load store instance, or else it won't be initialized when this runs during auth bootstrap before app init
+    useNotsStore().start()
   },
   revokeUser () {
     this.user.authenticated = false
@@ -40,6 +44,8 @@ export default {
     this.user.ip = ''
     this.user.name = ''
     this.user.roles = []
+
+    useNotsStore().stop()
   },
 
   // bootstrap auth state from session token, if it exists. Should be called once on app startup before router and app init
@@ -75,8 +81,8 @@ export default {
   },
 
   logout () {
+    this.revokeUser()
     sessionStorage.removeItem('token')
     deleteAuthToken(ax)
-    this.revokeUser()
   },
 }

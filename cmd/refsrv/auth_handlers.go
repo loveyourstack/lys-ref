@@ -243,6 +243,14 @@ func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	// get this user's active ws connections
+	wsConns := srvApp.NotificationHub.GetUserConns(sess.UserId)
+
+	// unregister user's ws connections
+	for _, wsConn := range wsConns {
+		srvApp.NotificationHub.Unregister(sess.UserId, wsConn)
+	}
+
 	// archive session to db
 	err = srvApp.archiveSessions(ctx, []lysauth.Session{sess})
 	if err != nil {

@@ -649,13 +649,16 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 func (srvApp *httpServerApplication) wsRoutes() lys.RouteAdderFunc {
 	return func(r *mux.Router) *mux.Router {
 
-		endpoint := "/register-for-notifications"
+		techR := r.NewRoute().Subrouter()
+		techR.Use(authorizeRole([]sysrole.Enum{sysrole.Tech}))
 
-		r.HandleFunc(endpoint, srvApp.wsRegisterForNotifications).Methods("GET")
+		endpoint := "/hub/status" // tech only
 
-		endpoint = "/unregister-for-notifications"
+		techR.HandleFunc(endpoint, srvApp.wsHubStatus).Methods("GET")
 
-		r.HandleFunc(endpoint, srvApp.wsUnregisterForNotifications).Methods("GET")
+		endpoint = "/notifications/register" // needs ws:// protocol
+
+		r.HandleFunc(endpoint, srvApp.wsNotificationsRegister).Methods("GET")
 
 		return r
 	}

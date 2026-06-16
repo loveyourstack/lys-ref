@@ -20,6 +20,7 @@
                 <v-tab value="sessions">Sessions</v-tab>
                 <v-tab value="reqLog">Request log</v-tab>
                 <v-tab value="loginAttempts">Login attempts</v-tab>
+                <v-tab value="hubStatus">Hub status</v-tab>
                 <v-tab value="awsCalls">AWS API</v-tab>
                 <v-tab value="ecbCalls">ECB API</v-tab>
                 <v-tab value="mmCalls">Maxmind API</v-tab>
@@ -37,6 +38,10 @@
 
                 <v-window-item value="loginAttempts">
                   <app-mon-login-attempt-table />
+                </v-window-item>
+
+                <v-window-item value="hubStatus">
+                  <app-mon-hub-status />
                 </v-window-item>
 
                 <v-window-item value="awsCalls">
