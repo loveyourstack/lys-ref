@@ -189,6 +189,16 @@ const routes = [
         ]
       },
       {
+        path: 'server-push',
+        children: [
+          {
+            path: 'notifications',
+            name: 'Notifications',
+            component: () => import('@/pages/ServPNotifications.vue'),
+          },
+        ]
+      },
+      {
         path: 'supplier',
         children: [
           {
@@ -200,16 +210,6 @@ const routes = [
             path: 'tenant-view',
             name: 'Tenant view',
             component: () => import('@/pages/SuppTenantView.vue'),
-          },
-        ]
-      },
-      {
-        path: 'websockets',
-        children: [
-          {
-            path: 'notifications',
-            name: 'Notifications',
-            component: () => import('@/pages/WsNotifications.vue'),
           },
         ]
       },

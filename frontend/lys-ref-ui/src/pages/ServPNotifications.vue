@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">Notifications</span>
+              <span class="dt-title">Server push: notifications</span>
             </v-card-text>
           </v-card>
         </v-col>
@@ -16,8 +16,8 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <div class="dt-subtitle">Notifications are received in real-time via websockets.
-                This demonstrates the backend's ability to push updates to the frontend.</div>
+              <div class="dt-subtitle">Notifications are added in the database so they are persistent and can be used by any component. 
+                They are pushed to the app using listen/notify, and from the app to the frontend via websockets.</div>
 
               <div class="dt-subtitle">If you allow browser notifications for this site, you will see a pop-up notification when you click one of the buttons below.</div>
 
@@ -39,7 +39,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import ax from '@/api'
 
 const baseUrl = '/a/system/notifications/add-fake'

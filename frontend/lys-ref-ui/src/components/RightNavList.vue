@@ -29,10 +29,10 @@
       <v-list-item link title="Tenant view" to="/supplier/tenant-view" prepend-icon="mdi-web"></v-list-item>
     </div>
 
-    <v-list-subheader title="Websockets" class="mt-2 clickable" @click="showWebsocketItems = !showWebsocketItems"></v-list-subheader>
+    <v-list-subheader title="Server push" class="mt-2 clickable" @click="showServerPushItems = !showServerPushItems"></v-list-subheader>
 
-    <div v-if="showWebsocketItems">
-      <v-list-item link title="Notifications" to="/websockets/notifications" prepend-icon="mdi-bell"></v-list-item>
+    <div v-if="showServerPushItems">
+      <v-list-item link title="Notifications" to="/server-push/notifications" prepend-icon="mdi-bell-outline"></v-list-item>
     </div>
 
     <v-list-subheader v-if="auth.hasRole(Role.Tech)" title="Monitoring" class="mt-2 clickable" @click="showMonitoringItems = !showMonitoringItems"></v-list-subheader>
@@ -55,7 +55,7 @@ const showExtDataItems = ref(true)
 const showChartsItems = ref(true)
 const showParProcItems = ref(true)
 const showMultiTenItems = ref(true)
-const showWebsocketItems = ref(true)
+const showServerPushItems = ref(true)
 const showMonitoringItems = ref(true)
 
 useJsonLs({
@@ -65,7 +65,7 @@ useJsonLs({
     showChartsItems,
     showParProcItems,
     showMultiTenItems,
-    showWebsocketItems,
+    showServerPushItems,
     showMonitoringItems,
   },
 })

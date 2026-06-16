@@ -60,6 +60,7 @@ declare module 'vue' {
     HomeParallelProcessing: typeof import('./src/components/home/HomeParallelProcessing.vue')['default']
     HomeProjectStack: typeof import('./src/components/home/HomeProjectStack.vue')['default']
     HomeSaaS: typeof import('./src/components/home/HomeSaaS.vue')['default']
+    HomeServerPush: typeof import('./src/components/home/HomeServerPush.vue')['default']
     HomeTypeHandling: typeof import('./src/components/home/HomeTypeHandling.vue')['default']
     HomeUserDataRetention: typeof import('./src/components/home/HomeUserDataRetention.vue')['default']
     LeftNavList: typeof import('./src/components/LeftNavList.vue')['default']
