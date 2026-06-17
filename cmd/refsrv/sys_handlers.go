@@ -58,9 +58,9 @@ func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWrite
 func (srvApp *httpServerApplication) sysGetUiStoreData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	uiStoreData, err := srvApp.SysSvc.GetUiStoreData(ctx, srvApp.Db)
+	uiStoreData, err := srvApp.SysSvc.SelectUiStoreData(ctx, srvApp.Db)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.GetUiStoreData failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SelectUiStoreData failed: %w", err), srvApp.ErrorLog, w)
 		return
 	}
 

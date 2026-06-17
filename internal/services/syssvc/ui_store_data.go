@@ -37,7 +37,7 @@ type UiStoreData struct {
 	SuppProductCategories []suppprodcategory.Model `json:"supp_product_categories"`
 }
 
-func (svc Service) GetUiStoreData(ctx context.Context, db *pgxpool.Pool) (uiStoreData UiStoreData, err error) {
+func (svc Service) SelectUiStoreData(ctx context.Context, db *pgxpool.Pool) (uiStoreData UiStoreData, err error) {
 
 	uiStoreData.CoreMandatoryEnums, err = lyspg.SelectEnum(ctx, db, "core.mandatory_enum", nil, nil, "")
 	if err != nil {
