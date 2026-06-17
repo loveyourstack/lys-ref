@@ -1,10 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useWebSocket } from '@vueuse/core'
-import { notify } from 'lys-vue'
+import { fetchOnce, notify } from 'lys-vue'
 import { useAppStore } from '@/stores/app'
+import { type Notification } from '@/types/system'
+import ax from '@/api'
 
-type IncomingNotification = {
+type IncomingWsNotification = {
   type: string
   body: string
 }
@@ -18,11 +20,15 @@ function toNotificationsWsUrl(apiBaseUrl: string, token: string): string {
 
 export const useNotsStore = defineStore('notifications', () => {
   const appStore = useAppStore()
+  const baseUrl = '/a/system/notifications'  
 
-  const wsUrl = ref('')
   const isStarted = ref(false)
+  const items = ref<Notification[]>([])
+  const markingAllAsRead = ref(false)
+  const wsUrl = ref('')
+  const unreadCount = ref(0)
 
-  const { status, close } = useWebSocket(wsUrl, {
+  const { status: wsStatus, close } = useWebSocket(wsUrl, {
     immediate: false,
     autoReconnect: { 
       retries: 3,
@@ -39,18 +45,51 @@ export const useNotsStore = defineStore('notifications', () => {
     },
     onMessage(_, event) {
       try {
-        const msg = JSON.parse(String(event.data)) as IncomingNotification
+        const msg = JSON.parse(String(event.data)) as IncomingWsNotification
 
         if (!msg?.type || !msg?.body) return
 
         notify(appStore.company, msg.type, appStore.logoUrl, msg.body)
+        loadUnreadCount()
       } catch {
         // ignore malformed message
       }
     },
   })
 
-  function start() {
+  function loadItems() {
+    const myUrl = `${baseUrl}?xper_page=10`
+    fetchOnce({ ax, myUrl, result: items, onSuccess: () => {
+
+      // mark any unread loaded notifications as read
+      const unreadIds = items.value.filter(i => !i.is_read).map(i => i.id)
+      if (unreadIds.length > 0) {
+        setIdsRead(unreadIds)
+      }
+    }})
+  }
+
+  function loadUnreadCount() {
+    const myUrl = `${baseUrl}/unread-count`
+    fetchOnce({ ax, myUrl, result: unreadCount })
+  }
+
+  function setAllRead() {
+    markingAllAsRead.value = true
+    ax.patch(`${baseUrl}/set-all-read`).then(() => {
+      loadUnreadCount()
+    }).finally(() => {
+      markingAllAsRead.value = false
+    })
+  }
+
+  function setIdsRead(ids: number[]) {
+    ax.patch(`${baseUrl}/set-read`, { ids }).then(() => {
+      loadUnreadCount()
+    })
+  }
+
+  function wsStart() {
     const token = sessionStorage.getItem('token')
     if (!token || isStarted.value) return
 
@@ -59,10 +98,12 @@ export const useNotsStore = defineStore('notifications', () => {
     // no open(): wsUrl change triggers useWebSocket to connect
   }
 
-  function stop() {
+  function wsStop() {
     isStarted.value = false
     close()
   }
 
-  return { status, start, stop }
+  return { items, markingAllAsRead, unreadCount, wsStatus, wsStart, wsStop,
+    loadItems, loadUnreadCount, setAllRead, setIdsRead,
+   }
 })

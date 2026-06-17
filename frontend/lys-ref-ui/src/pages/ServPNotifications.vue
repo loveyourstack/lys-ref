@@ -19,7 +19,10 @@
               <div class="dt-subtitle">Notifications are added in the database so they are persistent and can be used by any component. 
                 They are pushed to the app using listen/notify, and from the app to the frontend via websockets.</div>
 
-              <div class="dt-subtitle">If you allow browser notifications for this site, you will see a pop-up notification when you click one of the buttons below.</div>
+              <div class="dt-subtitle">If you click one of the buttons below, a notification will be added and the bell icon in the top-right will indicate an unread notification.
+                You can click the icon to read the notification as normal.</div>
+
+              <div class="dt-subtitle">If you allow browser notifications for this site, you will also see a pop-up notification.</div>
 
               <v-list>
                 <v-list-item>

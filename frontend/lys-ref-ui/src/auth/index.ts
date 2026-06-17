@@ -32,7 +32,7 @@ export default {
     this.user.roles = data.roles
 
     // lazy-load store instance, or else it won't be initialized when this runs during auth bootstrap before app init
-    useNotsStore().start()
+    useNotsStore().wsStart()
   },
   revokeUser () {
     this.user.authenticated = false
@@ -45,7 +45,7 @@ export default {
     this.user.name = ''
     this.user.roles = []
 
-    useNotsStore().stop()
+    useNotsStore().wsStop()
   },
 
   // bootstrap auth state from session token, if it exists. Should be called once on app startup before router and app init

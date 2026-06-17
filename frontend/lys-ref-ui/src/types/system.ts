@@ -12,6 +12,16 @@ export interface LoginResponse {
   user_name: string
 }
 
+export interface Notification {
+  created_at: string
+  id: number
+  is_read: boolean
+  message: string
+  not_type: string
+  updated_at: string
+  user_fk: number
+}
+
 export enum Role {
   Standard = 'Standard',
   Viewer = 'Viewer',

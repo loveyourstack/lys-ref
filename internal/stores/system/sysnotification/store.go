@@ -2,10 +2,12 @@ package sysnotification
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
 	"github.com/loveyourstack/lys/lystype"
@@ -66,17 +68,88 @@ func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []M
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
 }
 
+// SelectOnlyUsers is a wrapper for Select that appends a filter to the provided params to only select notifications for the authenticated user.
+func (s Store) SelectOnlyUsers(ctx context.Context, params lyspg.SelectParams) (items []Model, unpagedCount lyspg.TotalCount, err error) {
+
+	// get user from ctx
+	userId := lys.GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		return nil, lyspg.TotalCount{}, fmt.Errorf("lys.GetUserIdFromCtx returned 0 - user not authenticated")
+	}
+
+	// append mandatory user id filter to params
+	params.Conditions = append(params.Conditions, lyspg.Condition{
+		Field:    "user_fk",
+		Operator: lyspg.OpEquals,
+		Value:    fmt.Sprintf("%d", userId),
+	})
+
+	return s.Select(ctx, params)
+}
+
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
 // SelectDetailsById looks up the notification by ID and returns the details needed for broadcasting via WebSocket.
 func SelectDetailsById(ctx context.Context, db *pgxpool.Pool, id int64) (userId int64, notType, message string, err error) {
+
 	item, err := lyspg.SelectUnique[Model](ctx, db, schemaName, viewName, pkColName, id)
 	if err != nil {
-		return 0, "", "", err
+		return 0, "", "", fmt.Errorf("lyspg.SelectUnique failed: %w", err)
 	}
 	return item.UserFk, item.NotType, item.Message, nil
+}
+
+func (s Store) SelectUserUnreadCount(ctx context.Context) (count int64, err error) {
+
+	userId := lys.GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		return 0, fmt.Errorf("lys.GetUserIdFromCtx returned 0 - user not authenticated")
+	}
+
+	stmt := fmt.Sprintf("SELECT COUNT(*) FROM %s.%s WHERE user_fk = $1 AND is_read = false;", schemaName, tableName)
+	err = s.Db.QueryRow(ctx, stmt, userId).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("s.Db.QueryRow.Scan failed: %w", err)
+	}
+	return count, nil
+}
+
+// SetUsersToRead sets the notifications with the provided ids to read, but only if they belong to the authenticated user.
+func (s Store) SetUsersToRead(ctx context.Context, ids []int64) (err error) {
+
+	// get user from ctx
+	userId := lys.GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		return fmt.Errorf("lys.GetUserIdFromCtx returned 0 - user not authenticated")
+	}
+
+	// update, but only where the notifications belong to the ctx user
+	stmt := fmt.Sprintf("UPDATE %s.%s SET is_read = true WHERE user_fk = $1 AND id = ANY($2);", schemaName, tableName)
+	_, err = s.Db.Exec(ctx, stmt, userId, ids)
+	if err != nil {
+		return fmt.Errorf("s.Db.Exec failed: %w", err)
+	}
+	return nil
+}
+
+// SetAllUsersToRead sets all notifications to read for the authenticated user.
+func (s Store) SetAllUsersToRead(ctx context.Context) (err error) {
+
+	// get user from ctx
+	userId := lys.GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		return fmt.Errorf("lys.GetUserIdFromCtx returned 0 - user not authenticated")
+	}
+
+	// update, but only where the notifications belong to the ctx user
+	stmt := fmt.Sprintf("UPDATE %s.%s SET is_read = true WHERE user_fk = $1 AND is_read = false;", schemaName, tableName)
+	_, err = s.Db.Exec(ctx, stmt, userId)
+	if err != nil {
+		return fmt.Errorf("s.Db.Exec failed: %w", err)
+	}
+	return nil
 }
 
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {

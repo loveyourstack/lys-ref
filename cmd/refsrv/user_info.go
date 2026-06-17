@@ -8,6 +8,10 @@ type ReqUserInfo struct {
 	UserName string         `json:"user_name"`
 }
 
+func (r ReqUserInfo) GetUserId() int64 {
+	return r.UserId
+}
+
 func (r ReqUserInfo) GetUserName() string {
 	return r.UserName
 }

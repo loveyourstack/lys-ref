@@ -101,6 +101,12 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// exclude websocket registration: request is long-lived
+		if r.URL.Path == "/a/ws/notifications/register" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// get user from request
 		userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
 		if !ok {

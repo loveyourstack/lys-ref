@@ -11,6 +11,8 @@
 
       <v-spacer></v-spacer>
 
+      <notification-menu />
+
       <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
           <div v-if="auth.user" class="d-flex align-center" v-bind="props">
@@ -39,9 +41,9 @@
               <v-switch label="Dark mode" color="primary" v-model="darkMode" hide-details></v-switch>
             </v-list-item>
 
-            <v-list-item v-if="auth.user.has_aws_sg_rules">
+            <v-list-item v-if="auth.user.has_aws_sg_rules" class="clickable" @click="updateAwsFirewall()">
               <v-btn prepend-icon="mdi-wall-fire" style="letter-spacing: normal !important;" 
-                :loading="updatingAwsFirewall" @click="updateAwsFirewall()">Update AWS firewall</v-btn>
+                :loading="updatingAwsFirewall">Update AWS firewall</v-btn>
             </v-list-item>
 
           </v-list>

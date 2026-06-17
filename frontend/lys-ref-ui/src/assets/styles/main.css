@@ -56,6 +56,10 @@
   border-bottom: 1px solid rgba(var(--v-theme-outline), 0.3);
 }
 
+.bg-primary-lighten-5 {
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+}
+
 .nav-list .v-list-item, .nav-list .v-list-subheader {
   color: rgb(var(--v-theme-on-surface));
 }

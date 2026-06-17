@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"slices"
@@ -70,4 +71,82 @@ func (srvApp *httpServerApplication) sysGetUiStoreData(w http.ResponseWriter, r 
 		Data:   uiStoreData,
 	}
 	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) sysGetUserUnreadNotificationCount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	notsStore := sysnotification.Store{Db: srvApp.Db}
+	cnt, err := notsStore.SelectUserUnreadCount(ctx)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("notsStore.SelectUserUnreadCount failed: %w", err), srvApp.ErrorLog, w)
+		return
+	}
+
+	// return success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   cnt,
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) sysSetAllNotificationsToRead(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// set all notifications to read for the authenticated user
+	notsStore := sysnotification.Store{Db: srvApp.Db}
+	err := notsStore.SetAllUsersToRead(ctx)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("notsStore.SetAllUsersToRead failed: %w", err), srvApp.ErrorLog, w)
+		return
+	}
+
+	// return success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   "updated",
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		type input struct {
+			Ids []int64 `json:"ids"`
+		}
+
+		// get req body
+		body, err := lys.ExtractJsonBody(r, env.PostOptions.MaxBodySize)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: ExtractJsonBody failed: %w", err), env.ErrorLog, w)
+			return
+		}
+
+		// unmarshal the body
+		var inp input
+		err = json.Unmarshal(body, &inp)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: json.Unmarshal failed: %w", err), env.ErrorLog, w)
+			return
+		}
+
+		// set these ids to read
+		notsStore := sysnotification.Store{Db: srvApp.Db}
+		err = notsStore.SetUsersToRead(ctx, inp.Ids)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), srvApp.ErrorLog, w)
+			return
+		}
+
+		// return success
+		resp := lys.StdResponse{
+			Status: lys.ReqSucceeded,
+			Data:   "updated",
+		}
+		lys.JsonResponse(resp, http.StatusOK, w)
+	}
 }

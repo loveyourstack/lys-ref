@@ -606,9 +606,14 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 		endpoint = "/notifications"
 
 		notsStore := sysnotification.Store{Db: srvApp.Db}
-		r.HandleFunc(endpoint, lys.Get(apiEnv, notsStore, nil)).Methods("GET")
-		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, notsStore)).Methods("GET")
+
+		// default select: override Get to only return notifications for the ctx user id
+		r.HandleFunc(endpoint, lys.Get(apiEnv, notsStore, &lys.GetOpts[sysnotification.Model]{SelectFunc: notsStore.SelectOnlyUsers})).Methods("GET")
+
+		r.HandleFunc(endpoint+"/unread-count", srvApp.sysGetUserUnreadNotificationCount).Methods("GET")
 		r.HandleFunc(endpoint+"/add-fake", srvApp.sysAddFakeNotification).Methods("POST")
+		r.HandleFunc(endpoint+"/set-all-read", srvApp.sysSetAllNotificationsToRead).Methods("PATCH")
+		r.HandleFunc(endpoint+"/set-read", srvApp.sysSetNotificationsToRead(apiEnv)).Methods("PATCH")
 
 		endpoint = "/ui-store-data"
 
