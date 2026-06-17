@@ -9,7 +9,7 @@
       </v-btn>
     </template>
 
-    <v-card class="mr-2" max-width="400">
+    <v-card class="mr-2" :max-width="mdAndUp ? 600 : '100%'">
       <v-list density="compact" lines="two">
         <div class="d-flex">
           <v-list-subheader>NOTIFICATIONS</v-list-subheader>
@@ -38,8 +38,8 @@
             <v-icon :icon="getIconDetails(item.not_type).icon" :color="getIconDetails(item.not_type).color"></v-icon>
           </template>
 
-          <v-list-item-title v-text="item.not_type"></v-list-item-title>
-          <v-list-item-subtitle v-text="item.message"></v-list-item-subtitle>
+          <v-list-item-title v-text="item.message" class="text-wrap"></v-list-item-title>
+          <v-list-item-subtitle v-text="useTimeAgo(item.created_at)"></v-list-item-subtitle>
         </v-list-item>
 
       </v-list>
@@ -49,8 +49,11 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useTimeAgo } from '@vueuse/core'
+import { useDisplay } from 'vuetify'
 import { useNotsStore } from '@/stores/notifications'
 
+const { mdAndUp } = useDisplay()
 const notsStore = useNotsStore()
 
 const menuOpen = ref(false)

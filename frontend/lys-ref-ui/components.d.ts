@@ -66,7 +66,6 @@ declare module 'vue' {
     LeftNavList: typeof import('./src/components/LeftNavList.vue')['default']
     MyHome: typeof import('./src/components/MyHome.vue')['default']
     NotificationMenu: typeof import('./src/components/NotificationMenu.vue')['default']
-    NotificationMenus: typeof import('./src/components/NotificationMenus.vue')['default']
     ProcFlowForm: typeof import('./src/components/process/flow/ProcFlowForm.vue')['default']
     ProcFlowTable: typeof import('./src/components/process/flow/ProcFlowTable.vue')['default']
     ProcFlowTableFilters: typeof import('./src/components/process/flow/ProcFlowTableFilters.vue')['default']
