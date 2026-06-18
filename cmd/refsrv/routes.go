@@ -636,6 +636,10 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 		r.HandleFunc(endpoint, lys.Get(apiEnv, blockedIpStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, blockedIpStore)).Methods("GET")
 
+		endpoint = "/hub/status"
+
+		r.HandleFunc(endpoint, srvApp.techHubStatus).Methods("GET")
+
 		endpoint = "/login-attempts"
 
 		r.HandleFunc(endpoint, srvApp.authGetLoginAttempts).Methods("GET")
@@ -662,14 +666,7 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 func (srvApp *httpServerApplication) wsRoutes() lys.RouteAdderFunc {
 	return func(r *mux.Router) *mux.Router {
 
-		techR := r.NewRoute().Subrouter()
-		techR.Use(authorizeRole([]sysrole.Enum{sysrole.Tech}))
-
-		endpoint := "/hub/status" // tech only
-
-		techR.HandleFunc(endpoint, srvApp.wsHubStatus).Methods("GET")
-
-		endpoint = "/notifications/register" // needs ws:// protocol
+		endpoint := "/notifications/register" // needs ws:// protocol
 
 		r.HandleFunc(endpoint, srvApp.wsNotificationsRegister).Methods("GET")
 

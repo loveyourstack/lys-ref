@@ -34,7 +34,7 @@ interface statusRecord {
    [userName: string]: number
 }
 
-const myUrl = '/a/ws/hub/status'
+const myUrl = '/a/tech/hub/status'
 const items = ref<statusRecord>()
 
 function loadItems() {
