@@ -58,6 +58,7 @@ const props = defineProps<{
 const headers = [
   { title: 'Last access at', key: 'last_access_at', sortable: false },
   { title: 'User name', key: 'user_name', sortable: false },
+  /*{ title: 'Email', key: 'email', sortable: false },*/
   { title: 'IP', key: 'ip', sortable: false },
   { title: 'GeoIP Location', key: 'geo_ip_location', sortable: false },
   { title: 'User agent', key: 'user_agent', sortable: false },

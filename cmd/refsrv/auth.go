@@ -231,6 +231,7 @@ func (srvApp *httpServerApplication) loadSessionsFromDb(ctx context.Context) (er
 	for i, dbSess := range dbSessions {
 		appSessInput := lysauth.SessionInput{
 			AllowMultipleSessions: dbSess.AllowMultipleSessions,
+			Email:                 dbSess.Email,
 			FamilyName:            dbSess.FamilyName,
 			ForcePasswordChange:   dbSess.ForcePasswordChange,
 			GivenName:             dbSess.GivenName,
@@ -399,10 +400,10 @@ func appSessionsToInputs(appSessions []lysauth.Session) []syssession.Input {
 		inputs[i] = syssession.Input{
 			AllowMultipleSessions: appSess.AllowMultipleSessions,
 			CreatedAt:             appSess.CreatedAt,
-			Email:                 "", // not using in this project
+			Email:                 appSess.Email,
 			ExpiresAt:             appSess.ExpiresAt,
-			FamilyName:            "", // not using in this project
-			GivenName:             "", // not using in this project
+			FamilyName:            appSess.FamilyName,
+			GivenName:             appSess.GivenName,
 			GeoIpCountryIsoCode:   appSess.GeoIpCountryIsoCode,
 			GeoIpLocation:         appSess.GeoIpLocation,
 			Ip:                    appSess.Ip,

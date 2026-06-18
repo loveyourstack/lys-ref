@@ -203,6 +203,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	// create a session for this user
 	sessInput := lysauth.SessionInput{
 		AllowMultipleSessions: sysUser.AllowMultipleSessions,
+		Email:                 sysUser.Email,
 		FamilyName:            sysUser.FamilyName,
 		ForcePasswordChange:   sysUser.ForcePasswordChange,
 		GivenName:             sysUser.GivenName,

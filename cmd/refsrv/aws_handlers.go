@@ -21,6 +21,10 @@ func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.Resp
 		lys.HandleError(ctx, fmt.Errorf("srvApp.Sessions.FromRequest failed: %w", err), srvApp.ErrorLog, w)
 		return
 	}
+	if sess.Email == "" {
+		lys.HandleUserError(lyserr.User{Message: "email missing in session"}, w)
+		return
+	}
 
 	// user IP is only correct in prod, so exit if not in prod
 	if srvApp.Config.General.Env != appenv.Prod {
@@ -39,15 +43,8 @@ func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.Resp
 		return
 	}
 
-	// get user (for email)
-	sysUser, err := srvApp.UserStore.SelectByName(ctx, sess.UserName)
-	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("srvApp.UserStore.SelectByName failed for username %v: %w", sess.UserName, err), srvApp.ErrorLog, w)
-		return
-	}
-
 	// send notification mail to user
-	err = sendAwsSgRuleChangeNotificationEmail(srvApp.Config.Smtp, sysUser.Email)
+	err = sendAwsSgRuleChangeNotificationEmail(srvApp.Config.Smtp, sess.Email)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("sendAwsSgRuleChangeNotificationEmail failed: %w", err), srvApp.ErrorLog, w)
 		// don't return: update succeeded, just log mail failure

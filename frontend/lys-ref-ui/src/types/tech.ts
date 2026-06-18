@@ -21,6 +21,7 @@ export interface ServerRequest {
 export interface Session {
   allow_multiple_sessions: boolean
   created_at: Date
+  email: string
   expires_at: Date
   force_password_change: boolean
   geo_ip_country_iso_code: string
