@@ -22,3 +22,7 @@ useAuthentication = true # may only be false if env = dev above
 
 [ui]
 url = "http://localhost:3000" # same as main UI: would normally be a different one
+
+[smtp] # needed for config validation, not used by supplier API
+senderEmail = "bob@example.com"
+senderPassword = "x"
