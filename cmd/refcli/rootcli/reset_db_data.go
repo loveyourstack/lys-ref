@@ -47,6 +47,8 @@ func ResetDbDataCmd(cliApp *cliapp.App) *cobra.Command {
 
 				"supplier/supplier_reset_tables.sql",
 				"supplier/supplier_data.sql",
+
+				"system/system_reset_tables.sql",
 			}
 			for _, file := range filesToExecute {
 				err = lyspgdb.ExecuteFile(ctx, ownerDb, file, ddl.SQLAssets, nil, cliApp.InfoLog)
