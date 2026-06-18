@@ -16,6 +16,9 @@
 
           <v-spacer></v-spacer>
 
+          <v-btn icon="mdi-chevron-left" flat :disabled="notsStore.listPage <= 1" @click="notsStore.listPage--; notsStore.loadItems()"></v-btn>
+          <v-btn icon="mdi-chevron-right" flat :disabled="!notsStore.listHasMore" @click="notsStore.listPage++; notsStore.loadItems()"></v-btn>
+
           <v-menu :close-on-content-click="false">
             <template v-slot:activator="{ props }">
               <v-btn icon="mdi-dots-vertical" flat v-bind="props"></v-btn>
@@ -71,6 +74,7 @@ function getIconDetails(type: string): { icon: string, color: string } {
 
 watch(menuOpen, isOpen => {
   if (isOpen) {
+    notsStore.listPage = 1
     notsStore.loadItems()
   }
 })

@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useWebSocket } from '@vueuse/core'
-import { fetchOnce, notify } from 'lys-vue'
+import { fetchOnce, notify, type GetMetadata } from 'lys-vue'
 import { useAppStore } from '@/stores/app'
 import { type Notification } from '@/types/system'
 import ax from '@/api'
@@ -24,6 +24,8 @@ export const useNotsStore = defineStore('notifications', () => {
 
   const isStarted = ref(false)
   const items = ref<Notification[]>([])
+  const listHasMore = ref(false)
+  const listPage = ref(1)
   const markingAllAsRead = ref(false)
   const wsUrl = ref('')
   const unreadCount = ref(0)
@@ -58,8 +60,16 @@ export const useNotsStore = defineStore('notifications', () => {
   })
 
   function loadItems() {
-    const myUrl = `${baseUrl}?xper_page=10`
-    fetchOnce({ ax, myUrl, result: items, onSuccess: () => {
+    const metaData = ref<GetMetadata>({count: 0, total_count: 0, total_count_is_estimated: false})
+    const myUrl = `${baseUrl}?xpage=${listPage.value}&xper_page=10`
+    fetchOnce({ ax, myUrl, result: items, metaData, onSuccess: () => {
+
+      // determine whether there are more pages to load
+      if (metaData.value && metaData.value.total_count && metaData.value.total_count > listPage.value * 10) {
+        listHasMore.value = true
+      } else {
+        listHasMore.value = false
+      }
 
       // mark any unread loaded notifications as read
       const unreadIds = items.value.filter(i => !i.is_read).map(i => i.id)
@@ -103,7 +113,7 @@ export const useNotsStore = defineStore('notifications', () => {
     close()
   }
 
-  return { items, markingAllAsRead, unreadCount, wsStatus, wsStart, wsStop,
+  return { items, listHasMore, listPage, markingAllAsRead, unreadCount, wsStatus, wsStart, wsStop,
     loadItems, loadUnreadCount, setAllRead, setIdsRead,
    }
 })
