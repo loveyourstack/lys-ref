@@ -47,6 +47,13 @@ CREATE OR REPLACE VIEW digmark.v_campaign_performance AS
   JOIN digmark.vertical dm_v ON dm_c.vertical_fk = dm_v.id;
 
 
+CREATE OR REPLACE VIEW digmark.v_latest_perf_summary AS
+  SELECT day_cet AS day, SUM(spend_eur) AS total_spend, SUM(revenue_eur) AS total_revenue 
+  FROM digmark.campaign_performance
+  WHERE day_cet > current_date -7
+  GROUP BY 1 ORDER BY 1;
+
+
 CREATE OR REPLACE VIEW digmark.v_vertical AS
   SELECT
     dm_v.id,

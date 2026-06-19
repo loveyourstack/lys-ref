@@ -53,6 +53,10 @@ tests:
 clib:
 	go build -o ./bin ./cmd/refcli
 
+# build MCP server
+.PHONY: mcpb
+mcpb:
+	go build -o ./bin ./cmd/mcpsrv
 
 # build server
 .PHONY: srvb
@@ -66,4 +70,4 @@ suppsrvb:
 
 # build all apps
 .PHONY: build
-build: clib srvb suppsrvb
+build: clib mcpb srvb suppsrvb

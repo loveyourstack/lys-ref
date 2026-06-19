@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "lys-ref-analytics": {
+      "type": "stdio",
+      "command": "go",
+      "args": ["run", "./cmd/mcpsrv", "-config", "ref_config.toml"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
