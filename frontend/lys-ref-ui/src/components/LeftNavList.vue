@@ -17,13 +17,19 @@
     <div v-if="showEntityRelItems">
       <v-list-item link title="Verticals" to="/digital-marketing/verticals" prepend-icon="mdi-domain"></v-list-item>
       <v-list-item link title="Campaigns" to="/digital-marketing/campaigns" prepend-icon="mdi-bullhorn-outline"></v-list-item>
-      <v-list-item link title="Campaign Perf" to="/digital-marketing/campaign-performance" prepend-icon="mdi-poll"></v-list-item>
+      <v-list-item link title="Campaign perf" to="/digital-marketing/campaign-performance" prepend-icon="mdi-poll"></v-list-item>
     </div>
 
     <v-list-subheader title="Advanced tables" class="mt-2 clickable" @click="showAdvTableItems = !showAdvTableItems"></v-list-subheader>
 
     <div v-if="showAdvTableItems">
       <v-list-item link title="Optimizer" to="/digital-marketing/campaign-optimizer" prepend-icon="mdi-counter"></v-list-item>
+    </div>
+
+    <v-list-subheader title="AI / LLMs" class="mt-2 clickable" @click="showAiItems = !showAiItems"></v-list-subheader>
+
+    <div v-if="showAiItems">
+      <v-list-item link title="MCP server" to="/digital-marketing/mcp-server" prepend-icon="mdi-robot"></v-list-item>
     </div>
 
     <v-list-subheader title="User data retention" class="mt-2 clickable" @click="showUserDataRetItems = !showUserDataRetItems"></v-list-subheader> 
@@ -43,6 +49,7 @@ import { useJsonLs } from 'lys-vue'
 const showTypeItems = ref(true)
 const showEntityRelItems = ref(true)
 const showAdvTableItems = ref(true)
+const showAiItems = ref(true)
 const showUserDataRetItems = ref(true)
 
 useJsonLs({
@@ -51,6 +58,7 @@ useJsonLs({
     showTypeItems,
     showEntityRelItems,
     showAdvTableItems,
+    showAiItems,
     showUserDataRetItems,
   },
 })

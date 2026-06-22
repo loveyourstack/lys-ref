@@ -127,6 +127,50 @@ export interface CampaignPerfLatestSummary {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 
+export type McpColumnDef = {
+  key: string
+  label: string
+  format?: (value: any) => string
+  align?: 'start' | 'end'
+}
+
+export type McpQueryDef<T> = {
+  id: number
+  naturalLanguage: string
+  mcpTool: string
+  params: Record<string, unknown>
+  columns: McpColumnDef[]
+  normalize: (raw: unknown) => T[]
+}
+
+export interface PerfSummary {
+  active_campaigns: number
+  clicks: number
+  conversions: number
+  impressions: number
+  profit_eur: number
+  return_on_investment: number
+  revenue_eur: number
+  spend_eur: number
+}
+export interface RevenueByDay {
+  day: string
+  revenue_eur: number
+}
+export interface TopCampaign {
+  campaign: string
+  manager: string
+  profit_eur: number
+  return_on_investment: number
+}
+export interface VerticalPerf {
+  profit_eur: number
+  return_on_investment: number
+  vertical: string
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
 export interface VerticalInput {
   name: string | undefined
 }
