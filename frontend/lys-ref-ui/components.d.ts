@@ -54,6 +54,7 @@ declare module 'vue' {
     EcbExchangeRateTableFilters: typeof import('./src/components/ecb/exchangeRate/EcbExchangeRateTableFilters.vue')['default']
     EcbXrPerformanceChart: typeof import('./src/components/ecb/exchangeRate/EcbXrPerformanceChart.vue')['default']
     HomeAdvancedTables: typeof import('./src/components/home/HomeAdvancedTables.vue')['default']
+    HomeAi: typeof import('./src/components/home/HomeAi.vue')['default']
     HomeCharts: typeof import('./src/components/home/HomeCharts.vue')['default']
     HomeEntityRelationships: typeof import('./src/components/home/HomeEntityRelationships.vue')['default']
     HomeExternalData: typeof import('./src/components/home/HomeExternalData.vue')['default']
