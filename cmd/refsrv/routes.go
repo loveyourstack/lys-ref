@@ -271,6 +271,10 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 
 		r.HandleFunc(endpoint, lys.GetSimple(apiEnv, campStore.SelectManagerBudgets)).Methods("GET")
 
+		endpoint = "/mcp-query"
+
+		r.HandleFunc(endpoint, srvApp.dmMcpQuery).Methods("POST")
+
 		endpoint = "/verticals"
 
 		vertStore := dmvertical.Store{Db: srvApp.Db}

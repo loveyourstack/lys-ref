@@ -40,6 +40,11 @@ type developer struct {
 	Password   string
 }
 
+type McpServer struct {
+	BinaryPath     string
+	ConfigFilePath string
+}
+
 // Process contains the config for the process schema
 type Process struct {
 	CliCmdPrefix string
@@ -86,6 +91,7 @@ type Config struct {
 	API          api
 	UI           ui
 	Developer    developer
+	McpServer    McpServer
 
 	Aws     awsapi.Conf
 	MaxMind mmapi.Conf

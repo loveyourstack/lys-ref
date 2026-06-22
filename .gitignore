@@ -3,5 +3,4 @@
 /sql/migrations
 /srvconfigs
 
-/ref_config.toml
-/suppsrv_config.toml
+/*config.toml

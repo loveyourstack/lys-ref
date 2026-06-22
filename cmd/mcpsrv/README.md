@@ -44,7 +44,7 @@ Best when your MCP host runs on the same EC2 instance (for example a self-hosted
 
 1. Provision EC2 in the same VPC/subnet region as RDS.
 2. Install Go (or ship prebuilt `bin/mcpsrv`).
-3. Place `ref_config.toml` with least-privileged DB credentials.
+3. Place `mcp_config.toml` with least-privileged DB credentials.
 4. Configure security groups:
 	 - EC2 egress to Postgres port
 	 - RDS ingress from EC2 security group
@@ -86,6 +86,6 @@ This repository does not currently include a native HTTP MCP transport in `cmd/m
 
 - "config file not found": verify `-config` path and working directory.
 - "failed to decode config": check TOML keys and section names.
-- "Db.Database is empty" or "DbServerUser.Name is empty": required keys are missing.
+- "Db.Database is empty" or "DbMcpUser.Name is empty": required keys are missing.
 - "failed to open DB pool": verify network path, credentials, SSL settings, and DB availability.
 - MCP client cannot see tools: ensure MCP server is enabled and launched by the client, not just run manually.

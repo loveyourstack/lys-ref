@@ -39,6 +39,10 @@ familyName = ""
 email = ""
 password = ""
 
+[mcpServer]
+binaryPath = "/path/to/mcpsrv"
+configFilePath = "/path/to/mcp_config.toml"
+
 [aws]
 accessKeyId = ""
 region = ""
