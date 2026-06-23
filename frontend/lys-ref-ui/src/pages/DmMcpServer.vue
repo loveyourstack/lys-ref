@@ -16,7 +16,8 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <div class="dt-subtitle">The backend contains an MCP server which allows LLMs to query the campaign performance data shown in the "Entity relationships" section above.</div>
+              <div class="dt-subtitle">The backend contains an <a href="https://modelcontextprotocol.io/docs/learn/server-concepts" target="_blank" rel="noopener noreferrer">MCP server</a> 
+                which allows LLMs to query the campaign performance data shown in the "Entity relationships" section above.</div>
 
               <div class="dt-subtitle">Currently there is no attached LLM model, so the natural language to MCP tool translation is simulated.
                 However the MCP server query and response handling is fully functional.
