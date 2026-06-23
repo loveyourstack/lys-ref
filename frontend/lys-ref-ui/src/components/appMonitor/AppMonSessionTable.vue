@@ -93,4 +93,9 @@ function blockSessionIp(ip: string) {
   })
 }
 
+// autorefresh every 10 seconds
+setInterval(() => {
+  refreshItemsDebounced()
+}, 10000)
+
 </script>
