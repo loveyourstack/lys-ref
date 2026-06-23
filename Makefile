@@ -58,7 +58,7 @@ clib:
 mcpb:
 	go build -o ./bin ./cmd/mcpsrv
 
-# build server
+# build ref server
 .PHONY: srvb
 srvb:
 	go build -o ./bin ./cmd/refsrv
@@ -71,3 +71,31 @@ suppsrvb:
 # build all apps
 .PHONY: build
 build: clib mcpb srvb suppsrvb
+
+###########################################################
+
+# build and copy CLI to remote
+.PHONY: copycli
+copycli: clib
+	rsync -az -e ssh ./bin/refcli lysref:/home/ubuntu/bin
+
+# build and copy MCP server to remote
+.PHONY: copymcp
+copymcp: mcpb
+	rsync -az -e ssh ./bin/mcpsrv lysref:/home/ubuntu/bin
+
+# build and copy ref server to remote
+.PHONY: copysrv
+copysrv: srvb
+	rsync -az -e ssh ./bin/refsrv lysref:/home/ubuntu/bin
+
+# build and copy supplier server to remote
+.PHONY: copysuppsrv
+copysuppsrv: suppsrvb
+	rsync -az -e ssh ./bin/suppsrv lysref:/home/ubuntu/bin
+
+# build and copy ui/dist to remote
+.PHONY: copyui
+copyui:
+	pnpm --dir frontend/lys-ref-ui build
+	rsync --delete -az -e ssh ./frontend/lys-ref-ui/dist/ lysref:/home/ubuntu/frontend
