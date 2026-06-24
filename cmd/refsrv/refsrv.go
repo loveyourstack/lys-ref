@@ -169,10 +169,13 @@ func main() {
 		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
 	}
 
-	// start hub listener, reading payload details from the system.notification store
-	hubListenerErrCh := make(chan error, 1)
+	// start hub listener on its own lifecycle so hub failures do not stop the HTTP server
+	hubListenerDoneCh := make(chan struct{})
 	go func() {
-		hubListenerErrCh <- srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById)
+		defer close(hubListenerDoneCh)
+		if err := srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById); err != nil && !errors.Is(err, context.Canceled) {
+			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
+		}
 	}()
 
 	// --------------------------------
@@ -190,18 +193,12 @@ func main() {
 		srvErrCh <- srv.ListenAndServe()
 	}()
 
-	// wait for shutdown signal or server error
+	// wait for shutdown signal or server error; hub failures are handled independently
 	select {
 	case err := <-srvErrCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			srvApp.ErrorLog.Error("srv.ListenAndServe failed", "error", err)
 		}
-	case err := <-hubListenerErrCh:
-		if err != nil {
-			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
-		}
-		stop()
-		srvApp.InfoLog.Info("hub listener exited")
 	case <-ctx.Done():
 		srvApp.InfoLog.Info("shutdown signal received")
 	}
@@ -229,9 +226,9 @@ func main() {
 
 	// gracefully shutdown notification hub, waiting for ListenAndBroadcast to exit or timeout before forcefully closing
 	select {
-	case <-hubListenerErrCh:
-		// exit: error already logged above
-	case <-time.After(3 * time.Second):
+	case <-hubListenerDoneCh:
+		// exit: hub already stopped or exited on its own
+	case <-time.After(5 * time.Second):
 		srvApp.ErrorLog.Error("shutdown: timeout waiting for hub listener to exit")
 	}
 	if err := srvApp.NotificationHub.Close(); err != nil {
