@@ -22,7 +22,7 @@
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
-        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter() || item.run_count > 0" color="error" @click="deleteItem">Delete</v-btn>
+        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter() || item.run_count > 0" color="error" @click="deleteItem">{{ $t('actions.delete') }}</v-btn>
       </template>
     </l-cancel-and-save-actions>
 

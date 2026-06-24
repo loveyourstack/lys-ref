@@ -5,38 +5,58 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-rocket-launch-outline" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">Project stack and repositories</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Modern technologies with custom open source libraries on top.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.project_stack.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.project_stack.subtitle") }}</v-card-subtitle>
 
-      <div class="text-body-large mb-3">
-        This project uses
-        <a href="https://www.postgresql.org/" target="_blank" rel="noopener noreferrer">PostgreSQL</a> for the database, 
-        <a href="https://go.dev/" target="_blank" rel="noopener noreferrer">Go</a> on the server, 
-        and <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue.js</a> 
-        with <a href="https://vuetifyjs.com/" target="_blank" rel="noopener noreferrer">Vuetify</a> components in the UI.
-      </div>
+      <i18n-t scope="global" keypath="home.project_stack.p1" tag="div" class="text-body-large mb-3">
+        <template #PostgreSQL>
+          <a href="https://www.postgresql.org/" target="_blank" rel="noopener noreferrer">PostgreSQL</a>
+        </template>
+        <template #Go>
+          <a href="https://go.dev/" target="_blank" rel="noopener noreferrer">Go</a>
+        </template>
+        <template #VueJs>
+          <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue.js</a>
+        </template>
+        <template #Vuetify>
+          <a href="https://vuetifyjs.com/" target="_blank" rel="noopener noreferrer">Vuetify</a>
+        </template>
+      </i18n-t>
 
       <div class="text-body-large">
-        The LoveYourStack open source repositories relevant to this project are:
+        {{ $t("home.project_stack.p2") }}
         <ul>
-          <li>
-            <a href="https://github.com/loveyourstack/lys-ref" target="_blank" rel="noopener noreferrer">lys-ref</a> for this project's code.
-          </li>
-          <li>
-            <a href="https://github.com/loveyourstack/lys" target="_blank" rel="noopener noreferrer">lys</a> for the main backend library.
-          </li>
-          <li>
-            <a href="https://github.com/loveyourstack/connectors" target="_blank" rel="noopener noreferrer">connectors</a> for the ECB and MaxMind connectors.
-          </li>
-          <li>
-            <a href="https://github.com/loveyourstack/lys-vue" target="_blank" rel="noopener noreferrer">lys-vue</a> for the UI library, 
-            which is available via <a href="https://www.npmjs.com/package/lys-vue" target="_blank" rel="noopener noreferrer">npm</a>.
-          </li>
+          <i18n-t scope="global" keypath="home.project_stack.p2_list.item_1" tag="li">
+            <template #lysRef>
+              <a href="https://github.com/loveyourstack/lys-ref" target="_blank" rel="noopener noreferrer">lys-ref</a>
+            </template>
+          </i18n-t>
+
+          <i18n-t scope="global" keypath="home.project_stack.p2_list.item_2" tag="li">
+            <template #lys>
+              <a href="https://github.com/loveyourstack/lys" target="_blank" rel="noopener noreferrer">lys</a>
+            </template>
+          </i18n-t>
+
+          <i18n-t scope="global" keypath="home.project_stack.p2_list.item_3" tag="li">
+            <template #connectors>
+              <a href="https://github.com/loveyourstack/connectors" target="_blank" rel="noopener noreferrer">connectors</a>
+            </template>
+          </i18n-t>
+
+          <i18n-t scope="global" keypath="home.project_stack.p2_list.item_4" tag="li">
+            <template #lysVue>
+              <a href="https://github.com/loveyourstack/lys-vue" target="_blank" rel="noopener noreferrer">lys-vue</a>
+            </template>
+            <template #npm>
+              <a href="https://www.npmjs.com/package/lys-vue" target="_blank" rel="noopener noreferrer">npm</a>
+            </template>
+          </i18n-t>
         </ul>
       </div>
 
       <div class="text-body-large">
-        The cards below give an overview of the subheadings in the left and right navigation panels.
+        {{ $t("home.project_stack.p3") }}
       </div>
     </v-card-item>
   </v-card>

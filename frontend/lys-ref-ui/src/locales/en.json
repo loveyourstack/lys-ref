@@ -1,0 +1,153 @@
+{
+    "actions": {
+        "add": "Add",
+        "adjust_columns": "Adjust columns",
+        "archive": "Archive",
+        "cancel": "Cancel",
+        "close": "Close",
+        "delete": "Delete",
+        "download_to_excel": "Download to Excel",
+        "edit": "Edit",
+        "import": "Import",
+        "login": "Login",
+        "logout": "Logout",
+        "reset_table": "Reset table",
+        "restore": "Restore",
+        "run": "Run",
+        "save": "Save",
+        "show_archive": "Show archive",
+        "show_update_history": "Show update history"
+    },
+    "home": {
+        "advanced_tables": {
+            "title": "Advanced tables",
+            "subtitle": "Complex data presentation.",
+            "p1": "This section demonstrates some of the more advanced features of Vuetify's data tables."
+        },
+        "ai": {
+            "title": "AI / LLMs",
+            "subtitle": "Adding LLM tools.",
+            "p1": "This section shows how to add custom data sources to LLMs."
+        },
+        "charts": {
+            "title": "Charts",
+            "subtitle": "Visualizing data with charts.",
+            "p1": "This section shows some types of charts using Chart.js."
+        },
+        "entity_relationships": {
+            "title": "Entity relationships",
+            "subtitle": "Managing relationships between entities.",
+            "p1": "This section examines the implications of an entity hierarchy: parent, regular, and child/data entities."
+        },
+        "external_data": {
+            "title": "External data",
+            "subtitle": "Importing and managing external data sources.",
+            "p1": "This section shows data from the European Central Bank's API and the MaxMind API.",
+            "p2": "In the backend, the it shows how to merge data efficiently using hash tables and how to stream from file directly into the database."
+        },
+        "parallel_processing": {
+            "title": "Parallel processing",
+            "subtitle": "Improved data throughput.",
+            "p1": "This section shows an implementation of job workflows, where each step is a fake backend command to manipulate data.",
+            "p2": "When a job is started, each step that can be executed in parallel runs concurrently, and structures are in place to manage failure gracefully."
+        },
+        "project_stack": {
+            "title": "Project stack and repositories",
+            "subtitle": "Modern technologies with custom open source libraries on top.",
+            "p1": "This project uses {PostgreSQL} for the database, {Go} on the server, and {VueJs} with {Vuetify} components in the UI.",
+            "p2": "The LoveYourStack open source repositories relevant to this project are:",
+            "p2_list": {
+                "item_1": "{lysRef} for this project's code.",
+                "item_2": "{lys} for the main backend library.",
+                "item_3": "{connectors} for the ECB and MaxMind connectors.",
+                "item_4": "{lysVue} for the UI library, which is available via {npm}."
+            },
+            "p3": "The cards below give an overview of the subheadings in the left and right navigation panels."
+        },
+        "saas": {
+            "title": "SaaS / multi-tenancy",
+            "subtitle": "Solving SaaS on the data level.",
+            "p1": "This section shows how to use Postgres RLS (Row-Level Security) to implement multi-tenancy in a SaaS application.",
+            "p2": "It shows how to access the data both from an internal database connection, and also from a tenant application using a special RLS-enabled database connection."
+        },
+        "server_push": {
+            "title": "Server push",
+            "subtitle": "Real-time notifications and updates.",
+            "p1": "This section demonstrates how data is pushed from database to app (via listen/notify) and from app to frontend (via websockets)."
+        },
+        "type_handling": {
+            "title": "Type handling",
+            "subtitle": "Dealing with different data types.",
+            "p1": "This section gets the basics out the way; it demonstrates how to handle common data types (e.g. strings, numbers, dates, arrays).",
+            "p2": "It examines the implications of mandatory vs optional vs default values."
+        },
+        "user_data_retention": {
+            "title": "User data retention",
+            "subtitle": "Techniques for preserving user data.",
+            "p1": "This section demonstrates how to properly archive (soft delete) data including cascading effects, and how to track user changes using a database audit log."
+        },
+        "welcome": "Welcome to"
+    },
+    "left_nav": {
+        "ai": {
+            "title": "AI / LLMs",
+            "mcp_server": "MCP server"
+        },
+        "advanced_tables": {
+            "title": "Advanced tables",
+            "optimizer": "Optimizer"
+        },
+        "entity_relationships": {
+            "title": "Entity relationships",
+            "campaign_perf": "Campaign perf",
+            "campaigns": "Campaigns",
+            "verticals": "Verticals"
+        },
+        "home": "Home",
+        "type_handling": {
+            "title": "Type handling",
+            "arrays": "Arrays",
+            "default_values": "Default values",
+            "mandatory_values": "Mandatory values",
+            "optional_values": "Optional values",
+            "variants": "Variants"
+        },
+        "user_data_retention": {
+            "title": "User data retention",
+            "authors": "Authors",
+            "books": "Books"
+        }
+    },
+    "right_nav": {
+        "charts": {
+            "title": "Charts",
+            "campaign_charts": "Campaign charts",
+            "xr_performance": "XR performance"
+        },
+        "external_data": {
+            "title": "External data",
+            "currencies": "Currencies",
+            "exchange_rates": "Exchange rates",
+            "geo_ip": "Geo IP"
+        },
+        "monitoring": {
+            "title": "Monitoring",
+            "application": "Application",
+            "database": "Database"
+        },
+        "parallel_processing": {
+            "title": "Parallel processing",
+            "flows": "Flows",
+            "runs": "Runs"
+        },
+        "saas": {
+            "title": "SaaS / multi-tenancy",
+            "internal_view": "Internal view",
+            "tenant_view": "Tenant view"
+        },
+        "server_push": {
+            "title": "Server push",
+            "notifications": "Notifications"
+        }
+    }
+}

@@ -36,7 +36,7 @@
                     <td>{{ query.naturalLanguage }}</td>
                     <td><code>{{ query.mcpTool }} -> {{ formatParams(query.params) }}</code></td>
                     <td>
-                      <v-btn color="primary" :loading="isLoading" @click="activeQuery = query; run(query.naturalLanguage)">Run</v-btn>
+                      <v-btn color="primary" :loading="isLoading" @click="activeQuery = query; run(query.naturalLanguage)">{{ $t('actions.run') }}</v-btn>
                     </td>
                   </tr>
                 </tbody>

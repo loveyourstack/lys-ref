@@ -3,7 +3,7 @@
     <v-img class="mb-4" height="150" src="@/assets/logo.png" />
 
     <div class="mb-8 text-center">
-      <div class="text-body-medium font-weight-light mb-n1">Welcome to</div>
+      <div class="text-body-medium font-weight-light mb-n1">{{ $t("home.welcome") }}</div>
       <div class="text-display-medium font-weight-bold">LoveYourStack</div>
     </div>
 

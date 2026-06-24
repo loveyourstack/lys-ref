@@ -38,11 +38,11 @@
           {{ showArchive ? 'Archived books' : 'User data retention: books' }}
         </template>
 
-        <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">Add</v-btn>
+        <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
 
         <template #menuItems>
           <v-list-item prepend-icon="mdi-archive-arrow-down-outline">
-            <v-switch label="Show archive" v-model="showArchive" class="ml-2" color="secondary" hide-details density="comfortable"
+            <v-switch :label="`${$t('actions.show_archive')}`" v-model="showArchive" class="ml-2" color="secondary" hide-details density="comfortable"
               @update:model-value="refreshItems()"
             ></v-switch>
           </v-list-item>
@@ -66,14 +66,14 @@
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
-      <v-btn v-if="!showArchive" icon flat size="small" v-tooltip:bottom="'Edit'" @click="editID = item.id; showEdit = true">
+      <v-btn v-if="!showArchive" icon flat size="small" v-tooltip:bottom="`${$t('actions.edit')}`" @click="editID = item.id; showEdit = true">
         <v-icon color="primary" icon="mdi-square-edit-outline"></v-icon>
       </v-btn>
-      <v-btn v-if="!showArchive" icon flat size="small" v-tooltip:bottom="'Show update history'" @click="auditID = item.id; showAudit = true">
+      <v-btn v-if="!showArchive" icon flat size="small" v-tooltip:bottom="`${$t('actions.show_update_history')}`" @click="auditID = item.id; showAudit = true">
         <v-icon color="secondary" icon="mdi-history"></v-icon>
       </v-btn>
       <v-btn v-if="showArchive && !item.archived_by_cascade && !item.author_is_archived" :disabled="!auth.isWriter()" icon flat 
-        size="small" v-tooltip="'Restore'" @click="restoreItem(item.id)">
+        size="small" v-tooltip="`${$t('actions.restore')}`" @click="restoreItem(item.id)">
         <v-icon color="secondary" icon="mdi-restore"></v-icon>
       </v-btn>
     </template>

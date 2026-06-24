@@ -24,7 +24,7 @@
   >
     <template #top>
       <l-dt-top :ax="ax" :title="props.title ?? 'Parent entity: verticals'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
-        <v-btn color="secondary" @click="editID = 0; showEdit = true">Add</v-btn>
+        <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
@@ -46,7 +46,7 @@
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
-      <v-btn icon flat size="small" v-tooltip="'Edit'" @click="editID = item.id; showEdit = true">
+      <v-btn icon flat size="small" v-tooltip="`${$t('actions.edit')}`" @click="editID = item.id; showEdit = true">
         <v-icon color="primary" icon="mdi-square-edit-outline"></v-icon>
       </v-btn>
     </template>

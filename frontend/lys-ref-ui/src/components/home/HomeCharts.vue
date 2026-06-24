@@ -5,11 +5,11 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-chart-bell-curve-cumulative" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">Charts</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Visualizing data with charts.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.charts.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.charts.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large">
-        This section shows some types of charts using Chart.js.
+        {{ $t("home.charts.p1") }}
       </div>
     </v-card-item>
   </v-card>

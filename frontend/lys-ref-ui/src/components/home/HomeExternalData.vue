@@ -5,16 +5,15 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-currency-eur" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">External data</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Importing and managing external data sources.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.external_data.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.external_data.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large mb-3">
-        This section shows data from the European Central Bank's API and the MaxMind API.
+        {{ $t("home.external_data.p1") }}
       </div>
 
       <div class="text-body-large mb-3">
-        In the backend, the it shows how to merge data efficiently using hash tables
-        and how to stream from file directly into the database.
+        {{ $t("home.external_data.p2") }}
       </div>
     </v-card-item>
   </v-card>

@@ -46,7 +46,7 @@
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
-      <v-btn icon flat size="small" v-tooltip="'Edit'" @click="editID = item.id; showEdit = true">
+      <v-btn icon flat size="small" v-tooltip="`${$t('actions.edit')}`" @click="editID = item.id; showEdit = true">
         <v-icon color="primary" icon="mdi-square-edit-outline"></v-icon>
       </v-btn>
     </template>

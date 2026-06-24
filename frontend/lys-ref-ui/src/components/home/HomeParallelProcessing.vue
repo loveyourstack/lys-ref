@@ -5,15 +5,15 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-sitemap-outline" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">Parallel processing</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Improved data throughput.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.parallel_processing.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.parallel_processing.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large mb-3">
-        This section shows an implementation of job workflows, where each step is a fake backend command to manipulate data.
+        {{ $t("home.parallel_processing.p1") }}
       </div>
 
       <div class="text-body-large">
-        When a job is started, each step that can be executed in parallel runs concurrently, and structures are in place to manage failure gracefully.
+        {{ $t("home.parallel_processing.p2") }}
       </div>
     </v-card-item>
   </v-card>

@@ -18,7 +18,7 @@
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
-        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter()" color="error" @click="archiveItem">Archive</v-btn>
+        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter()" color="error" @click="archiveItem">{{ $t('actions.archive') }}</v-btn>
       </template>
     </l-cancel-and-save-actions>
 

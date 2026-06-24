@@ -1,0 +1,153 @@
+{
+    "actions": {
+        "add": "Hinzufügen",
+        "adjust_columns": "Spalten anpassen",
+        "archive": "Archivieren",
+        "cancel": "Abbrechen",
+        "close": "Schließen",
+        "delete": "Löschen",
+        "download_to_excel": "In Excel herunterladen",
+        "edit": "Bearbeiten",
+        "import": "Importieren",
+        "login": "Anmelden",
+        "logout": "Abmelden",
+        "reset_table": "Tabelle zurücksetzen",
+        "restore": "Wiederherstellen",
+        "run": "Ausführen",
+        "save": "Speichern",
+        "show_archive": "Archiv anzeigen",
+        "show_update_history": "Update-Verlauf anzeigen"
+    },
+    "home": {
+        "advanced_tables": {
+            "title": "Erweiterte Tabellen",
+            "subtitle": "Komplexe Datenpräsentation.",
+            "p1": "Dieser Abschnitt zeigt einige der fortgeschritteneren Funktionen der Vuetify-Datentabellen."
+        },
+        "ai": {
+            "title": "KI / LLMs",
+            "subtitle": "Hinzufügen von LLM-Tools.",
+            "p1": "Dieser Abschnitt zeigt, wie benutzerdefinierte Datenquellen zu LLMs hinzugefügt werden können."
+        },
+        "charts": {
+            "title": "Diagramme",
+            "subtitle": "Visualisierung von Daten mit Diagrammen.",
+            "p1": "Dieser Abschnitt zeigt einige Diagrammtypen mit Chart.js."
+        },
+        "entity_relationships": {
+            "title": "Entity-Beziehungen",
+            "subtitle": "Verwaltung von Beziehungen zwischen Entitäten.",
+            "p1": "Dieser Abschnitt untersucht die Auswirkungen einer Entitätenhierarchie: übergeordnete, reguläre und untergeordnete/Datenentitäten."
+        },
+        "external_data": {
+            "title": "Externe Daten",
+            "subtitle": "Importieren und Verwalten externer Datenquellen.",
+            "p1": "Dieser Abschnitt zeigt Daten von der API der Europäischen Zentralbank und der MaxMind-API.",
+            "p2": "Im Backend wird gezeigt, wie Daten effizient mit Hash-Tabellen zusammengeführt werden und wie direkt aus einer Datei in die Datenbank gestreamt werden kann."
+        },
+        "parallel_processing": {
+            "title": "Parallelverarbeitung",
+            "subtitle": "Verbesserter Datendurchsatz.",
+            "p1": "Dieser Abschnitt zeigt eine Implementierung von Job-Workflows, bei denen jeder Schritt ein gefälschter Backend-Befehl zur Datenmanipulation ist.",
+            "p2": "Wenn ein Job gestartet wird, läuft jeder Schritt, der parallel ausgeführt werden kann, gleichzeitig, und es sind Strukturen vorhanden, um Fehler elegant zu verwalten."
+        },
+        "project_stack": {
+            "title": "Projekt-Stack und Repositories",
+            "subtitle": "Moderne Technologien mit benutzerdefinierten Open-Source-Bibliotheken obendrauf.",
+            "p1": "Dieses Projekt verwendet {PostgreSQL} für die Datenbank, {Go} auf dem Server und {VueJs} mit {Vuetify}-Komponenten im UI.",
+            "p2": "Die für dieses Projekt relevanten LoveYourStack Open-Source-Repositories sind:",
+            "p2_list": {
+                "item_1": "{lysRef} für den Code dieses Projekts.",
+                "item_2": "{lys} für die Haupt-Backend-Bibliothek.",
+                "item_3": "{connectors} für die ECB- und MaxMind-Connectoren.",
+                "item_4": "{lysVue} für die UI-Bibliothek, die über {npm} verfügbar ist."
+            },
+            "p3": "Die Karten unten geben einen Überblick über die Unterüberschriften in den linken und rechten Navigationsbereichen."
+        },
+        "saas": {
+            "title": "SaaS / Multi-Tenancy",
+            "subtitle": "Lösen von SaaS auf Datenebene.",
+            "p1": "Dieser Abschnitt zeigt, wie Postgres RLS (Row-Level Security) verwendet wird, um Multi-Tenancy in einer SaaS-Anwendung zu implementieren.",
+            "p2": "Es wird gezeigt, wie auf die Daten sowohl über eine interne Datenbankverbindung als auch über eine Mandantenanwendung mit einer speziellen RLS-fähigen Datenbankverbindung zugegriffen werden kann."
+        },
+        "server_push": {
+            "title": "Server-Push",
+            "subtitle": "Echtzeit-Benachrichtigungen und -Updates.",
+            "p1": "Dieser Abschnitt zeigt, wie Daten von der Datenbank zur App (über listen/notify) und von der App zum Frontend (über Websockets) gepusht werden."
+        },
+        "type_handling": {
+            "title": "Typbehandlung",
+            "subtitle": "Umgang mit verschiedenen Datentypen.",
+            "p1": "Dieser Abschnitt behandelt die Grundlagen; er zeigt, wie man mit gängigen Datentypen umgeht (z. B. Zeichenketten, Zahlen, Daten, Arrays).",
+            "p2": "Es werden die Auswirkungen von obligatorischen vs. optionalen vs. Standardwerten untersucht."
+        },
+        "user_data_retention": {
+            "title": "Aufbewahrung von Benutzerdaten",
+            "subtitle": "Techniken zur Sicherung von Benutzerdaten.",
+            "p1": "Dieser Abschnitt zeigt, wie Daten ordnungsgemäß archiviert (soft gelöscht) werden, einschließlich der Auswirkungen auf verknüpfte Daten, und wie Benutzeränderungen mithilfe eines Datenbank-Audit-Logs verfolgt werden können."
+        },
+        "welcome": "Willkommen bei"
+    },
+    "left_nav": {
+        "ai": {
+            "title": "KI / LLMs",
+            "mcp_server": "MCP-Server"
+        },
+        "advanced_tables": {
+            "title": "Erweiterte Tabellen",
+            "optimizer": "Optimierer"
+        },
+        "entity_relationships": {
+            "title": "Entity-Beziehungen",
+            "campaign_perf": "Kampagnenleistung",
+            "campaigns": "Kampagnen",
+            "verticals": "Vertikalen"
+        },
+        "home": "Startseite",
+        "type_handling": {
+            "title": "Typbehandlung",
+            "arrays": "Arrays",
+            "default_values": "Standardwerte",
+            "mandatory_values": "Obligatorische Werte",
+            "optional_values": "Optionale Werte",
+            "variants": "Varianten"
+        },
+        "user_data_retention": {
+            "title": "Aufbewahrung von Benutzerdaten",
+            "authors": "Autoren",
+            "books": "Bücher"
+        }
+    },
+    "right_nav": {
+        "charts": {
+            "title": "Diagramme",
+            "campaign_charts": "Kampagnencharts",
+            "xr_performance": "XR-Leistung"
+        },
+        "external_data": {
+            "title": "Externe Daten",
+            "currencies": "Währungen",
+            "exchange_rates": "Wechselkurse",
+            "geo_ip": "Geo IP"
+        },
+        "monitoring": {
+            "title": "Überwachung",
+            "application": "Anwendung",
+            "database": "Datenbank"
+        },
+        "parallel_processing": {
+            "title": "Parallele Verarbeitung",
+            "flows": "Abläufe",
+            "runs": "Durchläufe"
+        },
+        "saas": {
+            "title": "SaaS / Multi-Tenancy",
+            "internal_view": "Interne Ansicht",
+            "tenant_view": "Mandantenansicht"
+        },
+        "server_push": {
+            "title": "Server push",
+            "notifications": "Benachrichtigungen"
+        }
+    }
+}

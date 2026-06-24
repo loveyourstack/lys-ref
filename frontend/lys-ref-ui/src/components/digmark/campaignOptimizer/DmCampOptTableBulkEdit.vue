@@ -16,7 +16,7 @@
                 <v-autocomplete label="Active" v-model="newActive" :items="BooleanOptions" density="comfortable" max-width="300" hide-details
                   :rules="[(v: string) => v != undefined || 'Active is required']"
                 ></v-autocomplete>
-                <v-btn color="secondary" class="ml-5 mt-3" :loading="patchingActive" :disabled="!auth.isWriter()" @click="patchActiveByIds">Save</v-btn>
+                <v-btn color="secondary" class="ml-5 mt-3" :loading="patchingActive" :disabled="!auth.isWriter()" @click="patchActiveByIds">{{ $t('actions.save') }}</v-btn>
               </v-col>
             </v-row>
           </v-form>
@@ -30,7 +30,7 @@
                   :class="getTextClass(budgetChangeByPercent)"
                   :rules="[(v: string) => !!v || 'Budget percent change is required']">
                 </v-text-field>
-                <v-btn color="secondary" class="ml-5 mt-3" :loading="patchingBudgetPercent" :disabled="!auth.isWriter()" @click="patchBudgetPercentByIds">Save</v-btn>
+                <v-btn color="secondary" class="ml-5 mt-3" :loading="patchingBudgetPercent" :disabled="!auth.isWriter()" @click="patchBudgetPercentByIds">{{ $t('actions.save') }}</v-btn>
               </v-col>
             </v-row>
           </v-form>

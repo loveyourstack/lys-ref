@@ -5,11 +5,11 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-counter" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">Advanced tables</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Complex data presentation.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.advanced_tables.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.advanced_tables.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large">
-        This section demonstrates some of the more advanced features of Vuetify's data tables.
+        {{ $t("home.advanced_tables.p1") }}
       </div>
     </v-card-item>
   </v-card>

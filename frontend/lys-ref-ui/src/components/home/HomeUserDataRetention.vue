@@ -5,11 +5,11 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-book-open-outline" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">User data retention</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Techniques for preserving user data.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.user_data_retention.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.user_data_retention.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large">
-        This section demonstrates how to properly archive (soft delete) data including cascading effects, and how to track user changes using a database audit log.
+        {{ $t("home.user_data_retention.p1") }}
       </div>
     </v-card-item>
   </v-card>

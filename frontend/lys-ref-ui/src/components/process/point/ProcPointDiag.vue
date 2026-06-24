@@ -6,7 +6,7 @@
         <div>{{ errMsg }}</div>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="showDialog = false">Close</v-btn>
+        <v-btn color="primary" @click="showDialog = false">{{ $t('actions.close') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

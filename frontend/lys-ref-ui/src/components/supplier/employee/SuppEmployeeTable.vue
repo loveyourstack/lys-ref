@@ -26,7 +26,7 @@
       <!-- note passing of computed axInstance and reqHeaders for file download -->
       <l-dt-top :ax="axToUse" :title="props.title ?? 'Supplier employees'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :reqHeaders="reqHeaders">
-        <v-btn v-if="props.internal" color="secondary" @click="editID = 0; showEdit = true">Add</v-btn>
+        <v-btn v-if="props.internal" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
@@ -42,14 +42,14 @@
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
-      <v-btn icon flat size="small" v-tooltip:bottom="'Edit'" @click="editID = item.id; showEdit = true">
+      <v-btn icon flat size="small" v-tooltip:bottom="`${$t('actions.edit')}`" @click="editID = item.id; showEdit = true">
         <v-icon color="primary" icon="mdi-square-edit-outline"></v-icon>
       </v-btn>
-      <v-btn v-if="!suppStore.selectedEmpEmail" icon flat size="small" v-tooltip:bottom="'Login'" @click="suppStore.selectedEmpEmail = item.email!; suppStore.selectedCompId = item.company_fk!">
+      <v-btn v-if="!suppStore.selectedEmpEmail" icon flat size="small" v-tooltip:bottom="`${$t('actions.login')}`" @click="suppStore.selectedEmpEmail = item.email!; suppStore.selectedCompId = item.company_fk!">
         <v-icon color="primary" icon="mdi-login"></v-icon>
       </v-btn>
       <v-btn v-if="suppStore.selectedEmpEmail && suppStore.selectedEmpEmail === item.email" 
-        icon flat size="small" v-tooltip:bottom="'Logout'" @click="suppStore.selectedEmpEmail = ''; suppStore.selectedCompId = 0">
+        icon flat size="small" v-tooltip:bottom="`${$t('actions.logout')}`" @click="suppStore.selectedEmpEmail = ''; suppStore.selectedCompId = 0">
         <v-icon color="primary" icon="mdi-logout"></v-icon>
       </v-btn>
     </template>

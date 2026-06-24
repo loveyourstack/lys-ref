@@ -77,7 +77,7 @@
         </v-card-text>
 
         <v-card-actions class="pt-0">
-          <v-btn icon flat v-tooltip:bottom="'Edit'" size="small" @click="editID = item.id; showEdit = true">
+          <v-btn icon flat v-tooltip:bottom="`${$t('actions.edit')}`" size="small" @click="editID = item.id; showEdit = true">
             <v-icon color="secondary" icon="mdi-square-edit-outline"></v-icon>
           </v-btn>
           <v-btn icon flat v-tooltip:bottom="'Add dependency'" size="small" @click="stepID = item.id; showLinkEdit = true">

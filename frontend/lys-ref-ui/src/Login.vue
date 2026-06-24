@@ -27,7 +27,7 @@
                       @click:append-inner="showPw = !showPw"
                     ></v-text-field>
 
-                    <v-btn color="secondary" block class="mt-2" type="submit" :loading="loading">Login</v-btn>
+                    <v-btn color="secondary" block class="mt-2" type="submit" :loading="loading">{{ $t('actions.login') }}</v-btn>
                   </v-form>
 
                 </v-card-text>

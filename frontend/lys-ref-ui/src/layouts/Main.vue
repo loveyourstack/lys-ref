@@ -23,7 +23,7 @@
 
         <v-list density="compact" class="mt-1">
           <v-list-item prepend-icon="mdi-logout" class="clickable" @click="logout()">
-            <v-list-item-title>Logout</v-list-item-title>
+            <v-list-item-title>{{ $t('actions.logout') }}</v-list-item-title>
           </v-list-item>
         </v-list>
 
@@ -36,6 +36,11 @@
 
         <v-card>
           <v-list density="compact">
+
+            <v-list-item>
+              <v-select label="Language" v-model="locale" :items="appStore.locales" item-title="name" item-value="code" hide-details dense outlined>
+              </v-select>
+            </v-list-item>
 
             <v-list-item>
               <v-switch label="Dark mode" color="primary" v-model="darkMode" hide-details></v-switch>
@@ -75,6 +80,7 @@ import { useRouter } from 'vue-router'
 import { fetchOnce, notify } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
+import { i18n } from '@/plugins'
 import { useAppStore } from '@/stores/app'
 import { useCoreStore } from '@/stores/core'
 import { useDigmarkStore } from '@/stores/digmark'
@@ -98,6 +104,7 @@ const pubStore = usePublisherStore()
 const suppStore = useSupplierStore()
 
 const darkMode = ref(false)
+const locale = i18n.global.locale
 
 const storeData = ref<StoreData>()
 
@@ -168,10 +175,11 @@ watch(darkMode, (newVal) => {
   else { theme.change('light') }
 })
 
-watch([darkMode, showRightNav], () => {
+watch([darkMode, locale, showRightNav], () => {
 
   let lsObj = {
     'darkMode': darkMode.value,
+    'locale': locale.value,
     'showRightNav': showRightNav.value,
   }
   localStorage.setItem(lsKey, JSON.stringify(lsObj))
@@ -185,6 +193,7 @@ onBeforeMount(() => {
 
   const lsObj = JSON.parse(lsJSON)
   if (lsObj['darkMode'] !== undefined) { darkMode.value = lsObj['darkMode'] }
+  if (lsObj['locale'] !== undefined) { locale.value = lsObj['locale'] }
   if (lsObj['showRightNav'] !== undefined) { showRightNav.value = lsObj['showRightNav'] }
 })
 

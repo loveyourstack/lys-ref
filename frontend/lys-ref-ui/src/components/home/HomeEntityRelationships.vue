@@ -5,11 +5,11 @@
         <v-avatar class="ml-2 mr-4" icon="mdi-domain" size="60" variant="tonal" />
       </template>
 
-      <v-card-title class="text-headline-medium font-weight-bold">Entity relationships</v-card-title>
-      <v-card-subtitle class="text-body-large mb-3">Managing relationships between entities.</v-card-subtitle>
+      <v-card-title class="text-headline-medium font-weight-bold">{{ $t("home.entity_relationships.title") }}</v-card-title>
+      <v-card-subtitle class="text-body-large mb-3">{{ $t("home.entity_relationships.subtitle") }}</v-card-subtitle>
 
       <div class="text-body-large">
-        This section examines the implications of an entity hierarchy: parent, regular, and child/data entities.
+        {{ $t("home.entity_relationships.p1") }}
       </div>
     </v-card-item>
   </v-card>
