@@ -14,13 +14,14 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'External data: exchange rates'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.external_data.exchange_rates')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">This data is synced from the European Central Bank API. The sync methods in the backend demonstrate high-volume data processing.</div>
-          <div class="dt-subtitle">When working with large result sets, the total number of results shown in the pagination footer is estimated using database statistics, as indicated by the "~" prefix.</div>
+          <div class="dt-subtitle">{{ $t('external_data.exchange_rates.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('external_data.exchange_rates.p2') }}</div>
         </v-col>
       </v-row>
 

@@ -14,7 +14,7 @@
   <v-row density="compact">
     <v-col class="d-flex align-center">
       <v-breadcrumbs :items="[
-          { title: 'Runs', disabled: false },
+          { title: $t('right_nav.parallel_processing.runs'), disabled: false },
           { title: props.flow, disabled: false },
           { title: props.step_name, disabled: false }
         ]" 
@@ -31,9 +31,9 @@
 
   <v-row density="comfortable">
     <v-col class="mb-6">
-      <div class="dt-subtitle">Each card below shows the result of the execution of a process step.</div>
-      <div class="dt-subtitle">The cards are updated automatically every 2 seconds as long as there is at least one process still running.</div>
-      <div class="dt-subtitle">Each fake running process has a 5% chance per second of failing.</div>
+      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p2') }}</div>
+      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p3') }}</div>
     </v-col>
   </v-row>
 

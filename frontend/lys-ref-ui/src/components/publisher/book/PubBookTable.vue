@@ -35,7 +35,7 @@
       <l-dt-top :ax="ax" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <template #title>
           <v-icon v-if="showArchive" color="secondary" size="small" class="mb-1" icon="mdi-archive-arrow-down-outline"></v-icon>
-          {{ showArchive ? 'Archived books' : 'User data retention: books' }}
+          {{ showArchive ? $t('user_data_retention.books.archived_title') : $t('left_nav.user_data_retention.books') }}
         </template>
 
         <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -51,8 +51,8 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">If the author is archived, his active books will also be automatically archived.</div>
-          <div class="dt-subtitle">However, books by active authors can also be archived separately. Restoration is only possible if the book was archived separately.</div>
+          <div class="dt-subtitle">{{ $t('user_data_retention.books.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('user_data_retention.books.p2') }}</div>
         </v-col>
       </v-row>
     </template>

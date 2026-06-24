@@ -23,15 +23,15 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Regular entity: campaigns'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('entity_relationships.campaigns.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">Regular entities show primary columns of parent entities and aggregates of child entities.</div>
-          <div class="dt-subtitle">In this case, we show the name column of the parent country and vertical tables, and the date bounds of the child campaign performance table.</div>
-          <div class="dt-subtitle">The parent entities should be filterable.</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p2') }}</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p3') }}</div>
         </v-col>
       </v-row>
 

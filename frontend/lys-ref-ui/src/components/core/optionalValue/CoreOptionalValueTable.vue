@@ -32,14 +32,15 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Optional values'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('left_nav.type_handling.optional_values')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">All columns are optional. Zero-values by type are inserted where no value is given.</div>
+          <div class="dt-subtitle">{{ $t('type_handling.optional_values.p1') }}</div>
         </v-col>
       </v-row>
     </template>

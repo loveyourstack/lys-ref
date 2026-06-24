@@ -14,13 +14,13 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Data entity: campaign performance'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('entity_relationships.campaign_perf.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">Data entities show primary columns of parent entities and should have no child entities.</div>
-          <div class="dt-subtitle">Data is usually managed by background processes and not editable via API or UI.</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.campaign_perf.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.campaign_perf.p2') }}</div>
         </v-col>
       </v-row>
     </template>

@@ -2,15 +2,15 @@
   <v-row>
     <v-col>
       <div class="dt-title">
-        <slot name="title">Exchange rate performance</slot>
+        <slot name="title">{{ $t('charts.xr_performance.title') }}</slot>
       </div>
     </v-col>
   </v-row>
 
   <v-row density="comfortable">
     <v-col class="mb-2">
-      <div class="dt-subtitle">Using the exchange rates from the 'External data' section, this chart shows normalized EUR performance vs active currencies for the selected period.</div>
-      <div class="dt-subtitle">The data point tooltips show the actual exchange rate rather than the normalized value.</div>
+      <div class="dt-subtitle">{{ $t('charts.xr_performance.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('charts.xr_performance.p2') }}</div>
     </v-col>
   </v-row>
 

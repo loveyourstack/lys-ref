@@ -23,13 +23,14 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Flows'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.parallel_processing.flows')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">A flow is a set of connected processes. Click 'View steps' on one of the flows to see more information.</div>
+          <div class="dt-subtitle">{{ $t('parallel_processing.flows.p1') }}</div>
         </v-col>
       </v-row>
 

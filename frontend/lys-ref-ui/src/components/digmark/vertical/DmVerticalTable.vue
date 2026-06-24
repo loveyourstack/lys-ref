@@ -23,15 +23,21 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Parent entity: verticals'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('entity_relationships.verticals.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">Parent entities show aggregates (e.g. count) of child entities. In this case, campaign is the child entity.</div>
-          <div class="dt-subtitle">If needed, provide a quick way to filter child entities by the parent, as shown with the "View campaigns" <v-icon small color="secondary" icon="mdi-bullhorn-outline"></v-icon> button below.</div>
-          <div class="dt-subtitle">Disable deletion of the parent if it has associated child entities, unless there is a composition relationship which allows cascaded deletion.</div>
+          <div class="dt-subtitle">{{ $t('entity_relationships.verticals.p1') }}</div>
+
+          <i18n-t scope="global" keypath="entity_relationships.verticals.p2" tag="div" class="dt-subtitle">
+            <template #viewCampsIcon>
+              <v-icon color="secondary" icon="mdi-bullhorn-outline"></v-icon>
+            </template>
+          </i18n-t>
+          
+          <div class="dt-subtitle">{{ $t('entity_relationships.verticals.p3') }}</div>
         </v-col>
       </v-row>
     </template>

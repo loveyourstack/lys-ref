@@ -18,6 +18,74 @@
         "show_archive": "Archiv anzeigen",
         "show_update_history": "Update-Verlauf anzeigen"
     },
+    "advanced_tables": {
+        "optimizer": {
+            "title": "Kampagnenoptimierer",
+            "p1": "Zeigt Kampagnen, die mit voraggregierten Kampagnenleistungsdaten aus dem Abschnitt 'Entity-Beziehungen' verknüpft sind.",
+            "p2": "Demonstriert die folgenden erweiterten Tabellenfunktionen:",
+            "p2_list": {
+                "item_1": "Tab-basierte Filterung (des Managers)",
+                "item_2": "Inline-Updates (von Aktiv und Tagesbudget)",
+                "item_3": "Massenaktualisierungen über Zeilenauswahl. Die Auswahl respektiert Filter nach der Aktualisierung. Verwendet Browser-Benachrichtigungen, wenn erlaubt",
+                "item_4": "Summenzeile, die Filterung und Spaltenauswahl respektiert und Paging ignoriert",
+                "item_5": "Zeilenerweiterung zeigt die neuesten täglichen Leistungskennzahlen"
+            }
+        }
+    },
+    "ai": {
+        "mcp_server": {
+            "p1": "Das Backend enthält einen {MCPServer}, der es LLMs ermöglicht, die im Abschnitt \"Entity-Beziehungen\" oben gezeigten Kampagnenleistungsdaten abzufragen.",
+            "p2": "Derzeit ist kein angeschlossenes LLM-Modell vorhanden, sodass die Übersetzung von natürlicher Sprache in MCP-Tools simuliert wird. Die Abfrage und Verarbeitung von Antworten des MCP-Servers ist jedoch vollständig funktionsfähig."
+        }
+    },
+    "charts": {
+        "campaign_charts": {
+            "p1": "Verwendet die Kampagnendaten aus dem Abschnitt 'Entity-Beziehungen', um weitere Diagrammtypen zu demonstrieren.",
+            "p2": "Die Farben von Titel- und Beschriftungstexten in der Diagrammbibliothek wurden überschrieben, um den Anwendungsmodus Hell oder Dunkel zu respektieren.",
+            "budget_breakdown": "Budgetaufteilung",
+            "spend_vs_revenue": "Kampagnenausgaben vs. Umsatz: letzte 7 Tage"
+        },
+        "xr_performance": {
+            "title": "Wechselkursleistung",
+            "p1": "Verwendet die Wechselkurse aus dem Abschnitt 'Externe Daten', um die normalisierte EUR-Leistung im Vergleich zu den aktiven Währungen für den ausgewählten Zeitraum anzuzeigen.",
+            "p2": "Die Datenpunkt-Tooltips zeigen den tatsächlichen Wechselkurs anstelle des normalisierten Werts."
+        }
+    },
+    "entity_relationships": {
+        "campaign_perf": {
+            "title": "Datenentität: Kampagnenleistung",
+            "p1": "Datenentitäten zeigen die primären Spalten der übergeordneten Entitäten und sollten keine untergeordneten Entitäten haben.",
+            "p2": "Daten werden normalerweise von Hintergrundprozessen verwaltet und sind nicht über API oder UI bearbeitbar."
+        },
+        "campaigns": {
+            "title": "Reguläre Entität: Kampagnen",
+            "p1": "Reguläre Entitäten zeigen die primären Spalten der übergeordneten Entitäten und Aggregationen der untergeordneten Entitäten.",
+            "p2": "In diesem Fall zeigen wir die Namensspalte der übergeordneten Länder- und Vertikaltabellen sowie die Datumsgrenzen der untergeordneten Kampagnenleistungstabelle.",
+            "p3": "Die übergeordneten Entitäten sollten filterbar sein."
+        },
+        "verticals": {
+            "title": "Übergeordnete Entität: Vertikalen",
+            "p1": "Übergeordnete Entitäten zeigen Aggregationen (z. B. Anzahl) der untergeordneten Entitäten. In diesem Fall ist die Kampagne die untergeordnete Entität.",
+            "p2": "Falls erforderlich, eine schnelle Möglichkeit bieten, untergeordnete Entitäten nach der übergeordneten Entität zu filtern, wie unten mit der Schaltfläche \"Kampagnen anzeigen\" {viewCampsIcon} gezeigt.",
+            "p3": "Die Löschung der übergeordneten Entität sollte deaktiviert werden, wenn sie mit untergeordneten Entitäten verknüpft ist, es sei denn, es besteht eine Kompositionsbeziehung, die eine kaskadierte Löschung ermöglicht."
+        }
+    },
+    "external_data": {
+        "currencies": {
+            "p1": "Währungscode und Name werden von der API der Europäischen Zentralbank synchronisiert.",
+            "p2": "Aktiv und Symbol sind benutzergepflegte Metadatenfelder, die unabhängig von den synchronisierten Daten gespeichert werden."
+        },
+        "exchange_rates": {
+            "p1": "Diese Daten werden von der API der Europäischen Zentralbank synchronisiert. Die Synchronisierungsmethoden im Backend demonstrieren die Verarbeitung großer Datenmengen.",
+            "p2": "Beim Arbeiten mit großen Ergebnismengen wird die Gesamtzahl der in der Paginierungsfußzeile angezeigten Ergebnisse anhand von Datenbankstatistiken geschätzt, wie durch das Präfix \"~\" angezeigt."
+        },
+        "geo_ip": {
+            "title": "Geo IP Informationen",
+            "p1": "Geo IP-Daten werden aus MaxMind GeoLite2-City CSV-Dateien importiert. Im Backend wird dies demonstriert, wie große Dateien in die Datenbank gestreamt werden.",
+            "your_ip": "Ihre IP ist:",
+            "your_location": "Ihr Geo IP-Standort ist:"
+        }
+    },
     "home": {
         "advanced_tables": {
             "title": "Erweiterte Tabellen",
@@ -118,6 +186,29 @@
             "books": "Bücher"
         }
     },
+    "parallel_processing": {
+        "flows": {
+            "p1": "Ein Ablauf ist eine Menge von verbundenen Prozessen. Klicken Sie auf 'Schritte anzeigen' bei einem der Abläufe, um weitere Informationen zu sehen.",
+            "steps": {
+                "title": "Schritte",
+                "p1": "Jede Karte unten ist ein Schritt im Prozess mit einem zugehörigen Fake-Backend-Befehl. Auf großen Bildschirmen: Schritte auf der rechten Seite hängen von den Schritten auf der linken Seite ab.",
+                "p2": "Jeder Schritt kann unabhängig oder mit seinen Abhängigkeiten ausgeführt werden. Schritte ohne Abhängigkeiten werden parallel ausgeführt. Wenn Sie einen Schritt ausführen, öffnet sich eine Seite, um den Fortschritt und die Ergebnisse anzuzeigen.",
+                "p3": "Demonstriert gleichmäßige Abstände von hierarchischen Daten. Im Backend wird demonstriert:",
+                "p3_list": {
+                    "item_1": "Rekursive Beziehungen (Schritte können von anderen Schritten abhängen)",
+                    "item_2": "Parallele Verarbeitung, mit der Option, beim ersten Fehler abzubrechen oder fortzufahren"
+                }
+            }
+        },
+        "runs": {
+            "p1": "Jeder Durchlauf ist eine Ausführung eines Ablaufschritts und seiner Abhängigkeiten. Klicken Sie auf 'Schritte anzeigen', um das Ergebnis jedes Prozessschritts zu sehen.",
+            "points": {
+                "p1": "Jede Karte unten zeigt das Ergebnis der Ausführung eines Prozessschritts.",
+                "p2": "Die Karten werden automatisch alle 2 Sekunden aktualisiert, solange mindestens ein Prozess noch läuft.",
+                "p3": "Jeder gefälschte laufende Prozess hat eine 5%ige Chance pro Sekunde, fehlschlagen."
+            }
+        }
+    },
     "right_nav": {
         "charts": {
             "title": "Diagramme",
@@ -148,6 +239,82 @@
         "server_push": {
             "title": "Server push",
             "notifications": "Benachrichtigungen"
+        }
+    },
+    "saas":{
+        "internal_view": {
+            "p1": "Dieses Beispiel basiert auf der klassischen Northwind-Datenbank.",
+            "p2": "Wir sind ein Lebensmittelhändler und haben Lieferanten. Die Mitarbeiter der Lieferanten können sich anmelden, um ihre Produkte zu verwalten.",
+            "p3": "Diese Seite zeigt die Mitarbeiter der Lieferanten und Produkte, wie wir sie in unserer internen Anwendung sehen würden.",
+            "p4": "Die Mitarbeitertabelle ermöglicht eine gefälschte Anmeldung eines Lieferantenmitarbeiters, um Daten in der Mandantenansicht anzuzeigen. Die E-Mail des angemeldeten Mitarbeiters wird fett hervorgehoben.",
+            "supplier_employees": {
+                "p1": "Interne Ansicht: alle Lieferantenmitarbeiter sind sichtbar und bearbeitbar."
+            },
+            "supplier_products": {
+                "p1": "Interne Ansicht: alle Lieferantenprodukte sind sichtbar, aber nicht bearbeitbar."
+            }
+        },
+        "supplier_employees": "Lieferantenmitarbeiter",
+        "supplier_products": "Lieferantenprodukte",
+        "tenant_view": {
+            "p1": "Diese Seite zeigt die Mitarbeiter der Lieferanten und Produkte, wie sie der angemeldete Lieferantenmitarbeiter sehen würde.",
+            "p2": "Lieferanten haben eine separate Backend-API (und normalerweise eine separate UI), sodass Endpunkte und Bereitstellungen von der internen Anwendung getrennt sind.",
+            "p3": "Mandantenisolierung (d.h. jeder Lieferant kann nur seine eigenen Daten sehen) wird durch Datenbankzeilen-Sicherheitsrichtlinien durchgesetzt.",
+            "please_login": "Bitte melden Sie sich als Mitarbeiter auf der Seite Interne Ansicht an.",
+            "supplier_employees": {
+                "p1": "Mandantenansicht: nur Mitarbeiter des Mandanten sind sichtbar und nicht bearbeitbar."
+            },
+            "supplier_products": {
+                "p1": "Mandantenansicht: nur Produkte des Mandanten sind sichtbar und vom Mandanten bearbeitbar."
+            }
+        }
+    },
+    "server_push": {
+        "notifications": {
+            "p1": "Benachrichtigungen werden in der Datenbank hinzugefügt, sodass sie persistent sind und von jeder Komponente verwendet werden können. Sie werden über listen/notify an die App gesendet und von der App über Websockets an das Frontend weitergeleitet.",
+            "p2": "Wenn Sie auf eine der Schaltflächen unten klicken, wird eine Benachrichtigung hinzugefügt und das Glockensymbol oben rechts zeigt eine ungelesene Benachrichtigung an. Sie können auf das Symbol klicken, um die Benachrichtigung wie gewohnt zu lesen.",
+            "p3": "Wenn Sie Browser-Benachrichtigungen für diese Website zulassen, wird auch eine Pop-up-Benachrichtigung angezeigt.",
+            "add_info": "Info-Benachrichtigung hinzufügen",
+            "add_warning": "Warnungs-Benachrichtigung hinzufügen"
+        }
+    },
+    "type_handling": {
+        "arrays": {
+            "p1": "Elemente in Tabellen verknüpfen, sofern der Platz dies zulässt. Elemente in Formularen durch Zeilenumbrüche trennen, um die Bearbeitung zu vereinfachen."
+        },
+        "default_values": {
+            "p1": "Zwischen echten (obligatorischen) Standardwerten und Standardwerten im Sinne eines vorgeschlagenen Wertes unterscheiden."
+        },
+        "mandatory_values": {
+            "p1": "Alle Spalten erfordern einen Wert. Text darf nicht leer sein (''). Diese Tabelle zeigt auch die Filterfunktionalität pro Typ.",
+            "p2": "Einige weitere Punkte, die für alle Tabellen in dieser App gelten:",
+            "p2_list": {
+                "item_1": "Der Seiteninhalt und die Tabellen-Paging-Footer sind linksbündig ausgerichtet. Dies ermöglicht ein reibungsloses Paging, auch wenn sich die Inhaltsbreite ändert",
+                "item_2": "Alle Tabellen ermöglichen eine Mehrspaltensortierung durch Klicken auf die Spaltenüberschriften",
+                "item_3": "Ausgewählte Filter- und Sortieroptionen werden für jede Tabelle gespeichert. Sie können zurückgesetzt werden, indem Sie \"Tabelle zurücksetzen\" aus dem Menü in der oberen rechten Ecke wählen",
+                "item_4": "Spalten können auf kleineren Bildschirmen bei Bedarf ausgeblendet werden, indem die Funktion \"Spalten anpassen\" aus dem Tabellenmenü verwendet wird",
+                "item_5": "Daten können aus dem Tabellenmenü nach Excel heruntergeladen werden. Die heruntergeladenen Daten berücksichtigen die aktuellen Filter"
+            }
+        },
+        "optional_values": {
+            "p1": "Alle Spalten sind optional. Wo kein Wert angegeben ist, werden typabhängige Nullwerte eingefügt."
+        },
+        "variants": {
+            "p1": "Häufige Varianten grundlegender Datentypen."
+        }
+    },
+    "user_data_retention": {
+        "authors": {
+            "archived_title": "Archivierte Autoren",
+            "p1": "Das Bearbeitungsformular hat keine Löschoption; Autoren und ihre Bücher werden stattdessen in einem separaten Speicher archiviert.",
+            "p2": "Archivierte Autoren können angezeigt werden, indem Sie im Menü auf der rechten Seite \"Archiv anzeigen\" auswählen.",
+            "p3": "Wenn das Archiv angezeigt wird, steht eine Schaltfläche {restoreIcon} zur Verfügung, um archivierte Autoren in die Haupttabelle wiederherzustellen.",
+            "p4": "Die Schaltfläche \"Änderungsverlauf anzeigen\" {showUpdateHistIcon} zeigt die Datenänderungen, falls vorhanden, für jeden Autor an."
+        },
+        "books": {
+            "archived_title": "Archivierte Bücher",
+            "p1": "Wenn der Autor archiviert ist, werden auch seine aktiven Bücher automatisch archiviert.",
+            "p2": "Bücher von aktiven Autoren können jedoch auch separat archiviert werden. Eine Wiederherstellung ist nur möglich, wenn das Buch separat archiviert wurde."
         }
     }
 }

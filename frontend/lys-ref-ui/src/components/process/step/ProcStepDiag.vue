@@ -18,9 +18,9 @@
   <v-row density="compact">
     <v-col class="d-flex align-center">
       <v-breadcrumbs density="compact" :items="[
-          { title: 'Flows', disabled: false },
+          { title: $t('right_nav.parallel_processing.flows'), disabled: false },
           { title: props.flow_name, disabled: false },
-          { title: 'Steps', disabled: false }
+          { title: $t('parallel_processing.flows.steps.title'), disabled: false }
         ]" 
       ></v-breadcrumbs>
 
@@ -32,12 +32,12 @@
 
   <v-row density="comfortable">
     <v-col class="mb-6">
-      <div class="dt-subtitle">Each card below is a step in the process with an associated fake backend command. On large screens: steps on the right depend on steps to their left.</div>
-      <div class="dt-subtitle">Each step can be run independently or with its dependencies. Steps without dependencies are run in parallel. When you run a step, a page opens to display its progress and results.</div>
-      <div class="dt-subtitle">Demonstrates even spacing of hierarchical data. In the backend, demonstrates:
+      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p2') }}</div>
+      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p3') }}
         <ul class="mt-1 mb-1">
-          <li>Recursive relationships (steps can depend on other steps)</li>
-          <li>Parallel processing, with the option to cancel on the first error or continue</li>
+          <li>{{ $t('parallel_processing.flows.steps.p3_list.item_1') }}</li>
+          <li>{{ $t('parallel_processing.flows.steps.p3_list.item_2') }}</li>
         </ul>
       </div>
     </v-col>

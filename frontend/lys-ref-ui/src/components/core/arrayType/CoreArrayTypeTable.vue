@@ -23,13 +23,14 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Arrays'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('left_nav.type_handling.arrays')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">In table, join elements if space allows. In form, split elements by newline to simplify editing.</div>
+          <div class="dt-subtitle">{{ $t('type_handling.arrays.p1') }}</div>
         </v-col>
       </v-row>
     </template>

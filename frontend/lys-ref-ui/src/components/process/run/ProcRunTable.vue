@@ -14,7 +14,8 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Runs'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.parallel_processing.runs')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn icon flat size="small" v-tooltip="'Refresh list'" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>
         </v-btn>
@@ -22,7 +23,7 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">Each run is an execution of a flow step and its dependencies. Click 'View steps' to see the result of each process step.</div>
+          <div class="dt-subtitle">{{ $t('parallel_processing.runs.p1') }}</div>
         </v-col>
       </v-row>
 

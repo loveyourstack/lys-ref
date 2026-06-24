@@ -8,8 +8,8 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-2">
-                  <div class="dt-subtitle">Using the campaign data from the 'Entity relationships' section, demonstrates further chart types.</div>
-                  <div class="dt-subtitle">The title and label text colors in the chart library have been overriden to respect the application-level light or dark mode.</div>
+                  <div class="dt-subtitle">{{ $t('charts.campaign_charts.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('charts.campaign_charts.p2') }}</div>
                 </v-col>
               </v-row>
 

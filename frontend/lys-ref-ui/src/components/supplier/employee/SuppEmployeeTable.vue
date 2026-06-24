@@ -24,15 +24,15 @@
   >
     <template #top>
       <!-- note passing of computed axInstance and reqHeaders for file download -->
-      <l-dt-top :ax="axToUse" :title="props.title ?? 'Supplier employees'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_employees')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :reqHeaders="reqHeaders">
         <v-btn v-if="props.internal" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle" v-if="props.internal">Internal view: all supplier employees are visible and editable.</div>
-          <div class="dt-subtitle" v-else>Tenant view: only employees of the tenant are visible, and are not editable.</div>
+          <div class="dt-subtitle" v-if="props.internal">{{ $t('saas.internal_view.supplier_employees.p1') }}</div>
+          <div class="dt-subtitle" v-else>{{ $t('saas.tenant_view.supplier_employees.p1') }}</div>
         </v-col>
       </v-row>
     </template>

@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">Server push: notifications</span>
+              <span class="dt-title">{{ $t('right_nav.server_push.notifications') }}</span>
             </v-card-text>
           </v-card>
         </v-col>
@@ -16,20 +16,16 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <div class="dt-subtitle">Notifications are added in the database so they are persistent and can be used by any component. 
-                They are pushed to the app using listen/notify, and from the app to the frontend via websockets.</div>
-
-              <div class="dt-subtitle">If you click one of the buttons below, a notification will be added and the bell icon in the top-right will indicate an unread notification.
-                You can click the icon to read the notification as normal.</div>
-
-              <div class="dt-subtitle">If you allow browser notifications for this site, you will also see a pop-up notification.</div>
+              <div class="dt-subtitle">{{ $t('server_push.notifications.p1') }}</div>
+              <div class="dt-subtitle">{{ $t('server_push.notifications.p2') }}</div>
+              <div class="dt-subtitle">{{ $t('server_push.notifications.p3') }}</div>
 
               <v-list>
                 <v-list-item>
-                  <v-btn color="info" @click="addNotification('Info')">Add Info notification</v-btn>
+                  <v-btn color="info" @click="addNotification('Info')">{{ $t('server_push.notifications.add_info') }}</v-btn>
                 </v-list-item>
                 <v-list-item>
-                  <v-btn color="warning" @click="addNotification('Warning')">Add Warning notification</v-btn>
+                  <v-btn color="warning" @click="addNotification('Warning')">{{ $t('server_push.notifications.add_warning') }}</v-btn>
                 </v-list-item>
               </v-list>
 

@@ -8,10 +8,10 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-6">
-                  <div class="dt-subtitle">This example is based on the classic Northwind database.</div>
-                  <div class="dt-subtitle">We are a food trader, and we have suppliers. The supplier employees can log in to manage their products.</div>
-                  <div class="dt-subtitle">This page shows supplier employees and products as we would see them in our internal application.</div>
-                  <div class="dt-subtitle">The employees table allows a fake login of a supplier employee in order to show data in the Tenant view. The logged-in employee's email is highlighted in bold.</div>
+                  <div class="dt-subtitle">{{ $t('saas.internal_view.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('saas.internal_view.p2') }}</div>
+                  <div class="dt-subtitle">{{ $t('saas.internal_view.p3') }}</div>
+                  <div class="dt-subtitle">{{ $t('saas.internal_view.p4') }}</div>
                 </v-col>
               </v-row>
 

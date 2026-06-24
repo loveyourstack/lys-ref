@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <div class="dt-title">
-        <slot name="title">Budget breakdown</slot>
+        <slot name="title">{{ $t('charts.campaign_charts.budget_breakdown') }}</slot>
       </div>
     </v-col>
   </v-row>

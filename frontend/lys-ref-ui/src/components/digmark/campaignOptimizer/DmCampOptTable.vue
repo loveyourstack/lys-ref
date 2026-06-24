@@ -18,20 +18,20 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Advanced table: campaign optimizer'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('advanced_tables.optimizer.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">Shows campaigns joined to pre-aggregated campaign performance data from the 'Entity relationships' section.</div>
+          <div class="dt-subtitle">{{ $t('advanced_tables.optimizer.p1') }}</div>
           <div class="dt-subtitle">
-            Demonstrates the following advanced table features:
+            {{ $t('advanced_tables.optimizer.p2') }}
             <ul class="mt-1 mb-1">
-              <li>Tab-based filtering (of Manager)</li>
-              <li>Inline updates (of Active and Daily budget)</li>
-              <li>Bulk updates via row selection. Selection respects filters after update. Uses browser notifications if allowed</li>
-              <li>Totals row which respects filtering and column selection and ignores paging</li>
-              <li>Row expansion showing latest daily performance metrics</li>
+              <li>{{ $t('advanced_tables.optimizer.p2_list.item_1') }}</li>
+              <li>{{ $t('advanced_tables.optimizer.p2_list.item_2') }}</li>
+              <li>{{ $t('advanced_tables.optimizer.p2_list.item_3') }}</li>
+              <li>{{ $t('advanced_tables.optimizer.p2_list.item_4') }}</li>
+              <li>{{ $t('advanced_tables.optimizer.p2_list.item_5') }}</li>
             </ul>
           </div>
         </v-col>

@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">AI / LLMs: MCP server</span>
+              <span class="dt-title">{{ $t('left_nav.ai.mcp_server') }}</span>
             </v-card-text>
           </v-card>
         </v-col>
@@ -16,12 +16,13 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <div class="dt-subtitle">The backend contains an <a href="https://modelcontextprotocol.io/docs/learn/server-concepts" target="_blank" rel="noopener noreferrer">MCP server</a> 
-                which allows LLMs to query the campaign performance data shown in the "Entity relationships" section above.</div>
+              <i18n-t scope="global" keypath="ai.mcp_server.p1" tag="div" class="dt-subtitle">
+                <template #MCPServer>
+                  <a href="https://modelcontextprotocol.io/docs/learn/server-concepts" target="_blank" rel="noopener noreferrer">{{ $t('left_nav.ai.mcp_server') }}</a>
+                </template>
+              </i18n-t>
 
-              <div class="dt-subtitle">Currently there is no attached LLM model, so the natural language to MCP tool translation is simulated.
-                However the MCP server query and response handling is fully functional.
-              </div>
+              <div class="dt-subtitle">{{ $t('ai.mcp_server.p2') }}</div>
 
               <v-table class="mt-4">
                 <thead>

@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <div class="dt-title">
-        <slot name="title">Campaign spend vs revenue: last 7 days</slot>
+        <slot name="title">{{ $t('charts.campaign_charts.spend_vs_revenue') }}</slot>
       </div>
     </v-col>
   </v-row>

@@ -32,7 +32,7 @@
       <l-dt-top :ax="ax" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <template #title>
           <v-icon v-if="showArchive" color="secondary" size="small" class="mb-1" icon="mdi-archive-arrow-down-outline"></v-icon>
-          {{ showArchive ? 'Archived authors' : 'User data retention: authors' }}
+          {{ showArchive ? $t('user_data_retention.authors.archived_title') : $t('left_nav.user_data_retention.authors') }}
         </template>
 
         <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -49,10 +49,20 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">The Edit form has no delete option; authors and their books are instead archived to separate storage.</div>
-          <div class="dt-subtitle">Archived authors can be shown by selecting "Show archive" from the menu on the right.</div>
-          <div class="dt-subtitle">When the archive is shown, a button <v-icon small color="secondary" icon="mdi-restore"></v-icon> to restore archived authors to the main table is available.</div>
-          <div class="dt-subtitle">The Show update history button <v-icon small color="secondary" icon="mdi-history"></v-icon> shows the data changes, if any, for each author.</div>
+          <div class="dt-subtitle">{{ $t('user_data_retention.authors.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('user_data_retention.authors.p2') }}</div>
+
+          <i18n-t scope="global" keypath="user_data_retention.authors.p3" tag="div" class="dt-subtitle">
+            <template #restoreIcon>
+              <v-icon small color="secondary" icon="mdi-restore"></v-icon>
+            </template>
+          </i18n-t>
+
+          <i18n-t scope="global" keypath="user_data_retention.authors.p4" tag="div" class="dt-subtitle">
+            <template #showUpdateHistIcon>
+              <v-icon small color="secondary" icon="mdi-history"></v-icon>
+            </template>
+          </i18n-t>
         </v-col>
       </v-row>
     </template>

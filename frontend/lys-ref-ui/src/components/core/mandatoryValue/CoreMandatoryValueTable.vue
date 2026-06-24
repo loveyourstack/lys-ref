@@ -32,22 +32,23 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Mandatory values'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? $t('left_nav.type_handling.mandatory_values')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">All columns require a value. Text may not be empty (''). This table also demonstrates filter functionality per type.</div>
+          <div class="dt-subtitle">{{ $t('type_handling.mandatory_values.p1') }}</div>
           <div class="dt-subtitle">
-            Some further points which apply to all tables in this app:
+            {{ $t('type_handling.mandatory_values.p2') }}
             <ul class="mt-1 mb-1">
-              <li>The page content and the table paging footers are aligned to the left. This allows smooth paging even if the content width changes</li>
-              <li>All tables allow multi-column sorting by clicking on the column headers</li>
-              <li>Selected filtering and sorting options are remembered for each table. They can be reset by choosing "Reset table" from the menu in the top right corner</li>
-              <li>Columns can be hidden on smaller screens as required by using the "Adjust columns" feature from the table menu</li>
-              <li>Data can be downloaded to Excel from the table menu. The downloaded data respects the current filters</li>
+              <li>{{ $t('type_handling.mandatory_values.p2_list.item_1') }}</li>
+              <li>{{ $t('type_handling.mandatory_values.p2_list.item_2') }}</li>
+              <li>{{ $t('type_handling.mandatory_values.p2_list.item_3') }}</li>
+              <li>{{ $t('type_handling.mandatory_values.p2_list.item_4') }}</li>
+              <li>{{ $t('type_handling.mandatory_values.p2_list.item_5') }}</li>
             </ul>
           </div>
         </v-col>

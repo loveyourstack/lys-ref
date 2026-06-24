@@ -8,9 +8,9 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-6">
-                  <div class="dt-subtitle">This page shows supplier employees and products as the logged-in supplier employee would see them.</div>
-                  <div class="dt-subtitle">Suppliers have a separate backend API (and normally a separate UI) so that endpoints and deployments are separated from the internal application.</div>
-                  <div class="dt-subtitle">Tenant isolation (i.e. each supplier can only see his own data) is enforced using database row-level security.</div>
+                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p2') }}</div>
+                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p3') }}</div>
                 </v-col>
               </v-row>
 
@@ -18,8 +18,8 @@
 
               <supp-employee-table v-if="suppStore.selectedEmpEmail" :internal="false" />
               <div v-else>
-                <div class="dt-title">Supplier employees</div>
-                <div class="dt-subtitle">Please login as an employee on the Internal view page.</div>
+                <div class="dt-title">{{ $t('saas.supplier_employees') }}</div>
+                <div class="dt-subtitle">{{ $t('saas.tenant_view.please_login') }}</div>
               </div>
 
             </v-card-text>
@@ -33,8 +33,8 @@
 
               <supp-product-table v-if="suppStore.selectedEmpEmail" :internal="false" />
               <div v-else>
-                <div class="dt-title">Supplier products</div>
-                <div class="dt-subtitle">Please login as an employee on the Internal view page.</div>
+                <div class="dt-title">{{ $t('saas.supplier_products') }}</div>
+                <div class="dt-subtitle">{{ $t('saas.tenant_view.please_login') }}</div>
               </div>
 
             </v-card-text>
