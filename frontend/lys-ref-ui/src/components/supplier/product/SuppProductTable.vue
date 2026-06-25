@@ -24,8 +24,9 @@
   >
     <template #top>
       <!-- note passing of computed axInstance and reqHeaders for file download -->
-      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_products.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
-        :reqHeaders="reqHeaders">
+      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_products.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()" :reqHeaders="reqHeaders"
+        :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>
 

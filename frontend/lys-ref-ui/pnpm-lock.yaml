@@ -24,8 +24,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1
       lys-vue:
-        specifier: ^0.1.9
-        version: 0.1.9(axios@1.13.6)(vue@3.5.29(typescript@5.9.3))(vuetify@4.0.1)
+        specifier: ^0.1.12
+        version: 0.1.12(axios@1.13.6)(vue@3.5.29(typescript@5.9.3))(vuetify@4.0.1)
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.29(typescript@5.9.3))
@@ -1465,8 +1465,8 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lys-vue@0.1.9:
-    resolution: {integrity: sha512-RsiiIybIW5lWwsel+CkG23WkjTpYqRok7uYz0/ViPWZTxGKm8edfOw1qH375+fdpXgWuhNN372hKdhITX+0c6A==}
+  lys-vue@0.1.12:
+    resolution: {integrity: sha512-DP/KsEA4bte3CRagiCvq01t+CopdEQtdcyZoo+lWNt+TsCwvezDXRDrK1nnBtyV9t9byb+sux9AlveeI3Sr4cA==}
     engines: {node: '>=18'}
     peerDependencies:
       axios: ^1.13.0
@@ -3451,7 +3451,7 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lys-vue@0.1.9(axios@1.13.6)(vue@3.5.29(typescript@5.9.3))(vuetify@4.0.1):
+  lys-vue@0.1.12(axios@1.13.6)(vue@3.5.29(typescript@5.9.3))(vuetify@4.0.1):
     dependencies:
       axios: 1.13.6
       vue: 3.5.29(typescript@5.9.3)

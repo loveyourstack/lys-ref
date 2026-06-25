@@ -15,7 +15,8 @@
   >
     <template #top>
       <l-dt-top :ax="ax" :title="props.title ?? $t('external_data.exchange_rates.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
-        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+        :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
       </l-dt-top>
 
       <v-row density="comfortable">

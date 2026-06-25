@@ -14,7 +14,8 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'Login attempts'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :title="props.title ?? 'Login attempts'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+        :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn icon flat v-tooltip="'Refresh'" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>
         </v-btn>

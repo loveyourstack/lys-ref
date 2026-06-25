@@ -29,7 +29,8 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+      <l-dt-top :ax="ax" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+        :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <template #title>
           <v-icon v-if="showArchive" color="secondary" size="small" class="mb-1" icon="mdi-archive-arrow-down-outline"></v-icon>
           {{ showArchive ? $t('user_data_retention.authors.archived_title') : $t('user_data_retention.authors.title') }}

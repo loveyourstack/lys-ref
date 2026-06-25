@@ -12,6 +12,7 @@
     <l-text-array-entry title="Enter default values" :saving="importing" :max-items="maxImportItems" :enterDisabled="!auth.isWriter()"
       :subtitle="`The expected columns are: ${defaultValueImportColumns.join(', ')}`"
       sampleSheetLink="https://docs.google.com/spreadsheets/d/10klDBUMBk5ByLsXmJ5T2jMqp1aeoHJOV-hT6_7-IFrM/edit?pli=1&gid=80181138#gid=80181138"
+      :enterLabel="$t('actions.enter')"
       @cancel="showImport = false"
       @enter="(valA: string[]) => { const success = importItems(valA); if (success) { showImport = false } }"
     ></l-text-array-entry>
@@ -33,7 +34,8 @@
   >
     <template #top>
       <l-dt-top :ax="ax" :title="props.title ?? $t('type_handling.default_values.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
-        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
+        v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+        :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>
       </l-dt-top>
