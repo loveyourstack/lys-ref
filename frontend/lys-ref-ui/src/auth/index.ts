@@ -33,7 +33,7 @@ export default {
     this.user.name = data.user_name
     this.user.roles = data.roles
 
-    this.setLocale(data.geo_ip_country_iso_code)
+    this.setLocale(data.default_locale)
 
     // note: lazy-load store instances with (), or else they won't be initialized when this runs during auth bootstrap before app init
 
@@ -54,31 +54,32 @@ export default {
     useNotsStore().wsStop()
   },
 
-  setLocale (geoIpCountryIsoCode: string) {
-    if (!geoIpCountryIsoCode) {
-      //console.log('geoIpCountryIsoCode is empty, skipping locale set')
+  setLocale (defaultLocale: string) {
+    if (!defaultLocale) {
+      //console.log('defaultLocale is empty')
       return
     }
-    const geoCountryIso = geoIpCountryIsoCode.toLowerCase()
+    const localeLc = defaultLocale.toLowerCase()
 
     // exit if a locale is already set in LS
     const lsJSON = localStorage.getItem('main')
     if (lsJSON) {
       const lsObj = JSON.parse(lsJSON)
       if (lsObj['locale']) {
-        //console.log('locale already set in localStorage, skipping geoIP locale set')
+        //console.log('locale already set in localStorage')
         return
       }
     }
 
-    // exit if the geoCountryIso is not one of the available locales
-    if (!useAppStore().locales.some(l => l.code === geoCountryIso)) {
-      //console.log(`geoCountryIso ${geoCountryIso} is not an available locale, skipping locale set`)
+    // exit if the defaultLocale is not one of the available locales
+    if (!useAppStore().locales.some(l => l.code === localeLc)) {
+      //console.log(`defaultLocale ${localeLc} is not an available locale`)
       return
     }
 
     // set default locale
-    i18n.global.locale.value = geoCountryIso
+    //console.log(`setting default locale to ${localeLc}`)
+    i18n.global.locale.value = localeLc
   },
 
   // bootstrap auth state from session token, if it exists. Should be called once on app startup before router and app init

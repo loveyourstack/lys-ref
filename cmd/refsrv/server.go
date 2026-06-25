@@ -13,6 +13,7 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssession"
@@ -45,6 +46,7 @@ type httpServerApplication struct {
 	// stores
 	AwsUserSgRuleStore awsusersgrule.Store
 	BlockedIPStore     sysblockedip.Store
+	CountryStore       geocountry.Store
 	GeoLocationStore   mmlocation.Store
 	GeoNetworkStore    mmnetwork.Store
 	LoginAttemptStore  sysloginattempt.Store

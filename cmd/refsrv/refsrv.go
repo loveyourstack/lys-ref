@@ -23,6 +23,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
+	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
@@ -98,6 +99,7 @@ func main() {
 	// attach stores
 	srvApp.AwsUserSgRuleStore = awsusersgrule.Store{Db: srvApp.Db}
 	srvApp.BlockedIPStore = sysblockedip.Store{Db: srvApp.Db}
+	srvApp.CountryStore = geocountry.Store{Db: srvApp.Db}
 	srvApp.GeoLocationStore = mmlocation.Store{Db: srvApp.Db}
 	srvApp.GeoNetworkStore = mmnetwork.Store{Db: srvApp.Db}
 	srvApp.LoginAttemptStore = sysloginattempt.Store{Db: srvApp.Db}

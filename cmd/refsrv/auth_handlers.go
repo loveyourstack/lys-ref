@@ -18,6 +18,7 @@ import (
 )
 
 type loginResponse struct {
+	DefaultLocale       string     `json:"default_locale"`
 	ForcePasswordChange bool       `json:"force_password_change"`
 	HasAwsSgRules       bool       `json:"has_aws_sg_rules"`
 	GeoIpCountryIsoCode string     `json:"geo_ip_country_iso_code"`
@@ -99,10 +100,11 @@ func (srvApp *httpServerApplication) authGetSessions(w http.ResponseWriter, r *h
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-func authGetSignInResponse(forcePasswordChange, hasAwsSgRules bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
+func authGetSignInResponse(defaultLocale string, forcePasswordChange, hasAwsSgRules bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
 	ip netip.Addr, sessToken, userName string) loginResponse {
 
 	loginResp := loginResponse{
+		DefaultLocale:       defaultLocale,
 		ForcePasswordChange: forcePasswordChange,
 		HasAwsSgRules:       hasAwsSgRules,
 		GeoIpCountryIsoCode: geoIpCountryIsoCode,
@@ -193,6 +195,13 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// try to get the default locale for the user's country
+	defaultLocale, err := srvApp.CountryStore.SelectDefaultLocaleByIso2(ctx, geoIpCountryIsoCode)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		return
+	}
+
 	// check if user has AWS SG rules
 	hasAwsSgRules, err := srvApp.AwsUserSgRuleStore.UserHasRules(ctx, sysUser.Name)
 	if err != nil {
@@ -222,7 +231,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	}
 
 	// build the reponse to be returned to the user
-	loginResp := authGetSignInResponse(sysUser.ForcePasswordChange, hasAwsSgRules, sysrole.ToStringSlice(sysUser.Roles), sysUser.Id,
+	loginResp := authGetSignInResponse(defaultLocale, sysUser.ForcePasswordChange, hasAwsSgRules, sysrole.ToStringSlice(sysUser.Roles), sysUser.Id,
 		geoIpCountryIsoCode, geoIpLocation, remoteHostIP, sessToken, sysUser.Name)
 
 	// success
@@ -307,8 +316,15 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 		return
 	}
 
+	// try to get the default locale for the user's country
+	defaultLocale, err := srvApp.CountryStore.SelectDefaultLocaleByIso2(ctx, sess.GeoIpCountryIsoCode)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", sess.UserName, err), srvApp.ErrorLog, w)
+		return
+	}
+
 	// build the reponse to be returned to the UI
-	signInResp := authGetSignInResponse(sess.ForcePasswordChange, hasAwsSgRules, sess.Roles, sess.UserId,
+	signInResp := authGetSignInResponse(defaultLocale, sess.ForcePasswordChange, hasAwsSgRules, sess.Roles, sess.UserId,
 		sess.GeoIpCountryIsoCode, sess.GeoIpLocation, sess.Ip, sess.Token, sess.UserName)
 
 	// success

@@ -1,6 +1,7 @@
 import type { SelectionItem } from 'lys-vue'
 
 export interface LoginResponse {
+  default_locale: string
   force_password_change: boolean
   has_aws_sg_rules: boolean
   geo_ip_country_iso_code: string

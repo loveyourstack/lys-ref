@@ -2,9 +2,12 @@ package geocountry
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
@@ -21,9 +24,10 @@ const (
 )
 
 type Input struct {
-	IsActive bool   `db:"is_active" json:"is_active,omitempty"`
-	Iso2     string `db:"iso2" json:"iso2,omitempty" validate:"required,len=2"`
-	Name     string `db:"name" json:"name,omitempty" validate:"required,max=256"`
+	DefaultLocale string `db:"default_locale" json:"default_locale,omitempty" validate:"required,max=5"`
+	IsActive      bool   `db:"is_active" json:"is_active,omitempty"`
+	Iso2          string `db:"iso2" json:"iso2,omitempty" validate:"required,len=2"`
+	Name          string `db:"name" json:"name,omitempty" validate:"required,max=256"`
 }
 
 type Model struct {
@@ -72,6 +76,18 @@ func NameIdValueMap(ctx context.Context, db *pgxpool.Pool) (valMap map[string]in
 
 func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []Model, unpagedCount lyspg.TotalCount, err error) {
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
+}
+
+func (s Store) SelectDefaultLocaleByIso2(ctx context.Context, iso2 string) (defaultLocale string, err error) {
+
+	item, err := lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, "iso2", iso2)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", nil
+		}
+		return "", fmt.Errorf("lyspg.SelectUnique failed: %w", err)
+	}
+	return item.DefaultLocale, nil
 }
 
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
