@@ -23,7 +23,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('left_nav.type_handling.variants')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('type_handling.variants.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>

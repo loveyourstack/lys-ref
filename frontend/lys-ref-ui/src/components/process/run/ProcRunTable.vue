@@ -14,7 +14,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.parallel_processing.runs')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('parallel_processing.runs.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn icon flat size="small" v-tooltip="'Refresh list'" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>

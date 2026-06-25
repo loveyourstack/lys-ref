@@ -35,7 +35,7 @@
       <l-dt-top :ax="ax" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <template #title>
           <v-icon v-if="showArchive" color="secondary" size="small" class="mb-1" icon="mdi-archive-arrow-down-outline"></v-icon>
-          {{ showArchive ? $t('user_data_retention.books.archived_title') : $t('left_nav.user_data_retention.books') }}
+          {{ showArchive ? $t('user_data_retention.books.archived_title') : $t('user_data_retention.books.title') }}
         </template>
 
         <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>

@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">{{ $t('right_nav.server_push.notifications') }}</span>
+              <span class="dt-title">{{ $t('server_push.notifications.title') }}</span>
             </v-card-text>
           </v-card>
         </v-col>

@@ -32,7 +32,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('left_nav.type_handling.default_values')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('type_handling.default_values.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>

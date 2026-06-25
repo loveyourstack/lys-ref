@@ -23,7 +23,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.parallel_processing.flows')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('parallel_processing.flows.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>

@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">{{ $t('left_nav.ai.mcp_server') }}</span>
+              <span class="dt-title">{{ $t('ai.mcp_server.title') }}</span>
             </v-card-text>
           </v-card>
         </v-col>
@@ -18,7 +18,7 @@
 
               <i18n-t scope="global" keypath="ai.mcp_server.p1" tag="div" class="dt-subtitle">
                 <template #MCPServer>
-                  <a href="https://modelcontextprotocol.io/docs/learn/server-concepts" target="_blank" rel="noopener noreferrer">{{ $t('left_nav.ai.mcp_server') }}</a>
+                  <a href="https://modelcontextprotocol.io/docs/learn/server-concepts" target="_blank" rel="noopener noreferrer">{{ $t('ai.mcp_server.title') }}</a>
                 </template>
               </i18n-t>
 

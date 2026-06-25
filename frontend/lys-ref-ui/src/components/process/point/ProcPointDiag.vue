@@ -14,7 +14,7 @@
   <v-row density="compact">
     <v-col class="d-flex align-center">
       <v-breadcrumbs :items="[
-          { title: $t('right_nav.parallel_processing.runs'), disabled: false },
+          { title: $t('parallel_processing.runs.title'), disabled: false },
           { title: props.flow, disabled: false },
           { title: props.step_name, disabled: false }
         ]" 

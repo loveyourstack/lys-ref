@@ -21,7 +21,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('right_nav.external_data.currencies')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('external_data.currencies.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()">
       </l-dt-top>
 

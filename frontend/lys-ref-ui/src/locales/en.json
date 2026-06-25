@@ -19,7 +19,9 @@
         "show_update_history": "Show update history"
     },
     "advanced_tables": {
+        "nav": "Advanced tables",
         "optimizer": {
+            "nav": "Optimizer",
             "title": "Campaign optimizer",
             "p1": "Shows campaigns joined to pre-aggregated campaign performance data from the 'Entity relationships' section.",
             "p2": "Demonstrates the following advanced table features:",
@@ -33,53 +35,69 @@
         }
     },
     "ai": {
+        "nav": "AI / LLMs",
         "mcp_server": {
+            "nav": "MCP server",
+            "title": "MCP server",
             "p1": "The backend contains an {MCPServer} which allows LLMs to query the campaign performance data shown in the \"Entity relationships\" section above.",
             "p2": "Currently there is no attached LLM model, so the natural language to MCP tool translation is simulated. However the MCP server query and response handling is fully functional."
         }
     },
-    "entity_relationships": {
-        "campaign_perf": {
-            "title": "Data entity: campaign performance",
-            "p1": "Data entities show primary columns of parent entities and should have no child entities.",
-            "p2": "Data is usually managed by background processes and not editable via API or UI."
-        },
-        "campaigns": {
-            "title": "Regular entity: campaigns",
-            "p1": "Regular entities show primary columns of parent entities and aggregates of child entities.",
-            "p2": "In this case, we show the name column of the parent country and vertical tables, and the date bounds of the child campaign performance table.",
-            "p3": "The parent entities should be filterable."
-        },
-        "verticals": {
-            "title": "Parent entity: verticals",
-            "p1": "Parent entities show aggregates (e.g. count) of child entities. In this case, campaign is the child entity.",
-            "p2": "If needed, provide a quick way to filter child entities by the parent, as shown with the \"View campaigns\" {viewCampsIcon} button below.",
-            "p3": "Disable deletion of the parent if it has associated child entities, unless there is a composition relationship which allows cascaded deletion."
-        }
-    },
     "charts": {
+        "nav": "Charts",
         "campaign_charts": {
+            "nav": "Campaign charts",
             "p1": "Using the campaign data from the 'Entity relationships' section, demonstrates further chart types.",
             "p2": "The title and label text colors in the chart library have been overriden to respect the application-level light or dark mode.",
             "budget_breakdown": "Budget breakdown",
             "spend_vs_revenue": "Campaign spend vs revenue: last 7 days"
         },
         "xr_performance": {
+            "nav": "XR performance",
             "title": "Exchange rate performance",
             "p1": "Using the exchange rates from the 'External data' section, this chart shows normalized EUR performance vs active currencies for the selected period.",
             "p2": "The data point tooltips show the actual exchange rate rather than the normalized value."
         }
     },
+    "entity_relationships": {
+        "nav": "Entity relationships",
+        "campaign_perf": {
+            "nav": "Campaign perf",
+            "title": "Data entity: campaign performance",
+            "p1": "Data entities show primary columns of parent entities and should have no child entities.",
+            "p2": "Data is usually managed by background processes and not editable via API or UI."
+        },
+        "campaigns": {
+            "nav": "Campaigns",
+            "title": "Regular entity: campaigns",
+            "p1": "Regular entities show primary columns of parent entities and aggregates of child entities.",
+            "p2": "In this case, we show the name column of the parent country and vertical tables, and the date bounds of the child campaign performance table.",
+            "p3": "The parent entities should be filterable."
+        },
+        "verticals": {
+            "nav": "Verticals",
+            "title": "Parent entity: verticals",
+            "p1": "Parent entities show aggregates (e.g. count) of child entities. In this case, campaign is the child entity.",
+            "p2": "If needed, provide a quick way to filter child entities by the parent, as shown with the \"View campaigns\" {viewCampsIcon} button below.",
+            "p3": "Disable deletion of the parent if it has associated child entities, unless there is a composition relationship which allows cascaded deletion."
+        }
+    },
     "external_data": {
+        "nav": "External data",
         "currencies": {
+            "nav": "Currencies",
+            "title": "Currencies",
             "p1": "Currency code and name are synced from the European Central Bank API.",
             "p2": "Active and symbol are user-maintained metadata fields, stored independently of the synced data."
         },
         "exchange_rates": {
+            "nav": "Exchange rates",
+            "title": "Exchange rates",
             "p1": "This data is synced from the European Central Bank API. The sync methods in the backend demonstrate high-volume data processing.",
             "p2": "When working with large result sets, the total number of results shown in the pagination footer is estimated using database statistics, as indicated by the \"~\" prefix."
         },
         "geo_ip": {
+            "nav": "Geo IP",
             "title": "Geo IP information",
             "p1": "Geo IP data is imported from MaxMind GeoLite2-City CSV files. In the backend, this demonstrates streaming of large files into the database.",
             "your_ip": "Your IP is:",
@@ -87,6 +105,7 @@
         }
     },
     "home": {
+        "nav": "Home",
         "advanced_tables": {
             "title": "Advanced tables",
             "subtitle": "Complex data presentation.",
@@ -156,38 +175,20 @@
         },
         "welcome": "Welcome to"
     },
-    "left_nav": {
-        "ai": {
-            "title": "AI / LLMs",
-            "mcp_server": "MCP server"
+    "monitoring": {
+        "nav": "Monitoring",
+        "application": {
+            "nav": "Application"
         },
-        "advanced_tables": {
-            "title": "Advanced tables",
-            "optimizer": "Optimizer"
-        },
-        "entity_relationships": {
-            "title": "Entity relationships",
-            "campaign_perf": "Campaign perf",
-            "campaigns": "Campaigns",
-            "verticals": "Verticals"
-        },
-        "home": "Home",
-        "type_handling": {
-            "title": "Type handling",
-            "arrays": "Arrays",
-            "default_values": "Default values",
-            "mandatory_values": "Mandatory values",
-            "optional_values": "Optional values",
-            "variants": "Variants"
-        },
-        "user_data_retention": {
-            "title": "User data retention",
-            "authors": "Authors",
-            "books": "Books"
+        "database": {
+            "nav": "Database"
         }
     },
     "parallel_processing": {
+        "nav": "Parallel processing",
         "flows": {
+            "nav": "Flows",
+            "title": "Flows",
             "p1": "A flow is a set of connected processes. Click 'View steps' on one of the flows to see more information.",
             "steps": {
                 "title": "Steps",
@@ -201,6 +202,8 @@
             }
         },
         "runs": {
+            "nav": "Runs",
+            "title": "Runs",
             "p1": "Each run is an execution of a flow step and its dependencies. Click 'View steps' to see the result of each process step.",
             "points": {
                 "p1": "Each card below shows the result of the execution of a process step.",
@@ -209,40 +212,10 @@
             }
         }
     },
-    "right_nav": {
-        "charts": {
-            "title": "Charts",
-            "campaign_charts": "Campaign charts",
-            "xr_performance": "XR performance"
-        },
-        "external_data": {
-            "title": "External data",
-            "currencies": "Currencies",
-            "exchange_rates": "Exchange rates",
-            "geo_ip": "Geo IP"
-        },
-        "monitoring": {
-            "title": "Monitoring",
-            "application": "Application",
-            "database": "Database"
-        },
-        "parallel_processing": {
-            "title": "Parallel processing",
-            "flows": "Flows",
-            "runs": "Runs"
-        },
-        "saas": {
-            "title": "SaaS / multi-tenancy",
-            "internal_view": "Internal view",
-            "tenant_view": "Tenant view"
-        },
-        "server_push": {
-            "title": "Server push",
-            "notifications": "Notifications"
-        }
-    },
     "saas":{
+        "nav": "SaaS / multi-tenancy",
         "internal_view": {
+            "nav": "Internal view",
             "p1": "This example is based on the classic Northwind database.",
             "p2": "We are a food trader, and we have suppliers. The supplier employees can log in to manage their products.",
             "p3": "This page shows supplier employees and products as we would see them in our internal application.",
@@ -257,6 +230,7 @@
         "supplier_employees": "Supplier employees",
         "supplier_products": "Supplier products",
         "tenant_view": {
+            "nav": "Tenant view",
             "p1": "This page shows supplier employees and products as the logged-in supplier employee would see them.",
             "p2": "Suppliers have a separate backend API (and normally a separate UI) so that endpoints and deployments are separated from the internal application.",
             "p3": "Tenant isolation (i.e. each supplier can only see his own data) is enforced using database row-level security.",
@@ -270,7 +244,10 @@
         }
     },
     "server_push": {
+        "nav": "Server push",
         "notifications": {
+            "nav": "Notifications",
+            "title": "Notifications",
             "p1": "Notifications are added in the database so they are persistent and can be used by any component. They are pushed to the app using listen/notify, and from the app to the frontend via websockets.",
             "p2": "If you click one of the buttons below, a notification will be added and the bell icon in the top-right will indicate an unread notification. You can click the icon to read the notification as normal.",
             "p3": "If you allow browser notifications for this site, you will also see a pop-up notification.",
@@ -279,13 +256,20 @@
         }
     },
     "type_handling": {
+        "nav": "Type handling",
         "arrays": {
+            "nav": "Arrays",
+            "title": "Arrays",
             "p1": "In table, join elements if space allows. In form, split elements by newline to simplify editing."
         },
         "default_values": {
+            "nav": "Default values",
+            "title": "Default values",
             "p1": "Differentiate between true (mandatory) defaults and defaults in the sense of a suggested value."
         },
         "mandatory_values": {
+            "nav": "Mandatory values",
+            "title": "Mandatory values",
             "p1": "All columns require a value. Text may not be empty (''). This table also demonstrates filter functionality per type.",
             "p2": "Some further points which apply to all tables in this app:",
             "p2_list": {
@@ -297,14 +281,21 @@
             }
         },
         "optional_values": {
+            "nav": "Optional values",
+            "title": "Optional values",
             "p1": "All columns are optional. Zero-values by type are inserted where no value is given."
         },
         "variants": {
+            "nav": "Variants",
+            "title": "Variants",
             "p1": "Common variants of basic data types."
         }
     },
     "user_data_retention": {
+        "nav": "User data retention",
         "authors": {
+            "nav": "Authors",
+            "title": "Authors",
             "archived_title": "Archived authors",
             "p1": "The Edit form has no delete option; authors and their books are instead archived to separate storage.",
             "p2": "Archived authors can be shown by selecting \"Show archive\" from the menu on the right.",
@@ -312,6 +303,8 @@
             "p4": "The Show update history button {showUpdateHistIcon} shows the data changes, if any, for each author."
         },
         "books": {
+            "nav": "Books",
+            "title": "Books",
             "archived_title": "Archived books",
             "p1": "If the author is archived, his active books will also be automatically archived.",
             "p2": "However, books by active authors can also be archived separately. Restoration is only possible if the book was archived separately."
