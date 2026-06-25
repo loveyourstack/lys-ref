@@ -1,4 +1,6 @@
 import ax, { setAuthToken, deleteAuthToken } from '@/api'
+import { i18n } from '@/plugins'
+import { useAppStore } from '@/stores/app'
 import { useNotsStore } from '@/stores/notifications'
 import { Role, WriterRoles, type LoginResponse } from '@/types/system'
 
@@ -31,7 +33,11 @@ export default {
     this.user.name = data.user_name
     this.user.roles = data.roles
 
-    // lazy-load store instance, or else it won't be initialized when this runs during auth bootstrap before app init
+    this.setLocale(data.geo_ip_country_iso_code)
+
+    // note: lazy-load store instances with (), or else they won't be initialized when this runs during auth bootstrap before app init
+
+    // start websocket connection for notifications
     useNotsStore().wsStart()
   },
   revokeUser () {
@@ -46,6 +52,33 @@ export default {
     this.user.roles = []
 
     useNotsStore().wsStop()
+  },
+
+  setLocale (geoIpCountryIsoCode: string) {
+    if (!geoIpCountryIsoCode) {
+      //console.log('geoIpCountryIsoCode is empty, skipping locale set')
+      return
+    }
+    const geoCountryIso = geoIpCountryIsoCode.toLowerCase()
+
+    // exit if a locale is already set in LS
+    const lsJSON = localStorage.getItem('main')
+    if (lsJSON) {
+      const lsObj = JSON.parse(lsJSON)
+      if (lsObj['locale']) {
+        //console.log('locale already set in localStorage, skipping geoIP locale set')
+        return
+      }
+    }
+
+    // exit if the geoCountryIso is not one of the available locales
+    if (!useAppStore().locales.some(l => l.code === geoCountryIso)) {
+      //console.log(`geoCountryIso ${geoCountryIso} is not an available locale, skipping locale set`)
+      return
+    }
+
+    // set default locale
+    i18n.global.locale.value = geoCountryIso
   },
 
   // bootstrap auth state from session token, if it exists. Should be called once on app startup before router and app init
