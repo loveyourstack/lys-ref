@@ -45,7 +45,8 @@
      <template v-slot:[`item.campaign_count`]="{ item }">
       <span>
         {{ item.campaign_count }}
-        <v-btn v-if="item.campaign_count > 0" icon flat size="small" v-tooltip="'View campaigns'" :to="{ name: 'Campaigns', query: { vertical_fk: item.id }}">
+        <v-btn v-if="item.campaign_count > 0" icon flat size="small" v-tooltip="`${$t('entity_relationships.verticals.view_campaigns')}`" 
+          :to="{ name: 'Campaigns', query: { vertical_fk: item.id }}">
           <v-icon color="secondary" icon="mdi-bullhorn-outline"></v-icon>
         </v-btn>
       </span>

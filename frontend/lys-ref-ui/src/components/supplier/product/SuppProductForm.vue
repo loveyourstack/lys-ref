@@ -28,7 +28,7 @@
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="saveBtnLabel" :saveDisabled="!auth.isWriter()"
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
@@ -42,6 +42,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import type { AxiosInstance } from 'axios'
+import { useI18n } from 'vue-i18n'
 import { useFormCrud } from 'lys-vue'
 import axDefault, { axSupplier } from '@/api'
 import auth from '@/auth'
@@ -61,6 +62,7 @@ const emit = defineEmits<{
   (e: 'update'): void
 }>()
 
+const { t } = useI18n()
 const supStore = useSupplierStore()
 
 const axToUse: AxiosInstance = computed(() => props.internal ? axDefault : axSupplier).value
@@ -81,7 +83,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : 'New product'
+  return props.id !== 0 ? (item.value?.name ?? '') : t('saas.supplier_products.new_item')
 })
 
 </script>

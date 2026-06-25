@@ -29,7 +29,7 @@
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="saveBtnLabel" :saveDisabled="!auth.isWriter()"
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
@@ -42,6 +42,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFormCrud } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
@@ -60,6 +61,7 @@ const emit = defineEmits<{
   (e: 'update'): void
 }>()
 
+const { t } = useI18n()
 const coreStore = useCoreStore()
 
 const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } =
@@ -77,7 +79,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? 'ID ' + props.id : 'New array type'
+  return props.id !== 0 ? 'ID ' + props.id : t('type_handling.arrays.new_item')
 })
 
 </script>

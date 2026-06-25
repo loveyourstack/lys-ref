@@ -5,21 +5,25 @@
         "archive": "Archivieren",
         "cancel": "Abbrechen",
         "close": "Schließen",
+        "create": "Erstellen",
         "delete": "Löschen",
         "download_to_excel": "In Excel herunterladen",
         "edit": "Bearbeiten",
         "import": "Importieren",
         "login": "Anmelden",
         "logout": "Abmelden",
+        "move_down": "Nach unten verschieben",
+        "move_up": "Nach oben verschieben",
         "reset_table": "Tabelle zurücksetzen",
         "restore": "Wiederherstellen",
         "run": "Ausführen",
+        "run_with_dependencies": "Mit Abhängigkeiten ausführen",
         "save": "Speichern",
         "show_archive": "Archiv anzeigen",
         "show_update_history": "Update-Verlauf anzeigen"
     },
     "advanced_tables": {
-        "nav": "KI / LLMs",
+        "nav": "Erweiterte Tabellen",
         "optimizer": {
             "nav": "Optimierer",
             "title": "Kampagnenoptimierer",
@@ -31,7 +35,8 @@
                 "item_3": "Massenaktualisierungen über Zeilenauswahl. Die Auswahl respektiert Filter nach der Aktualisierung. Verwendet Browser-Benachrichtigungen, wenn erlaubt",
                 "item_4": "Summenzeile, die Filterung und Spaltenauswahl respektiert und Paging ignoriert",
                 "item_5": "Zeilenerweiterung zeigt die neuesten täglichen Leistungskennzahlen"
-            }
+            },
+            "budget_percent_change": "Budget prozentuale Änderung"
         }
     },
     "ai": {
@@ -50,6 +55,8 @@
             "p1": "Verwendet die Kampagnendaten aus dem Abschnitt 'Entity-Beziehungen', um weitere Diagrammtypen zu demonstrieren.",
             "p2": "Die Farben von Titel- und Beschriftungstexten in der Diagrammbibliothek wurden überschrieben, um den Anwendungsmodus Hell oder Dunkel zu respektieren.",
             "budget_breakdown": "Budgetaufteilung",
+            "by_manager": "Nach Manager",
+            "by_vertical": "Nach Vertikale",
             "spend_vs_revenue": "Kampagnenausgaben vs. Umsatz: letzte 7 Tage"
         },
         "xr_performance": {
@@ -70,6 +77,7 @@
         "campaigns": {
             "nav": "Kampagnen",
             "title": "Reguläre Entität: Kampagnen",
+            "new_item": "Neue Kampagne",
             "p1": "Reguläre Entitäten zeigen die primären Spalten der übergeordneten Entitäten und Aggregationen der untergeordneten Entitäten.",
             "p2": "In diesem Fall zeigen wir die Namensspalte der übergeordneten Länder- und Vertikaltabellen sowie die Datumsgrenzen der untergeordneten Kampagnenleistungstabelle.",
             "p3": "Die übergeordneten Entitäten sollten filterbar sein."
@@ -77,9 +85,11 @@
         "verticals": {
             "nav": "Vertikalen",
             "title": "Übergeordnete Entität: Vertikalen",
+            "new_item": "Neue Vertikale",
             "p1": "Übergeordnete Entitäten zeigen Aggregationen (z. B. Anzahl) der untergeordneten Entitäten. In diesem Fall ist die Kampagne die untergeordnete Entität.",
             "p2": "Falls erforderlich, eine schnelle Möglichkeit bieten, untergeordnete Entitäten nach der übergeordneten Entität zu filtern, wie unten mit der Schaltfläche \"Kampagnen anzeigen\" {viewCampsIcon} gezeigt.",
-            "p3": "Die Löschung der übergeordneten Entität sollte deaktiviert werden, wenn sie mit untergeordneten Entitäten verknüpft ist, es sei denn, es besteht eine Kompositionsbeziehung, die eine kaskadierte Löschung ermöglicht."
+            "p3": "Die Löschung der übergeordneten Entität sollte deaktiviert werden, wenn sie mit untergeordneten Entitäten verknüpft ist, es sei denn, es besteht eine Kompositionsbeziehung, die eine kaskadierte Löschung ermöglicht.",
+            "view_campaigns": "Kampagnen anzeigen"
         }
     },
     "external_data": {
@@ -189,15 +199,25 @@
         "flows": {
             "nav": "Abläufe",
             "title": "Abläufe",
+            "new_item": "Neuer Ablauf",
             "p1": "Ein Ablauf ist eine Menge von verbundenen Prozessen. Klicken Sie auf 'Schritte anzeigen' bei einem der Abläufe, um weitere Informationen zu sehen.",
+            "view_steps": "Schritte anzeigen",
+            "view_runs": "Durchläufe anzeigen",
             "steps": {
                 "title": "Schritte",
+                "add_item": "Schritt hinzufügen",
+                "new_item": "Neuer Schritt",
                 "p1": "Jede Karte unten ist ein Schritt im Prozess mit einem zugehörigen Fake-Backend-Befehl. Auf großen Bildschirmen: Schritte auf der rechten Seite hängen von den Schritten auf der linken Seite ab.",
                 "p2": "Jeder Schritt kann unabhängig oder mit seinen Abhängigkeiten ausgeführt werden. Schritte ohne Abhängigkeiten werden parallel ausgeführt. Wenn Sie einen Schritt ausführen, öffnet sich eine Seite, um den Fortschritt und die Ergebnisse anzuzeigen.",
                 "p3": "Demonstriert gleichmäßige Abstände von hierarchischen Daten. Im Backend wird demonstriert:",
                 "p3_list": {
                     "item_1": "Rekursive Beziehungen (Schritte können von anderen Schritten abhängen)",
                     "item_2": "Parallele Verarbeitung, mit der Option, beim ersten Fehler abzubrechen oder fortzufahren"
+                },
+                "cancel_on_error": "Bei Fehler alle unvollständigen Prozesse abbrechen",
+                "links": {
+                    "add_item": "Abhängigkeit hinzufügen",
+                    "new_item": "Neue Abhängigkeit"
                 }
             }
         },
@@ -227,8 +247,14 @@
                 "p1": "Interne Ansicht: alle Lieferantenprodukte sind sichtbar, aber nicht bearbeitbar."
             }
         },
-        "supplier_employees": "Lieferantenmitarbeiter",
-        "supplier_products": "Lieferantenprodukte",
+        "supplier_employees": {
+            "title": "Lieferantenmitarbeiter",
+            "new_item": "Neuer Mitarbeiter"
+        },
+        "supplier_products": {
+            "title": "Lieferantenprodukte",
+            "new_item": "Neues Produkt"
+        },
         "tenant_view": {
             "nav": "Mandantenansicht",
             "p1": "Diese Seite zeigt die Mitarbeiter der Lieferanten und Produkte, wie sie der angemeldete Lieferantenmitarbeiter sehen würde.",
@@ -260,16 +286,19 @@
         "arrays": {
             "nav": "Arrays",
             "title": "Arrays",
+            "new_item": "Neuer Array-Typ",
             "p1": "Elemente in Tabellen verknüpfen, sofern der Platz dies zulässt. Elemente in Formularen durch Zeilenumbrüche trennen, um die Bearbeitung zu vereinfachen."
         },
         "default_values": {
             "nav": "Standardwerte",
             "title": "Standardwerte",
+            "new_item": "Neuer Standardwert",
             "p1": "Zwischen echten (obligatorischen) Standardwerten und Standardwerten im Sinne eines vorgeschlagenen Wertes unterscheiden."
         },
         "mandatory_values": {
             "nav": "Obligatorische Werte",
             "title": "Obligatorische Werte",
+            "new_item": "Neuer obligatorischer Wert",
             "p1": "Alle Spalten erfordern einen Wert. Text darf nicht leer sein (''). Diese Tabelle zeigt auch die Filterfunktionalität pro Typ.",
             "p2": "Einige weitere Punkte, die für alle Tabellen in dieser App gelten:",
             "p2_list": {
@@ -283,11 +312,13 @@
         "optional_values": {
             "nav": "Optionale Werte",
             "title": "Optionale Werte",
+            "new_item": "Neuer optionaler Wert",
             "p1": "Alle Spalten sind optional. Wo kein Wert angegeben ist, werden typabhängige Nullwerte eingefügt."
         },
         "variants": {
             "nav": "Varianten",
             "title": "Varianten",
+            "new_item": "Neuer Variantentyp",
             "p1": "Häufige Varianten grundlegender Datentypen."
         }
     },
@@ -297,6 +328,7 @@
             "nav": "Autoren",
             "title": "Autoren",
             "archived_title": "Archivierte Autoren",
+            "new_item": "Neuer Autor",
             "p1": "Das Bearbeitungsformular hat keine Löschoption; Autoren und ihre Bücher werden stattdessen in einem separaten Speicher archiviert.",
             "p2": "Archivierte Autoren können angezeigt werden, indem Sie im Menü auf der rechten Seite \"Archiv anzeigen\" auswählen.",
             "p3": "Wenn das Archiv angezeigt wird, steht eine Schaltfläche {restoreIcon} zur Verfügung, um archivierte Autoren in die Haupttabelle wiederherzustellen.",
@@ -306,6 +338,7 @@
             "nav": "Bücher",
             "title": "Bücher",
             "archived_title": "Archivierte Bücher",
+            "new_item": "Neues Buch",
             "p1": "Wenn der Autor archiviert ist, werden auch seine aktiven Bücher automatisch archiviert.",
             "p2": "Bücher von aktiven Autoren können jedoch auch separat archiviert werden. Eine Wiederherstellung ist nur möglich, wenn das Buch separat archiviert wurde."
         }

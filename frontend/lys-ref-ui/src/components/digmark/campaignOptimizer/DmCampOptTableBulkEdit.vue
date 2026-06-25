@@ -26,9 +26,10 @@
           <v-form ref="budgetPercentForm">
             <v-row>
               <v-col class="d-flex">
-                <v-text-field label="Budget percent change" v-model.number="budgetChangeByPercent" type="number" density="comfortable" max-width="300" hide-details
+                <v-text-field :label="$t('advanced_tables.optimizer.budget_percent_change')" v-model.number="budgetChangeByPercent" type="number" 
+                  density="comfortable" max-width="300" hide-details
                   :class="getTextClass(budgetChangeByPercent)"
-                  :rules="[(v: string) => !!v || 'Budget percent change is required']">
+                  :rules="[(v: string) => !!v || `${$t('advanced_tables.optimizer.budget_percent_change')} is required`]">
                 </v-text-field>
                 <v-btn color="secondary" class="ml-5 mt-3" :loading="patchingBudgetPercent" :disabled="!auth.isWriter()" @click="patchBudgetPercentByIds">{{ $t('actions.save') }}</v-btn>
               </v-col>

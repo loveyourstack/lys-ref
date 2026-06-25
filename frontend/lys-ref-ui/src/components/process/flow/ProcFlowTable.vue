@@ -50,7 +50,7 @@
      <template v-slot:[`item.run_count`]="{ item }">
       <span>
         {{ item.run_count }}
-        <v-btn v-if="item.run_count > 0" icon flat size="small" v-tooltip:bottom="'View runs'" :to="{ name: 'Runs', query: { flow_fk: item.id }}">
+        <v-btn v-if="item.run_count > 0" icon flat size="small" v-tooltip:bottom="`${$t('parallel_processing.flows.view_runs')}`" :to="{ name: 'Runs', query: { flow_fk: item.id }}">
           <v-icon color="secondary" icon="mdi-repeat"></v-icon>
         </v-btn>
       </span>
@@ -59,7 +59,7 @@
      <template v-slot:[`item.step_count`]="{ item }">
       <span>
         {{ item.step_count }}
-        <v-btn icon flat size="small" v-tooltip:bottom="'View steps'" :to="{ name: 'Steps', params: { id: item.id }}">
+        <v-btn icon flat size="small" v-tooltip:bottom="`${$t('parallel_processing.flows.view_steps')}`" :to="{ name: 'Steps', params: { id: item.id }}">
           <v-icon color="primary" icon="mdi-focus-field"></v-icon>
         </v-btn>
       </span>

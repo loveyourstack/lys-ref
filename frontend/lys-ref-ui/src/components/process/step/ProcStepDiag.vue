@@ -26,7 +26,7 @@
 
       <v-spacer />
 
-      <v-btn color="secondary" @click="editID = 0; showEdit = true">Add step</v-btn>
+      <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('parallel_processing.flows.steps.add_item') }}</v-btn>
     </v-col>
   </v-row>
 
@@ -52,7 +52,7 @@
 
       <v-spacer />
 
-      <v-switch label="On error, cancel all unfinished processes" v-model="stopOnErr" color="primary"></v-switch>
+      <v-switch :label="$t('parallel_processing.flows.steps.cancel_on_error')" v-model="stopOnErr" color="primary"></v-switch>
     </v-col>
   </v-row>
 
@@ -80,22 +80,24 @@
           <v-btn icon flat v-tooltip:bottom="`${$t('actions.edit')}`" size="small" @click="editID = item.id; showEdit = true">
             <v-icon color="secondary" icon="mdi-square-edit-outline"></v-icon>
           </v-btn>
-          <v-btn icon flat v-tooltip:bottom="'Add dependency'" size="small" @click="stepID = item.id; showLinkEdit = true">
+          <v-btn icon flat v-tooltip:bottom="`${$t('parallel_processing.flows.steps.links.add_item')}`" size="small" @click="stepID = item.id; showLinkEdit = true">
             <v-icon color="secondary" icon="mdi-arrow-left-bottom-bold"></v-icon>
           </v-btn>
-          <v-btn :disabled="!auth.isWriter() || !mCol[idx-1]" icon flat v-tooltip:bottom="'Move up'" size="small" @click="swapDisplayOrder(item.id, mCol[idx-1]!.id)">
+          <v-btn :disabled="!auth.isWriter() || !mCol[idx-1]" icon flat v-tooltip:bottom="`${$t('actions.move_up')}`" size="small" 
+            @click="swapDisplayOrder(item.id, mCol[idx-1]!.id)">
             <v-icon color="secondary" icon="mdi-arrow-up"></v-icon>
           </v-btn>
-          <v-btn :disabled="!auth.isWriter() || !mCol[idx+1]" icon flat v-tooltip:bottom="'Move down'" size="small" @click="swapDisplayOrder(item.id, mCol[idx+1]!.id)">
+          <v-btn :disabled="!auth.isWriter() || !mCol[idx+1]" icon flat v-tooltip:bottom="`${$t('actions.move_down')}`" size="small" 
+            @click="swapDisplayOrder(item.id, mCol[idx+1]!.id)">
             <v-icon color="secondary" icon="mdi-arrow-down"></v-icon>
           </v-btn>
 
           <v-spacer></v-spacer>
 
-          <v-btn :disabled="!auth.isWriter()" icon flat v-tooltip:bottom="'Run'" size="small" @click="runStep(item.id, false)">
+          <v-btn :disabled="!auth.isWriter()" icon flat v-tooltip:bottom="`${$t('actions.run')}`" size="small" @click="runStep(item.id, false)">
             <v-icon color="primary" icon="mdi-play"></v-icon>
           </v-btn>
-          <v-btn v-if="item.depends_on" :disabled="!auth.isWriter()" icon flat size="small" v-tooltip:bottom="'Run with dependencies'" @click="runStep(item.id, true)">
+          <v-btn v-if="item.depends_on" :disabled="!auth.isWriter()" icon flat size="small" v-tooltip:bottom="`${$t('actions.run_with_dependencies')}`" @click="runStep(item.id, true)">
             <v-icon color="primary" icon="mdi-sitemap"></v-icon>
           </v-btn>
         </v-card-actions>

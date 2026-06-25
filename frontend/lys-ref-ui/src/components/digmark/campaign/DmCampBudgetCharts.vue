@@ -28,10 +28,13 @@ import { onMounted, ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
 import { type ChartData, type ChartOptions, Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js'
 import { Pie } from 'vue-chartjs'
+import { useI18n } from 'vue-i18n'
 import ax from '@/api'
 import { type BudgetByManager, type BudgetByVertical } from '@/types/digmark'
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title)
+
+const { t } = useI18n()
 
 const byManagerUrl = '/a/digmark/manager-budgets'
 const byVerticalUrl = '/a/digmark/vertical-budgets'
@@ -79,13 +82,13 @@ const baseOptions = computed<ChartOptions<'pie'>>(() => ({
 
 const managerChartOptions = computed<ChartOptions<'pie'>>(() => {
   const options = structuredClone(baseOptions.value)
-  options.plugins!.title!.text = 'By manager'
+  options.plugins!.title!.text = t('charts.campaign_charts.by_manager')
   return options
 })
 
 const verticalChartOptions = computed<ChartOptions<'pie'>>(() => {
   const options = structuredClone(baseOptions.value)
-  options.plugins!.title!.text = 'By vertical'
+  options.plugins!.title!.text = t('charts.campaign_charts.by_vertical')
   return options
 })
 

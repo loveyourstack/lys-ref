@@ -24,7 +24,7 @@
   >
     <template #top>
       <!-- note passing of computed axInstance and reqHeaders for file download -->
-      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_employees')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_employees.title')" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :reqHeaders="reqHeaders">
         <v-btn v-if="props.internal" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
       </l-dt-top>

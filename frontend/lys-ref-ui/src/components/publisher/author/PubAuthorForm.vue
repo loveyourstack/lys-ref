@@ -14,7 +14,7 @@
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="saveBtnLabel" :saveDisabled="!auth.isWriter()"
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
@@ -27,6 +27,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { callDelete, useFormCrud } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
@@ -45,6 +46,7 @@ const emit = defineEmits<{
   (e: 'update'): void
 }>()
 
+const { t } = useI18n()
 const pubStore = usePublisherStore()
 
 const { item, itemUrl, itemForm, saving, saveBtnLabel, showSaved, saveItem } =
@@ -61,7 +63,7 @@ const { item, itemUrl, itemForm, saving, saveBtnLabel, showSaved, saveItem } =
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : 'New author'
+  return props.id !== 0 ? (item.value?.name ?? '') : t('user_data_retention.authors.new_item')
 })
 
 function archiveItem() {

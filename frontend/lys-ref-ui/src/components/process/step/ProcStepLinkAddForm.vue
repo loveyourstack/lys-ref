@@ -1,6 +1,6 @@
 <template>
   <v-card-title class="pl-1 mb-1">
-    New dependency
+    {{ $t('parallel_processing.flows.steps.links.new_item') }}
   </v-card-title>
 
   <v-form v-if="!!item" ref="itemForm">
@@ -15,7 +15,7 @@
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="saveBtnLabel" :saveDisabled="!auth.isWriter()"
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
       @cancel="emit('cancel')" @save="saveItem">
     </l-cancel-and-save-actions>
 
@@ -24,8 +24,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { useFormCrud } from 'lys-vue'
-import { fetchOnce } from 'lys-vue'
+import { fetchOnce, useFormCrud } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
 import { type Step, type StepLink, NewStepLink, GetStepLinkInputFromItem } from '@/types/process'

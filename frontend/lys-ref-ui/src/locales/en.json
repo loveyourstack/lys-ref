@@ -5,15 +5,19 @@
         "archive": "Archive",
         "cancel": "Cancel",
         "close": "Close",
+        "create": "Create",
         "delete": "Delete",
         "download_to_excel": "Download to Excel",
         "edit": "Edit",
         "import": "Import",
         "login": "Login",
         "logout": "Logout",
+        "move_down": "Move down",
+        "move_up": "Move up",
         "reset_table": "Reset table",
         "restore": "Restore",
         "run": "Run",
+        "run_with_dependencies": "Run with dependencies",
         "save": "Save",
         "show_archive": "Show archive",
         "show_update_history": "Show update history"
@@ -31,7 +35,8 @@
                 "item_3": "Bulk updates via row selection. Selection respects filters after update. Uses browser notifications if allowed",
                 "item_4": "Totals row which respects filtering and column selection and ignores paging",
                 "item_5": "Row expansion showing latest daily performance metrics"
-            }
+            },
+            "budget_percent_change": "Budget percent change"
         }
     },
     "ai": {
@@ -50,6 +55,8 @@
             "p1": "Using the campaign data from the 'Entity relationships' section, demonstrates further chart types.",
             "p2": "The title and label text colors in the chart library have been overriden to respect the application-level light or dark mode.",
             "budget_breakdown": "Budget breakdown",
+            "by_manager": "By manager",
+            "by_vertical": "By vertical",
             "spend_vs_revenue": "Campaign spend vs revenue: last 7 days"
         },
         "xr_performance": {
@@ -70,6 +77,7 @@
         "campaigns": {
             "nav": "Campaigns",
             "title": "Regular entity: campaigns",
+            "new_item": "New campaign",
             "p1": "Regular entities show primary columns of parent entities and aggregates of child entities.",
             "p2": "In this case, we show the name column of the parent country and vertical tables, and the date bounds of the child campaign performance table.",
             "p3": "The parent entities should be filterable."
@@ -77,9 +85,11 @@
         "verticals": {
             "nav": "Verticals",
             "title": "Parent entity: verticals",
+            "new_item": "New vertical",
             "p1": "Parent entities show aggregates (e.g. count) of child entities. In this case, campaign is the child entity.",
             "p2": "If needed, provide a quick way to filter child entities by the parent, as shown with the \"View campaigns\" {viewCampsIcon} button below.",
-            "p3": "Disable deletion of the parent if it has associated child entities, unless there is a composition relationship which allows cascaded deletion."
+            "p3": "Disable deletion of the parent if it has associated child entities, unless there is a composition relationship which allows cascaded deletion.",
+            "view_campaigns": "View campaigns"
         }
     },
     "external_data": {
@@ -189,15 +199,25 @@
         "flows": {
             "nav": "Flows",
             "title": "Flows",
+            "new_item": "New flow",
             "p1": "A flow is a set of connected processes. Click 'View steps' on one of the flows to see more information.",
+            "view_steps": "View steps",
+            "view_runs": "View runs",
             "steps": {
                 "title": "Steps",
+                "add_item": "Add step",
+                "new_item": "New step",
                 "p1": "Each card below is a step in the process with an associated fake backend command. On large screens: steps on the right depend on steps to their left.",
                 "p2": "Each step can be run independently or with its dependencies. Steps without dependencies are run in parallel. When you run a step, a page opens to display its progress and results.",
                 "p3": "Demonstrates even spacing of hierarchical data. In the backend, demonstrates:",
                 "p3_list": {
                     "item_1": "Recursive relationships (steps can depend on other steps)",
                     "item_2": "Parallel processing, with the option to cancel on the first error or continue"
+                },
+                "cancel_on_error": "On error, cancel all unfinished processes",
+                "links": {
+                    "add_item": "Add dependency",
+                    "new_item": "New dependency"
                 }
             }
         },
@@ -227,8 +247,14 @@
                 "p1": "Internal view: all supplier products are visible but not editable."
             }
         },
-        "supplier_employees": "Supplier employees",
-        "supplier_products": "Supplier products",
+        "supplier_employees": {
+            "title": "Supplier employees",
+            "new_item": "New employee"
+        },
+        "supplier_products": {
+            "title": "Supplier products",
+            "new_item": "New product"
+        },
         "tenant_view": {
             "nav": "Tenant view",
             "p1": "This page shows supplier employees and products as the logged-in supplier employee would see them.",
@@ -260,16 +286,19 @@
         "arrays": {
             "nav": "Arrays",
             "title": "Arrays",
+            "new_item": "New array type",
             "p1": "In table, join elements if space allows. In form, split elements by newline to simplify editing."
         },
         "default_values": {
             "nav": "Default values",
             "title": "Default values",
+            "new_item": "New default value",
             "p1": "Differentiate between true (mandatory) defaults and defaults in the sense of a suggested value."
         },
         "mandatory_values": {
             "nav": "Mandatory values",
             "title": "Mandatory values",
+            "new_item": "New mandatory value",
             "p1": "All columns require a value. Text may not be empty (''). This table also demonstrates filter functionality per type.",
             "p2": "Some further points which apply to all tables in this app:",
             "p2_list": {
@@ -283,11 +312,13 @@
         "optional_values": {
             "nav": "Optional values",
             "title": "Optional values",
+            "new_item": "New optional value",
             "p1": "All columns are optional. Zero-values by type are inserted where no value is given."
         },
         "variants": {
             "nav": "Variants",
             "title": "Variants",
+            "new_item": "New variant type",
             "p1": "Common variants of basic data types."
         }
     },
@@ -297,6 +328,7 @@
             "nav": "Authors",
             "title": "Authors",
             "archived_title": "Archived authors",
+            "new_item": "New author",
             "p1": "The Edit form has no delete option; authors and their books are instead archived to separate storage.",
             "p2": "Archived authors can be shown by selecting \"Show archive\" from the menu on the right.",
             "p3": "When the archive is shown, a button {restoreIcon} to restore archived authors to the main table is available.",
@@ -306,6 +338,7 @@
             "nav": "Books",
             "title": "Books",
             "archived_title": "Archived books",
+            "new_item": "New book",
             "p1": "If the author is archived, his active books will also be automatically archived.",
             "p2": "However, books by active authors can also be archived separately. Restoration is only possible if the book was archived separately."
         }

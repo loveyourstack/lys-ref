@@ -30,7 +30,7 @@
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="saveBtnLabel" :saveDisabled="!auth.isWriter()"
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
       @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
@@ -44,6 +44,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import type { AxiosInstance } from 'axios'
+import { useI18n } from 'vue-i18n'
 import { useFormCrud } from 'lys-vue'
 import axDefault, { axSupplier } from '@/api'
 import auth from '@/auth'
@@ -63,6 +64,7 @@ const emit = defineEmits<{
   (e: 'update'): void
 }>()
 
+const { t } = useI18n()
 const supStore = useSupplierStore()
 
 const axToUse: AxiosInstance = computed(() => props.internal ? axDefault : axSupplier).value
@@ -83,7 +85,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  if (props.id === 0) return 'New employee'
+  if (props.id === 0) return t('saas.supplier_employees.new_item')
   if (!item.value) return ''
   return `${item.value.given_name ?? ''} ${item.value.family_name ?? ''}`.trim()
 })
