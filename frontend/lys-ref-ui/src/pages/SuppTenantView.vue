@@ -8,9 +8,9 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-6">
-                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p1') }}</div>
-                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p2') }}</div>
-                  <div class="dt-subtitle">{{ $t('saas.tenant_view.p3') }}</div>
+                  <div class="dt-subtitle">{{ $t('tenant_view.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('tenant_view.p2') }}</div>
+                  <div class="dt-subtitle">{{ $t('tenant_view.p3') }}</div>
                 </v-col>
               </v-row>
 
@@ -18,8 +18,8 @@
 
               <supp-employee-table v-if="suppStore.selectedEmpEmail" :internal="false" />
               <div v-else>
-                <div class="dt-title">{{ $t('saas.supplier_employees') }}</div>
-                <div class="dt-subtitle">{{ $t('saas.tenant_view.please_login') }}</div>
+                <div class="dt-title">{{ $t('supplier_employees') }}</div>
+                <div class="dt-subtitle">{{ $t('tenant_view.please_login') }}</div>
               </div>
 
             </v-card-text>
@@ -33,8 +33,8 @@
 
               <supp-product-table v-if="suppStore.selectedEmpEmail" :internal="false" />
               <div v-else>
-                <div class="dt-title">{{ $t('saas.supplier_products') }}</div>
-                <div class="dt-subtitle">{{ $t('saas.tenant_view.please_login') }}</div>
+                <div class="dt-title">{{ $t('supplier_products') }}</div>
+                <div class="dt-subtitle">{{ $t('tenant_view.please_login') }}</div>
               </div>
 
             </v-card-text>

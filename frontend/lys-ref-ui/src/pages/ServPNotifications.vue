@@ -5,7 +5,7 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-title">{{ $t('server_push.notifications.title') }}</span>
+              <span class="dt-title">{{ $t('notifications.title') }}</span>
             </v-card-text>
           </v-card>
         </v-col>
@@ -16,16 +16,16 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <div class="dt-subtitle">{{ $t('server_push.notifications.p1') }}</div>
-              <div class="dt-subtitle">{{ $t('server_push.notifications.p2') }}</div>
-              <div class="dt-subtitle">{{ $t('server_push.notifications.p3') }}</div>
+              <div class="dt-subtitle">{{ $t('notifications.p1') }}</div>
+              <div class="dt-subtitle">{{ $t('notifications.p2') }}</div>
+              <div class="dt-subtitle">{{ $t('notifications.p3') }}</div>
 
               <v-list>
                 <v-list-item>
-                  <v-btn color="info" @click="addNotification('Info')">{{ $t('server_push.notifications.add_info') }}</v-btn>
+                  <v-btn color="info" @click="addNotification('Info')">{{ $t('notifications.add_info') }}</v-btn>
                 </v-list-item>
                 <v-list-item>
-                  <v-btn color="warning" @click="addNotification('Warning')">{{ $t('server_push.notifications.add_warning') }}</v-btn>
+                  <v-btn color="warning" @click="addNotification('Warning')">{{ $t('notifications.add_warning') }}</v-btn>
                 </v-list-item>
               </v-list>
 

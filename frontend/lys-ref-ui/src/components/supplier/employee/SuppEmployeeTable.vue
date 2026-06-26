@@ -24,7 +24,7 @@
   >
     <template #top>
       <!-- note passing of computed axInstance and reqHeaders for file download -->
-      <l-dt-top :ax="axToUse" :title="props.title ?? $t('saas.supplier_employees.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="axToUse" :title="props.title ?? $t('supplier_employees.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()" :reqHeaders="reqHeaders"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn v-if="props.internal" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -32,8 +32,8 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle" v-if="props.internal">{{ $t('saas.internal_view.supplier_employees.p1') }}</div>
-          <div class="dt-subtitle" v-else>{{ $t('saas.tenant_view.supplier_employees.p1') }}</div>
+          <div class="dt-subtitle" v-if="props.internal">{{ $t('internal_view.supplier_employees.p1') }}</div>
+          <div class="dt-subtitle" v-else>{{ $t('tenant_view.supplier_employees.p1') }}</div>
         </v-col>
       </v-row>
     </template>

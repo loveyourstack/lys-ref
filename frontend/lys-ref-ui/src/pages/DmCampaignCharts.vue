@@ -8,8 +8,8 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-2">
-                  <div class="dt-subtitle">{{ $t('charts.campaign_charts.p1') }}</div>
-                  <div class="dt-subtitle">{{ $t('charts.campaign_charts.p2') }}</div>
+                  <div class="dt-subtitle">{{ $t('campaign_charts.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('campaign_charts.p2') }}</div>
                 </v-col>
               </v-row>
 

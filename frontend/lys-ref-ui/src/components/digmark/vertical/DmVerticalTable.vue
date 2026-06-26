@@ -23,7 +23,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('entity_relationships.verticals.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('verticals.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -31,15 +31,15 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('entity_relationships.verticals.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('verticals.p1') }}</div>
 
-          <i18n-t scope="global" keypath="entity_relationships.verticals.p2" tag="div" class="dt-subtitle">
+          <i18n-t scope="global" keypath="verticals.p2" tag="div" class="dt-subtitle">
             <template #viewCampsIcon>
               <v-icon color="secondary" icon="mdi-bullhorn-outline"></v-icon>
             </template>
           </i18n-t>
           
-          <div class="dt-subtitle">{{ $t('entity_relationships.verticals.p3') }}</div>
+          <div class="dt-subtitle">{{ $t('verticals.p3') }}</div>
         </v-col>
       </v-row>
     </template>
@@ -47,7 +47,7 @@
      <template v-slot:[`item.campaign_count`]="{ item }">
       <span>
         {{ item.campaign_count }}
-        <v-btn v-if="item.campaign_count > 0" icon flat size="small" v-tooltip="`${$t('entity_relationships.verticals.view_campaigns')}`" 
+        <v-btn v-if="item.campaign_count > 0" icon flat size="small" v-tooltip="`${$t('verticals.view_campaigns')}`" 
           :to="{ name: 'Campaigns', query: { vertical_fk: item.id }}">
           <v-icon color="secondary" icon="mdi-bullhorn-outline"></v-icon>
         </v-btn>

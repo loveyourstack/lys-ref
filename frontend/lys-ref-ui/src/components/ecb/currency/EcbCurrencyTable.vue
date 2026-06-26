@@ -21,15 +21,15 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('external_data.currencies.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('currencies.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('external_data.currencies.p1') }}</div>
-          <div class="dt-subtitle">{{ $t('external_data.currencies.p2') }}</div>
+          <div class="dt-subtitle">{{ $t('currencies.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('currencies.p2') }}</div>
         </v-col>
       </v-row>
 

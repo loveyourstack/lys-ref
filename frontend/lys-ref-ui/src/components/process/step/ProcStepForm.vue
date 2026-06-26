@@ -78,7 +78,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : t('parallel_processing.flows.steps.new_item')
+  return props.id !== 0 ? (item.value?.name ?? '') : t('flows.steps.new_item')
 })
 
 </script>

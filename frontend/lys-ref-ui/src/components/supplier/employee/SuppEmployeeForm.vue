@@ -85,7 +85,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  if (props.id === 0) return t('saas.supplier_employees.new_item')
+  if (props.id === 0) return t('supplier_employees.new_item')
   if (!item.value) return ''
   return `${item.value.given_name ?? ''} ${item.value.family_name ?? ''}`.trim()
 })

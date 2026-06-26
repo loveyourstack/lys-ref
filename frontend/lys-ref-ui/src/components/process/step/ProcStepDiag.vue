@@ -18,26 +18,26 @@
   <v-row density="compact">
     <v-col class="d-flex align-center">
       <v-breadcrumbs density="compact" :items="[
-          { title: $t('parallel_processing.flows.title'), disabled: false },
+          { title: $t('flows.title'), disabled: false },
           { title: props.flow_name, disabled: false },
-          { title: $t('parallel_processing.flows.steps.title'), disabled: false }
+          { title: $t('flows.steps.title'), disabled: false }
         ]" 
       ></v-breadcrumbs>
 
       <v-spacer />
 
-      <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('parallel_processing.flows.steps.add_item') }}</v-btn>
+      <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('flows.steps.add_item') }}</v-btn>
     </v-col>
   </v-row>
 
   <v-row density="comfortable">
     <v-col class="mb-6">
-      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p1') }}</div>
-      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p2') }}</div>
-      <div class="dt-subtitle">{{ $t('parallel_processing.flows.steps.p3') }}
+      <div class="dt-subtitle">{{ $t('flows.steps.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('flows.steps.p2') }}</div>
+      <div class="dt-subtitle">{{ $t('flows.steps.p3') }}
         <ul class="mt-1 mb-1">
-          <li>{{ $t('parallel_processing.flows.steps.p3_list.item_1') }}</li>
-          <li>{{ $t('parallel_processing.flows.steps.p3_list.item_2') }}</li>
+          <li>{{ $t('flows.steps.p3_list.item_1') }}</li>
+          <li>{{ $t('flows.steps.p3_list.item_2') }}</li>
         </ul>
       </div>
     </v-col>
@@ -52,7 +52,7 @@
 
       <v-spacer />
 
-      <v-switch :label="$t('parallel_processing.flows.steps.cancel_on_error')" v-model="stopOnErr" color="primary"></v-switch>
+      <v-switch :label="$t('flows.steps.cancel_on_error')" v-model="stopOnErr" color="primary"></v-switch>
     </v-col>
   </v-row>
 
@@ -80,7 +80,7 @@
           <v-btn icon flat v-tooltip:bottom="`${$t('actions.edit')}`" size="small" @click="editID = item.id; showEdit = true">
             <v-icon color="secondary" icon="mdi-square-edit-outline"></v-icon>
           </v-btn>
-          <v-btn icon flat v-tooltip:bottom="`${$t('parallel_processing.flows.steps.links.add_item')}`" size="small" @click="stepID = item.id; showLinkEdit = true">
+          <v-btn icon flat v-tooltip:bottom="`${$t('flows.steps.links.add_item')}`" size="small" @click="stepID = item.id; showLinkEdit = true">
             <v-icon color="secondary" icon="mdi-arrow-left-bottom-bold"></v-icon>
           </v-btn>
           <v-btn :disabled="!auth.isWriter() || !mCol[idx-1]" icon flat v-tooltip:bottom="`${$t('actions.move_up')}`" size="small" 

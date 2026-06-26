@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <div class="dt-title">
-        <slot name="title">{{ $t('charts.campaign_charts.budget_breakdown') }}</slot>
+        <slot name="title">{{ $t('campaign_charts.budget_breakdown') }}</slot>
       </div>
     </v-col>
   </v-row>
@@ -82,13 +82,13 @@ const baseOptions = computed<ChartOptions<'pie'>>(() => ({
 
 const managerChartOptions = computed<ChartOptions<'pie'>>(() => {
   const options = structuredClone(baseOptions.value)
-  options.plugins!.title!.text = t('charts.campaign_charts.by_manager')
+  options.plugins!.title!.text = t('campaign_charts.by_manager')
   return options
 })
 
 const verticalChartOptions = computed<ChartOptions<'pie'>>(() => {
   const options = structuredClone(baseOptions.value)
-  options.plugins!.title!.text = t('charts.campaign_charts.by_vertical')
+  options.plugins!.title!.text = t('campaign_charts.by_vertical')
   return options
 })
 

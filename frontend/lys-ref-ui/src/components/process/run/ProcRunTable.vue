@@ -14,7 +14,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('parallel_processing.runs.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('runs.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn icon flat size="small" v-tooltip="'Refresh list'" @click="refreshItems()">
@@ -24,7 +24,7 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('parallel_processing.runs.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('runs.p1') }}</div>
         </v-col>
       </v-row>
 

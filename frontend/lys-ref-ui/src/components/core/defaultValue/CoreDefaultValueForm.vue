@@ -67,7 +67,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? 'ID ' + props.id : t('type_handling.default_values.new_item')
+  return props.id !== 0 ? 'ID ' + props.id : t('default_values.new_item')
 })
 
 </script>

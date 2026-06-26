@@ -83,7 +83,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : t('saas.supplier_products.new_item')
+  return props.id !== 0 ? (item.value?.name ?? '') : t('supplier_products.new_item')
 })
 
 </script>

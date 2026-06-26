@@ -14,7 +14,7 @@
   <v-row density="compact">
     <v-col class="d-flex align-center">
       <v-breadcrumbs :items="[
-          { title: $t('parallel_processing.runs.title'), disabled: false },
+          { title: $t('runs.title'), disabled: false },
           { title: props.flow, disabled: false },
           { title: props.step_name, disabled: false }
         ]" 
@@ -31,9 +31,9 @@
 
   <v-row density="comfortable">
     <v-col class="mb-6">
-      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p1') }}</div>
-      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p2') }}</div>
-      <div class="dt-subtitle">{{ $t('parallel_processing.runs.points.p3') }}</div>
+      <div class="dt-subtitle">{{ $t('runs.points.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('runs.points.p2') }}</div>
+      <div class="dt-subtitle">{{ $t('runs.points.p3') }}</div>
     </v-col>
   </v-row>
 

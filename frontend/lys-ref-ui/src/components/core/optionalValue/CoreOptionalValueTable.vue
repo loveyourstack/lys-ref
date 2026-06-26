@@ -33,7 +33,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('type_handling.optional_values.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('optional_values.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -42,7 +42,7 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('type_handling.optional_values.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('optional_values.p1') }}</div>
         </v-col>
       </v-row>
     </template>

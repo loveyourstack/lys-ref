@@ -36,7 +36,7 @@
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <template #title>
           <v-icon v-if="showArchive" color="secondary" size="small" class="mb-1" icon="mdi-archive-arrow-down-outline"></v-icon>
-          {{ showArchive ? $t('user_data_retention.books.archived_title') : $t('user_data_retention.books.title') }}
+          {{ showArchive ? $t('books.archived_title') : $t('books.title') }}
         </template>
 
         <v-btn v-if="!showArchive" color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -52,8 +52,8 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('user_data_retention.books.p1') }}</div>
-          <div class="dt-subtitle">{{ $t('user_data_retention.books.p2') }}</div>
+          <div class="dt-subtitle">{{ $t('books.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('books.p2') }}</div>
         </v-col>
       </v-row>
     </template>

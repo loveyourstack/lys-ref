@@ -23,7 +23,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('entity_relationships.campaigns.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('campaigns.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
@@ -31,9 +31,9 @@
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p1') }}</div>
-          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p2') }}</div>
-          <div class="dt-subtitle">{{ $t('entity_relationships.campaigns.p3') }}</div>
+          <div class="dt-subtitle">{{ $t('campaigns.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('campaigns.p2') }}</div>
+          <div class="dt-subtitle">{{ $t('campaigns.p3') }}</div>
         </v-col>
       </v-row>
 

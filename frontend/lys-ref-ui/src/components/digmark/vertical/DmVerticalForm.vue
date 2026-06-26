@@ -64,7 +64,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : t('entity_relationships.verticals.new_item')
+  return props.id !== 0 ? (item.value?.name ?? '') : t('verticals.new_item')
 })
 
 </script>

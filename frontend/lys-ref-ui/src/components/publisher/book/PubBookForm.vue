@@ -68,7 +68,7 @@ const { item, itemUrl, itemForm, saving, saveBtnLabel, showSaved, saveItem } =
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? (item.value?.name ?? '') : t('user_data_retention.books.new_item')
+  return props.id !== 0 ? (item.value?.name ?? '') : t('books.new_item')
 })
 
 function archiveItem() {

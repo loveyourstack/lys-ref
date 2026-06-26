@@ -14,15 +14,15 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? $t('external_data.exchange_rates.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
+      <l-dt-top :ax="ax" :title="props.title ?? $t('exchange_rates.title')" :headers="headers" :excelDlUrl="excelDlUrl" 
         v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
       </l-dt-top>
 
       <v-row density="comfortable">
         <v-col class="mb-2">
-          <div class="dt-subtitle">{{ $t('external_data.exchange_rates.p1') }}</div>
-          <div class="dt-subtitle">{{ $t('external_data.exchange_rates.p2') }}</div>
+          <div class="dt-subtitle">{{ $t('exchange_rates.p1') }}</div>
+          <div class="dt-subtitle">{{ $t('exchange_rates.p2') }}</div>
         </v-col>
       </v-row>
 

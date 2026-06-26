@@ -91,7 +91,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
   })
 
 const formTitle = computed(() => {
-  return props.id !== 0 ? 'ID ' + props.id : t('type_handling.variants.new_item')
+  return props.id !== 0 ? 'ID ' + props.id : t('variants.new_item')
 })
 
 function isValidIp(input: string | undefined | null): boolean {

@@ -2,15 +2,15 @@
   <v-row>
     <v-col>
       <div class="dt-title">
-        <slot name="title">{{ $t('charts.xr_performance.title') }}</slot>
+        <slot name="title">{{ $t('xr_performance.title') }}</slot>
       </div>
     </v-col>
   </v-row>
 
   <v-row density="comfortable">
     <v-col class="mb-2">
-      <div class="dt-subtitle">{{ $t('charts.xr_performance.p1') }}</div>
-      <div class="dt-subtitle">{{ $t('charts.xr_performance.p2') }}</div>
+      <div class="dt-subtitle">{{ $t('xr_performance.p1') }}</div>
+      <div class="dt-subtitle">{{ $t('xr_performance.p2') }}</div>
     </v-col>
   </v-row>
 

@@ -8,10 +8,10 @@
 
               <v-row density="comfortable">
                 <v-col class="mb-6">
-                  <div class="dt-subtitle">{{ $t('saas.internal_view.p1') }}</div>
-                  <div class="dt-subtitle">{{ $t('saas.internal_view.p2') }}</div>
-                  <div class="dt-subtitle">{{ $t('saas.internal_view.p3') }}</div>
-                  <div class="dt-subtitle">{{ $t('saas.internal_view.p4') }}</div>
+                  <div class="dt-subtitle">{{ $t('internal_view.p1') }}</div>
+                  <div class="dt-subtitle">{{ $t('internal_view.p2') }}</div>
+                  <div class="dt-subtitle">{{ $t('internal_view.p3') }}</div>
+                  <div class="dt-subtitle">{{ $t('internal_view.p4') }}</div>
                 </v-col>
               </v-row>
 
