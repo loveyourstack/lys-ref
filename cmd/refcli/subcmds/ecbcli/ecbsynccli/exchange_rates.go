@@ -1,12 +1,14 @@
 package ecbsynccli
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/loveyourstack/connectors/ecb/ecbapi"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbxrperfnorm"
+	"github.com/loveyourstack/lys/lystype"
 	"github.com/spf13/cobra"
 )
 
@@ -32,12 +34,20 @@ func ExchangeRatesCmd(cliApp *cliapp.App) *cobra.Command {
 			// daily
 			err = cliApp.EcbSvc.SyncExchangeRates(cmd.Context(), cliApp.Db, "EUR", ecbapi.Daily, startDate, endDate)
 			if err != nil {
+				if errors.Is(err, ecbapi.ErrNoRatesFound) {
+					cliApp.Logger.Warn("no rates found", "startDate", startDate.Format(lystype.DateFormat), "endDate", endDate.Format(lystype.DateFormat))
+					return nil
+				}
 				return fmt.Errorf("cliApp.EcbSvc.SyncExchangeRates (Daily) failed: %w", err)
 			}
 
 			// monthly
 			/*err = cliApp.EcbSvc.SyncExchangeRates(cmd.Context(), cliApp.Db, "EUR", ecbapi.Monthly, startDate, endDate)
 			if err != nil {
+				if errors.Is(err, ecbapi.ErrNoRatesFound) {
+					cliApp.Logger.Warn("no rates found", "startDate", startDate.Format(lystype.DateFormat), "endDate", endDate.Format(lystype.DateFormat))
+					return nil
+				}
 				return fmt.Errorf("cliApp.EcbSvc.SyncExchangeRates (Monthly) failed: %w", err)
 			}*/
 
