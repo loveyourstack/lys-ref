@@ -70,7 +70,7 @@ func main() {
 	srvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5) // block after 5 failed attempts
 
 	// RLS connection (main connection for queries, with company_id setting applied for RLS)
-	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, srvApp.Config.General.AppName, "app.company_id", CompanyCtxKey, srvApp.ErrorLog)
+	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, srvApp.Config.General.AppName, "app.company_id", CompanyCtxKey, srvApp.Logger)
 	if err != nil {
 		log.Fatalf("initialization: failed to create RLS db connection pool: %s", err.Error())
 	}
@@ -109,7 +109,7 @@ func main() {
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}
-	srvApp.InfoLog.Info(startupMsg)
+	srvApp.Logger.Info(startupMsg)
 
 	// start server in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
 	errCh := make(chan error, 1)
@@ -124,7 +124,7 @@ func main() {
 			log.Fatalf("initialization: srv.ListenAndServe failed: %s", err.Error())
 		}
 	case <-ctx.Done():
-		srvApp.InfoLog.Info("shutdown signal received")
+		srvApp.Logger.Info("shutdown signal received")
 	}
 
 	// create context with timeout for server shutdown

@@ -43,12 +43,12 @@ func ExchangeRatesCmd(cliApp *cliapp.App) *cobra.Command {
 
 			// create normalized performance
 			ecbXrPerfNormStore := ecbxrperfnorm.Store{Db: cliApp.Db}
-			err = ecbXrPerfNormStore.Create(cmd.Context(), cliApp.InfoLog)
+			err = ecbXrPerfNormStore.Create(cmd.Context(), cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("ecbXrPerfNormStore.Create failed: %w", err)
 			}
 
-			cliApp.InfoLog.Debug("done")
+			cliApp.Logger.Debug("done")
 
 			return nil
 		},

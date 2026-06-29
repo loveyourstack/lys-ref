@@ -25,13 +25,13 @@ func (srvApp *httpServerApplication) dmGetCampaignOptAggregates(w http.ResponseW
 	}
 	getReqModifiers, err := lys.ExtractGetRequestModifiers(r, params)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractGetRequestModifiers failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractGetRequestModifiers failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	aggItems, err := campOptStore.SelectAggregates(ctx, getReqModifiers.SetFuncParamValues, getReqModifiers.Conditions)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("campOptStore.SelectAggregates failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("campOptStore.SelectAggregates failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r
 	// get req body
 	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -61,14 +61,14 @@ func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r
 	// marshal req body into inputs
 	inp, err := lys.DecodeJsonBody[input](body)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// begin tx
 	tx, err := srvApp.Db.Begin(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("db.Begin failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("db.Begin failed: %w", err), srvApp.Logger, w)
 		return
 	}
 	defer tx.Rollback(ctx)
@@ -79,7 +79,7 @@ func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r
 		}
 		err = dmcampaign.UpdatePartialTx(ctx, tx, assMap, id)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("dmcampaign.UpdatePartialTx failed on id: %d: %w", id, err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("dmcampaign.UpdatePartialTx failed on id: %d: %w", id, err), srvApp.Logger, w)
 			return
 		}
 	}
@@ -87,7 +87,7 @@ func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r
 	// success: commit tx
 	err = tx.Commit(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("tx.Commit failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("tx.Commit failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 	// get req body
 	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -117,7 +117,7 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 	// marshal req body into inputs
 	inp, err := lys.DecodeJsonBody[input](body)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -125,14 +125,14 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 	campStore := dmcampaign.Store{Db: srvApp.Db}
 	campIdBudgetMap, err := campStore.SelectIdBudgetMap(ctx, inp.Ids)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("campStore.SelectIdBudgetMap failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("campStore.SelectIdBudgetMap failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// begin tx
 	tx, err := srvApp.Db.Begin(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("db.Begin failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("db.Begin failed: %w", err), srvApp.Logger, w)
 		return
 	}
 	defer tx.Rollback(ctx)
@@ -146,7 +146,7 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 		}
 		err = dmcampaign.UpdatePartialTx(ctx, tx, assMap, id)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("dmcampaign.UpdatePartialTx failed on id: %d: %w", id, err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("dmcampaign.UpdatePartialTx failed on id: %d: %w", id, err), srvApp.Logger, w)
 			return
 		}
 	}
@@ -154,7 +154,7 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 	// success: commit tx
 	err = tx.Commit(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("tx.Commit failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("tx.Commit failed: %w", err), srvApp.Logger, w)
 		return
 	}
 

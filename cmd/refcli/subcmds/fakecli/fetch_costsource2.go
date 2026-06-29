@@ -18,7 +18,7 @@ func FetchCostSource2Cmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
-			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "costsource2", 3, cliApp.InfoLog)
+			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "costsource2", 3, cliApp.Logger)
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
 					return

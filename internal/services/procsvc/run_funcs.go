@@ -51,7 +51,7 @@ func (svc Service) MustRunWithDeps(ctx context.Context, db *pgxpool.Pool, runId 
 	for {
 
 		iter++
-		svc.InfoLog.Debug("point loop", slog.Int("iter", iter))
+		svc.Logger.Debug("point loop", slog.Int("iter", iter))
 
 		statusMap, err := pointStore.SelectStatusMapByRunId(ctx, runId)
 		if err != nil {
@@ -119,7 +119,7 @@ func (svc Service) RunWithDeps(ctx context.Context, db *pgxpool.Pool, runId int6
 	for {
 
 		iter++
-		svc.InfoLog.Debug("point loop", slog.Int("iter", iter))
+		svc.Logger.Debug("point loop", slog.Int("iter", iter))
 
 		statusMap, err := pointStore.SelectStatusMapByRunId(ctx, runId)
 		if err != nil {
@@ -160,16 +160,16 @@ func (svc Service) RunWithDeps(ctx context.Context, db *pgxpool.Pool, runId int6
 			}
 
 			wg.Add(1)
-			go func(ctx context.Context, pointStore procpoint.Store, pointId int64, cmdParts []string, infoLog *slog.Logger) {
+			go func(ctx context.Context, pointStore procpoint.Store, pointId int64, cmdParts []string, logger *slog.Logger) {
 
 				defer wg.Done()
 
 				err := svc.doPoint(ctx, pointStore, pointId, cmdParts)
 				if err != nil {
-					infoLog.Error("svc.doPoint error on cmd", slog.String("cmd", strings.Join(cmdParts, " ")), slog.String("error", err.Error()))
+					logger.Error("svc.doPoint error on cmd", slog.String("cmd", strings.Join(cmdParts, " ")), slog.String("error", err.Error()))
 				}
 
-			}(ctx, pointStore, point.Id, cmdParts, svc.InfoLog)
+			}(ctx, pointStore, point.Id, cmdParts, svc.Logger)
 		}
 
 		wg.Wait()

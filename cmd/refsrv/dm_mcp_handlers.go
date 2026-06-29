@@ -25,7 +25,7 @@ func (srvApp *httpServerApplication) dmMcpQuery(w http.ResponseWriter, r *http.R
 
 	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -35,7 +35,7 @@ func (srvApp *httpServerApplication) dmMcpQuery(w http.ResponseWriter, r *http.R
 
 	inp, err := lys.DecodeJsonBody[mcpBridgeInput](body)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (srvApp *httpServerApplication) dmMcpQuery(w http.ResponseWriter, r *http.R
 
 	toolResult, err := dmRunMcpToolCall(mcpCtx, srvApp.Config.McpServer, mapping.Tool, mapping.Args)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("dmRunMcpToolCall failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("dmRunMcpToolCall failed: %w", err), srvApp.Logger, w)
 		return
 	}
 

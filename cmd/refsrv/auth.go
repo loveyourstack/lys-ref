@@ -36,7 +36,7 @@ func (srvApp *httpServerApplication) archiveExpiredSessions(ctx context.Context)
 	err := srvApp.archiveSessions(runCtx, expiredSessions)
 	cancel()
 	if err != nil {
-		srvApp.ErrorLog.Error(fmt.Sprintf("archiveExpiredSessions: archive failed for %d sessions: %v", len(expiredSessions), err))
+		srvApp.Logger.Error(fmt.Sprintf("archiveExpiredSessions: archive failed for %d sessions: %v", len(expiredSessions), err))
 		return
 	}
 
@@ -46,7 +46,7 @@ func (srvApp *httpServerApplication) archiveExpiredSessions(ctx context.Context)
 	}
 	srvApp.Sessions.DeleteByTokens(tokens)
 
-	srvApp.InfoLog.Debug(fmt.Sprintf("archiveExpiredSessions: archived %d expired sessions", len(expiredSessions)))
+	srvApp.Logger.Debug(fmt.Sprintf("archiveExpiredSessions: archived %d expired sessions", len(expiredSessions)))
 }
 
 // archiveSessions saves the supplied appSessions to the session_history table.
@@ -85,16 +85,16 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		// auth required
 
 		// get session associated with this request, if any
-		sess, err := srvApp.Sessions.FromRequest(r, srvApp.InfoLog)
+		sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
 		if err != nil {
-			lys.HandleError(r.Context(), fmt.Errorf("authenticate: srvApp.Sessions.FromRequest failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleError(r.Context(), fmt.Errorf("authenticate: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
 		// convert session roles from string to enum
 		sysRoles, err := sysrole.FromStringSlice(sess.Roles)
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("authenticate: sysrole.FromStringSlice failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(r.Context(), fmt.Errorf("authenticate: sysrole.FromStringSlice failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -346,20 +346,20 @@ func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Han
 		// get remote ip
 		remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetRemoteHostIP failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
 		isBlocked, err := srvApp.LoginAttempts.IsBlocked(remoteHostIP)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.Logger, w)
 			return
 		}
 
 		// reject if blocked
 		if isBlocked {
 			lys.HandleUserError(lysauth.ErrBlocked, w)
-			srvApp.InfoLog.Debug(fmt.Sprintf("rejectBlockedIp: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
+			srvApp.Logger.Debug(fmt.Sprintf("rejectBlockedIp: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
 			return
 		}
 

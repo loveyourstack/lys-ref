@@ -18,7 +18,7 @@ func AddFakeUpdatesCmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
-			err = lyspgdb.ExecuteFile(cmd.Context(), cliApp.Db, "publisher/publisher_fake_updates.sql", ddl.SQLAssets, nil, cliApp.InfoLog)
+			err = lyspgdb.ExecuteFile(cmd.Context(), cliApp.Db, "publisher/publisher_fake_updates.sql", ddl.SQLAssets, nil, cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("lyspgdb.ExecuteFile failed: %w", err)
 			}

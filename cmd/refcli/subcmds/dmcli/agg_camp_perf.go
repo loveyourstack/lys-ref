@@ -19,7 +19,7 @@ func AggCampPerfCmd(cliApp *cliapp.App) *cobra.Command {
 			defer cliApp.Db.Close()
 
 			aggCampPerfStore := dmcampperfagg.Store{Db: cliApp.Db}
-			err = aggCampPerfStore.Create(context.Background(), cliApp.InfoLog)
+			err = aggCampPerfStore.Create(context.Background(), cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("aggCampPerfStore.Create failed: %w", err)
 			}

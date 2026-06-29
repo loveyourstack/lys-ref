@@ -18,7 +18,7 @@ func FetchRevSource2Cmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
-			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "revsource2", 6, cliApp.InfoLog)
+			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "revsource2", 6, cliApp.Logger)
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
 					return

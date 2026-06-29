@@ -18,7 +18,7 @@ func AggCostsCmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
-			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "aggcosts", 8, cliApp.InfoLog, args[0], args[1])
+			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "aggcosts", 8, cliApp.Logger, args[0], args[1])
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
 					return

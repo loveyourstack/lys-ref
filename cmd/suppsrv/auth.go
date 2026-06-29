@@ -25,7 +25,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		// get employee from email in Employee-Email header
 		employee, err := srvApp.getEmployeeFromReq(r)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("authenticate: getEmployeeFromReq failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("authenticate: getEmployeeFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -122,13 +122,13 @@ func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Han
 		// get remote ip
 		remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetRemoteHostIP failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
 		isBlocked, err := srvApp.LoginAttempts.IsBlocked(remoteHostIP)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.Logger, w)
 			return
 		}
 

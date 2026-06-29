@@ -191,12 +191,12 @@ func (svc Service) doPoint(ctx context.Context, pointStore procpoint.Store, poin
 		}
 
 		// on context cancellation, runRes.Canceled will be true
-		svc.InfoLog.Debug("failure", slog.String("cmd", fullCmd), slog.Any("result", runRes))
+		svc.Logger.Debug("failure", slog.String("cmd", fullCmd), slog.Any("result", runRes))
 
 		return fmt.Errorf("lysexec.Run failed for cmd: %s: %w", fullCmd, err)
 	}
 
-	//svc.InfoLog.Debug("success", slog.String("cmd", fullCmd), slog.Any("result", runRes))
+	//svc.Logger.Debug("success", slog.String("cmd", fullCmd), slog.Any("result", runRes))
 
 	// set finishedAt and status to Completed
 	err = pointStore.SetCompleted(ctx, pointId)
@@ -221,11 +221,11 @@ func (svc Service) getReplacementMap(kvPairs []string) (replacementMap map[strin
 	return replacementMap, nil
 }
 
-func (svc Service) RunFakeCmd(ctx context.Context, name string, sleepSecs int, infoLog *slog.Logger, args ...string) error {
+func (svc Service) RunFakeCmd(ctx context.Context, name string, sleepSecs int, logger *slog.Logger, args ...string) error {
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	infoLog.Debug("started", slog.String("name", name), slog.String("args", strings.Join(args, " ")))
+	logger.Debug("started", slog.String("name", name), slog.String("args", strings.Join(args, " ")))
 
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -249,7 +249,7 @@ func (svc Service) RunFakeCmd(ctx context.Context, name string, sleepSecs int, i
 		}
 	}
 
-	infoLog.Debug("finished", slog.String("name", name), slog.String("args", strings.Join(args, " ")))
+	logger.Debug("finished", slog.String("name", name), slog.String("args", strings.Join(args, " ")))
 
 	return nil
 }

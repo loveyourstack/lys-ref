@@ -57,7 +57,7 @@ func CurrenciesCmd(cliApp *cliapp.App) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("itemStore.Insert failed on key %v: %w", key, err)
 					}
-					cliApp.InfoLog.Info("inserted", slog.String("type", itemType), slog.Any("code", apiItem.Code))
+					cliApp.Logger.Info("inserted", slog.String("type", itemType), slog.Any("code", apiItem.Code))
 					continue
 				}
 
@@ -68,7 +68,7 @@ func CurrenciesCmd(cliApp *cliapp.App) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("itemStore.Update failed on key %v: %w", key, err)
 					}
-					cliApp.InfoLog.Info("updated", slog.String("type", itemType), slog.Any("code", apiItem.Code))
+					cliApp.Logger.Info("updated", slog.String("type", itemType), slog.Any("code", apiItem.Code))
 				}
 			}
 
@@ -83,11 +83,11 @@ func CurrenciesCmd(cliApp *cliapp.App) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("itemStore.Delete failed on key %v: %w", key, err)
 					}
-					cliApp.InfoLog.Info("deleted", slog.String("type", itemType), slog.Any("code", dbItem.Code))
+					cliApp.Logger.Info("deleted", slog.String("type", itemType), slog.Any("code", dbItem.Code))
 				}
 			}
 
-			cliApp.InfoLog.Debug("done")
+			cliApp.Logger.Debug("done")
 
 			return nil
 		},

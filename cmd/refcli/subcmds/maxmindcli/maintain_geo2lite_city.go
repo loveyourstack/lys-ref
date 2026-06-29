@@ -45,12 +45,12 @@ func MaintainGeo2LiteCityCmd(cliApp *cliapp.App) *cobra.Command {
 
 			// exit if no update needed
 			if lastWriteAt.After(lastModified) || lastWriteAt.Equal(lastModified) {
-				cliApp.InfoLog.Debug("no GeoLite2 update needed", slog.Time("lastWriteAt", lastWriteAt), slog.Time("lastModified", lastModified))
+				cliApp.Logger.Debug("no GeoLite2 update needed", slog.Time("lastWriteAt", lastWriteAt), slog.Time("lastModified", lastModified))
 				return nil
 			}
 
 			// update needed
-			cliApp.InfoLog.Info("running GeoLite2 update", slog.Time("lastWriteAt", lastWriteAt), slog.Time("lastModified", lastModified))
+			cliApp.Logger.Info("running GeoLite2 update", slog.Time("lastWriteAt", lastWriteAt), slog.Time("lastModified", lastModified))
 			err = cliApp.MaxMindSvc.WriteGeo2LiteCity(ctx, cliApp.Db, true)
 			if err != nil {
 				return fmt.Errorf("cliApp.MaxMindSvc.WriteGeo2LiteCity failed: %w", err)

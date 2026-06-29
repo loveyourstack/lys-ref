@@ -31,7 +31,7 @@ func InstallLysPgMonCmd(cliApp *cliapp.App) *cobra.Command {
 			defer ownerDb.Close()
 
 			// add schema, monitoring views and audit objects
-			err = lyspgmon.Install(cmd.Context(), ownerDb, cliApp.Config.DbOwnerUser.Name, cliApp.InfoLog)
+			err = lyspgmon.Install(cmd.Context(), ownerDb, cliApp.Config.DbOwnerUser.Name, cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("lyspgmon.Install failed: %w", err)
 			}

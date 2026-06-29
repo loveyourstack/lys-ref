@@ -38,7 +38,7 @@ func (srvApp *httpServerApplication) limit(next http.Handler) http.Handler {
 		// get remote IP
 		ip, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("limit: lysauth.GetRemoteHostIP failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(r.Context(), fmt.Errorf("limit: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -60,14 +60,14 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		// get user from request
 		userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
 		if !ok {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: user not authenticated"), srvApp.ErrorLog, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: user not authenticated"), srvApp.Logger, w)
 			return
 		}
 
 		// get remote ip
 		remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: lysauth.GetRemoteHostIP failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -78,7 +78,7 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		next.ServeHTTP(sw, r)
 		duration := time.Since(start)
 
-		srvApp.InfoLog.Info(fmt.Sprintf("%s - %s - %s %s %s - %d - %dms",
+		srvApp.Logger.Info(fmt.Sprintf("%s - %s - %s %s %s - %d - %dms",
 			remoteHostIP, userInfo.UserName, r.Proto, r.Method, r.URL.RequestURI(), sw.Status, duration.Milliseconds()))
 
 		// in real app: also log to db for activity monitoring as shown in refsrv

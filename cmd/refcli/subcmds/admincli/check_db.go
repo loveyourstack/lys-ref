@@ -30,7 +30,7 @@ func CheckDbCmd(cliApp *cliapp.App) *cobra.Command {
 			}
 			defer ownerDb.Close()
 
-			err = lyspgmon.CheckDb(cmd.Context(), ownerDb, cliApp.InfoLog, cliApp.ErrorLog)
+			err = lyspgmon.CheckDb(cmd.Context(), ownerDb, cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("lyspgmon.CheckDb failed: %w", err)
 			}

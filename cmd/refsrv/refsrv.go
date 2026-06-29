@@ -109,12 +109,12 @@ func main() {
 	srvApp.UserStore = sysuser.Store{Db: srvApp.Db}
 
 	// attach clients
-	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.InfoLog, srvApp.ErrorLog)
+	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)
 
 	// attach services
-	srvApp.AwsSvc = awssvc.NewService(srvApp.Db, srvApp.AwsClient, srvApp.InfoLog, srvApp.ErrorLog)
-	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.InfoLog, srvApp.ErrorLog)
-	srvApp.SysSvc = syssvc.NewService(srvApp.InfoLog, srvApp.ErrorLog)
+	srvApp.AwsSvc = awssvc.NewService(srvApp.Db, srvApp.AwsClient, srvApp.Logger)
+	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.Logger)
+	srvApp.SysSvc = syssvc.NewService(srvApp.Logger)
 
 	// connect to db using db owner and assign to srvApp
 	srvApp.OwnerDb, err = lyspgdb.GetPool(ctx, conf.Db, conf.DbOwnerUser, conf.General.AppName+" Srv")
@@ -166,7 +166,7 @@ func main() {
 
 	// attach ws notification hub to srvApp, listening on the same db channel found in system.notification_trigger()
 	srvApp.NotificationHub, err = lysws.NewNotificationHub(ctx, srvApp.Db, "system.notification", maxUserWsConnections,
-		srvApp.Config.UI.Url, srvApp.InfoLog, srvApp.ErrorLog)
+		srvApp.Config.UI.Url, srvApp.Logger)
 	if err != nil {
 		log.Fatalf("initialization: failed to create notification hub: %s", err.Error())
 	}
@@ -176,7 +176,7 @@ func main() {
 	go func() {
 		defer close(hubListenerDoneCh)
 		if err := srvApp.NotificationHub.ListenAndBroadcast(ctx, sysnotification.SelectDetailsById); err != nil && !errors.Is(err, context.Canceled) {
-			srvApp.ErrorLog.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
+			srvApp.Logger.Error("srvApp.NotificationHub.ListenAndBroadcast failed", "error", err)
 		}
 	}()
 
@@ -187,7 +187,7 @@ func main() {
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}
-	srvApp.InfoLog.Info(startupMsg)
+	srvApp.Logger.Info(startupMsg)
 
 	// start server in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
 	srvErrCh := make(chan error, 1)
@@ -199,10 +199,10 @@ func main() {
 	select {
 	case err := <-srvErrCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			srvApp.ErrorLog.Error("srv.ListenAndServe failed", "error", err)
+			srvApp.Logger.Error("srv.ListenAndServe failed", "error", err)
 		}
 	case <-ctx.Done():
-		srvApp.InfoLog.Info("shutdown signal received")
+		srvApp.Logger.Info("shutdown signal received")
 	}
 
 	// --------------------------------
@@ -213,15 +213,15 @@ func main() {
 
 	// gracefully shutdown server, waiting for active requests to finish or timeout before forcefully closing
 	if err := srv.Shutdown(srvShutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		srvApp.ErrorLog.Error("shutdown: srv.Shutdown failed", "error", err)
+		srvApp.Logger.Error("shutdown: srv.Shutdown failed", "error", err)
 	}
 
 	// persist sessions and login attempts to db, for loading on restart
 	if err := srvApp.persistSessions(context.Background()); err != nil {
-		srvApp.ErrorLog.Error("shutdown: srvApp.persistSessions failed", "error", err)
+		srvApp.Logger.Error("shutdown: srvApp.persistSessions failed", "error", err)
 	}
 	if err := srvApp.persistLoginAttempts(context.Background()); err != nil {
-		srvApp.ErrorLog.Error("shutdown: srvApp.persistLoginAttempts failed", "error", err)
+		srvApp.Logger.Error("shutdown: srvApp.persistLoginAttempts failed", "error", err)
 	}
 
 	// --------------------------------
@@ -231,9 +231,9 @@ func main() {
 	case <-hubListenerDoneCh:
 		// exit: hub already stopped or exited on its own
 	case <-time.After(5 * time.Second):
-		srvApp.ErrorLog.Error("shutdown: timeout waiting for hub listener to exit")
+		srvApp.Logger.Error("shutdown: timeout waiting for hub listener to exit")
 	}
 	if err := srvApp.NotificationHub.Close(); err != nil {
-		srvApp.ErrorLog.Error("shutdown: srvApp.NotificationHub.Close failed", "error", err)
+		srvApp.Logger.Error("shutdown: srvApp.NotificationHub.Close failed", "error", err)
 	}
 }

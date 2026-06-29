@@ -1,6 +1,6 @@
 <template>
   <v-card-title class="pl-1 mb-1">
-    {{ $t('arallel_processing.flows.steps.links.new_item') }}
+    {{ $t('flows.steps.links.new_item') }}
   </v-card-title>
 
   <v-form v-if="!!item" ref="itemForm">

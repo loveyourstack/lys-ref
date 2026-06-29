@@ -11,13 +11,13 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
+	"github.com/loveyourstack/lys/lyslog"
 )
 
 // Application contains the fields common to all commands
 type Application struct {
 	Config   *myapp.Config
-	InfoLog  *slog.Logger
-	ErrorLog *slog.Logger
+	Logger   *slog.Logger
 	Db       *pgxpool.Pool // app-level connection for queries
 	OwnerDb  *pgxpool.Pool // db owner connection for monitoring
 	Validate *validator.Validate
@@ -34,20 +34,18 @@ type Application struct {
 // NewApplication returns an Application with default settings. Not all fields get initialized.
 func NewApplication(conf *myapp.Config) (app *Application) {
 
-	// declare and configure logs
-	var infoLog, errorLog *slog.Logger
+	var opts *slog.HandlerOptions
 	if conf.General.Debug {
-		infoLog = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-		errorLog = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		opts = &slog.HandlerOptions{Level: slog.LevelDebug}
 	} else {
-		infoLog = slog.New(slog.NewTextHandler(os.Stdout, nil))
-		errorLog = slog.New(slog.NewTextHandler(os.Stderr, nil))
+		opts = &slog.HandlerOptions{}
 	}
+
+	logger := slog.New(lyslog.NewSplitStreamHandler(os.Stdout, os.Stderr, opts))
 
 	return &Application{
 		Config:   conf,
-		InfoLog:  infoLog,
-		ErrorLog: errorLog,
+		Logger:   logger,
 		Validate: validator.New(validator.WithRequiredStructEnabled()),
 
 		// services that can be initialized for all cmds, if any

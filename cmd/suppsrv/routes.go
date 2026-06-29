@@ -16,7 +16,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 
 	// define env struct needed for route handlers
 	apiEnv := lys.Env{
-		ErrorLog:    srvApp.ErrorLog,
+		Logger:      srvApp.Logger,
 		Validate:    srvApp.Validate,
 		GetOptions:  srvApp.GetOptions,
 		PostOptions: srvApp.PostOptions,

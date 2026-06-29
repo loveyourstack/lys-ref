@@ -56,7 +56,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 
 	// define env struct needed for route handlers
 	apiEnv := lys.Env{
-		ErrorLog:    srvApp.ErrorLog,
+		Logger:      srvApp.Logger,
 		Validate:    srvApp.Validate,
 		GetOptions:  srvApp.GetOptions,
 		PostOptions: srvApp.PostOptions,
@@ -650,7 +650,7 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 		r.HandleFunc(endpoint+"/unblock-ip/{ip}", srvApp.authUnblockIp).Methods("POST")
 
 		// for testing cancellation
-		r.HandleFunc("/pg-sleep", lys.PgSleep(srvApp.Db, srvApp.ErrorLog, 10, 0)).Methods("GET")
+		r.HandleFunc("/pg-sleep", lys.PgSleep(srvApp.Db, srvApp.Logger, 10, 0)).Methods("GET")
 
 		endpoint = "/server-requests"
 

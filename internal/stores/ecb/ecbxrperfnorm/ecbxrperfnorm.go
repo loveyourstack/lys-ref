@@ -54,7 +54,7 @@ type Store struct {
 	Db *pgxpool.Pool
 }
 
-func (s Store) Create(ctx context.Context, infoLog *slog.Logger) error {
+func (s Store) Create(ctx context.Context, logger *slog.Logger) error {
 
 	currstore := ecbcurr.Store{Db: s.Db}
 	eurCurr, err := currstore.SelectByCode(ctx, "EUR")
@@ -73,7 +73,7 @@ func (s Store) Create(ctx context.Context, infoLog *slog.Logger) error {
 		if err != nil {
 			return fmt.Errorf("s.createByPeriod failed for period %v: %w", p, err)
 		}
-		infoLog.Debug("created xr norm perf records", slog.String("period", p.String()), slog.Int64("rowsDeleted", rowsDeleted), slog.Int64("rowsInserted", rowsInserted))
+		logger.Debug("created xr norm perf records", slog.String("period", p.String()), slog.Int64("rowsDeleted", rowsDeleted), slog.Int64("rowsInserted", rowsInserted))
 	}
 
 	// check that all periods contain an equal number of days for each currency
@@ -91,7 +91,7 @@ func (s Store) Create(ctx context.Context, infoLog *slog.Logger) error {
 	}
 	if len(unevens) > 0 {
 		for _, u := range unevens {
-			infoLog.Warn(fmt.Sprintf("%v: %s: %v", u.Period, u.ToCurrencyCode, u.Count))
+			logger.Warn(fmt.Sprintf("%v: %s: %v", u.Period, u.ToCurrencyCode, u.Count))
 		}
 		return fmt.Errorf("uneven day counts for 1+ currencies")
 	}

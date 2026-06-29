@@ -28,7 +28,7 @@ func RunOnlyCmd(cliApp *cliapp.App) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("cliApp.ProcSvc.CreateRunFromStep failed: %w", err)
 			}
-			cliApp.InfoLog.Debug("created", slog.Int64("runId", runId))
+			cliApp.Logger.Debug("created", slog.Int64("runId", runId))
 
 			err = cliApp.ProcSvc.RunOnly(cmd.Context(), cliApp.Db, runId)
 			if err != nil {

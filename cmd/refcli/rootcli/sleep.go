@@ -48,7 +48,7 @@ func SleepCmd(cliApp *cliapp.App) *cobra.Command {
 
 				go func() {
 					<-ctx.Done()
-					cliApp.InfoLog.Info(fmt.Sprintf("canceling sleep after %d seconds", cancelAfterSecs))
+					cliApp.Logger.Info(fmt.Sprintf("canceling sleep after %d seconds", cancelAfterSecs))
 				}()
 			}
 

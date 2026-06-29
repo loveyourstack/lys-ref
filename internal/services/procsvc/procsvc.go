@@ -12,11 +12,10 @@ import (
 type Service struct {
 	Conf myapp.Process
 
-	InfoLog  *slog.Logger
-	ErrorLog *slog.Logger
+	Logger *slog.Logger
 }
 
-func NewService(conf myapp.Process, infoLog, errorLog *slog.Logger) (svc Service) {
+func NewService(conf myapp.Process, logger *slog.Logger) (svc Service) {
 
 	if conf.CliCmdPrefix == "" {
 		log.Fatalf("procsvc: conf.CliCmdPrefix is required")
@@ -27,8 +26,7 @@ func NewService(conf myapp.Process, infoLog, errorLog *slog.Logger) (svc Service
 	return Service{
 		Conf: conf,
 
-		InfoLog:  infoLog.With("svc", svcShortname),
-		ErrorLog: errorLog.With("svc", svcShortname),
+		Logger: logger.With("svc", svcShortname),
 	}
 }
 

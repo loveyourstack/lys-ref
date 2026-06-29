@@ -16,9 +16,9 @@ func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.Resp
 	ctx := r.Context()
 
 	// get session associated with this request, if any, and validate it
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.InfoLog)
+	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("srvApp.Sessions.FromRequest failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
 	}
 	if sess.Email == "" {
@@ -39,14 +39,14 @@ func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.Resp
 	// update firewall rules for this user
 	err = srvApp.AwsSvc.UpdateUserSecurityGroupRules(ctx, sess.UserName, sess.Ip)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("srvApp.AwsSvc.UpdateUserSecurityGroupRules failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("srvApp.AwsSvc.UpdateUserSecurityGroupRules failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// send notification mail to user
 	err = sendAwsSgRuleChangeNotificationEmail(srvApp.Config.Smtp, sess.Email)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("sendAwsSgRuleChangeNotificationEmail failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("sendAwsSgRuleChangeNotificationEmail failed: %w", err), srvApp.Logger, w)
 		// don't return: update succeeded, just log mail failure
 	}
 

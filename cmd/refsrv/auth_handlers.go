@@ -53,14 +53,14 @@ func (srvApp *httpServerApplication) authBlockSessionIp(w http.ResponseWriter, r
 	// persist blocked IP to db
 	_, err = srvApp.BlockedIPStore.Insert(ctx, sysblockedip.Input{Ip: ip})
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authBlockSessionIp: srvApp.BlockedIPStore.Insert failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authBlockSessionIp: srvApp.BlockedIPStore.Insert failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// delete any existing sessions for this IP
 	err = srvApp.Sessions.DeleteByIp(ip)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authBlockSessionIp: srvApp.Sessions.DeleteByIp failed for IP %s: %w", ip, err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authBlockSessionIp: srvApp.Sessions.DeleteByIp failed for IP %s: %w", ip, err), srvApp.Logger, w)
 		return
 	}
 
@@ -131,7 +131,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	// get login credentials from request
 	creds, err := srvApp.getCredentialsFromRequest(r)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authLogin: getCredentialsFromRequest failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authLogin: getCredentialsFromRequest failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		if errors.Is(err, pgx.ErrNoRows) {
 			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusForbidden}, w)
 		} else {
-			lys.HandleError(ctx, fmt.Errorf("authLogin: userStore.SelectByName failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("authLogin: userStore.SelectByName failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		}
 		return
 	}
@@ -158,7 +158,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusForbidden}, w)
 		} else {
-			lys.HandleInternalError(ctx, fmt.Errorf("authLogin: bcrypt.CompareHashAndPassword failed for username %s: %w", creds.UserName, err), srvApp.ErrorLog, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("authLogin: bcrypt.CompareHashAndPassword failed for username %s: %w", creds.UserName, err), srvApp.Logger, w)
 		}
 		return
 	}
@@ -168,11 +168,11 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	// delete login attempt for the user's IP
 	found, err := srvApp.LoginAttempts.DeleteByIp(remoteHostIP)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authLogin: srvApp.LoginAttempts.DeleteByIp failed for username %v: IP %s: %w", creds.UserName, remoteHostIP, err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authLogin: srvApp.LoginAttempts.DeleteByIp failed for username %v: IP %s: %w", creds.UserName, remoteHostIP, err), srvApp.Logger, w)
 		return
 	}
 	if !found {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.LoginAttempts.DeleteByIp: IP not found for username %v: IP %s", creds.UserName, remoteHostIP), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.LoginAttempts.DeleteByIp: IP not found for username %v: IP %s", creds.UserName, remoteHostIP), srvApp.Logger, w)
 		return
 	}
 
@@ -182,7 +182,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		if len(existingSessions) > 0 {
 			err = srvApp.archiveSessions(ctx, existingSessions)
 			if err != nil {
-				lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.archiveSessions failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+				lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.archiveSessions failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 				return
 			}
 		}
@@ -191,21 +191,21 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	// try to get geo info for the user's IP
 	geoIpLocation, geoIpCountryIsoCode, err := srvApp.authGetGeoIp(ctx, remoteHostIP.String())
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.authGetGeoIp failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.authGetGeoIp failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		return
 	}
 
 	// try to get the default locale for the user's country
 	defaultLocale, err := srvApp.CountryStore.SelectDefaultLocaleByIso2(ctx, geoIpCountryIsoCode)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		return
 	}
 
 	// check if user has AWS SG rules
 	hasAwsSgRules, err := srvApp.AwsUserSgRuleStore.UserHasRules(ctx, sysUser.Name)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		return
 	}
 
@@ -226,7 +226,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	}
 	sessToken, err := srvApp.Sessions.Add(sessInput)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.Sessions.Add failed for username %v: %w", creds.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: srvApp.Sessions.Add failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		return
 	}
 
@@ -247,9 +247,9 @@ func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 
 	// get session
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.InfoLog)
+	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authLogout: srvApp.Sessions.FromRequest failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authLogout: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -264,7 +264,7 @@ func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.R
 	// archive session to db
 	err = srvApp.archiveSessions(ctx, []lysauth.Session{sess})
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authLogout: srvApp.archiveSessions failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogout: srvApp.archiveSessions failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -292,34 +292,34 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 	}
 
 	// get session associated with this request, if any
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.InfoLog)
+	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.Sessions.FromRequest failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// delete login attempt for the user's IP
 	found, err := srvApp.LoginAttempts.DeleteByIp(remoteHostIP)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.LoginAttempts.DeleteByIp failed for username %v: IP %s: %w", sess.UserName, remoteHostIP, err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.LoginAttempts.DeleteByIp failed for username %v: IP %s: %w", sess.UserName, remoteHostIP, err), srvApp.Logger, w)
 		return
 	}
 	if !found {
-		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.LoginAttempts.DeleteByIp: IP not found for username %v: IP %s", sess.UserName, remoteHostIP), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.LoginAttempts.DeleteByIp: IP not found for username %v: IP %s", sess.UserName, remoteHostIP), srvApp.Logger, w)
 		return
 	}
 
 	// check if user has AWS SG rules
 	hasAwsSgRules, err := srvApp.AwsUserSgRuleStore.UserHasRules(ctx, sess.UserName)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", sess.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.AwsUserSgRuleStore.UserHasRules failed for username %v: %w", sess.UserName, err), srvApp.Logger, w)
 		return
 	}
 
 	// try to get the default locale for the user's country
 	defaultLocale, err := srvApp.CountryStore.SelectDefaultLocaleByIso2(ctx, sess.GeoIpCountryIsoCode)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", sess.UserName, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", sess.UserName, err), srvApp.Logger, w)
 		return
 	}
 
@@ -341,7 +341,7 @@ func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, 
 	// get remote ip
 	remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("%s: lysauth.GetRemoteHostIP failed: %w", caller, err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("%s: lysauth.GetRemoteHostIP failed: %w", caller, err), srvApp.Logger, w)
 		return netip.Addr{}, false
 	}
 
@@ -352,7 +352,7 @@ func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, 
 		// reject if blocked (should be caught by the rejectBlockedIp middleware, but just in case)
 		if errors.Is(err, lysauth.ErrBlocked) {
 			lys.HandleUserError(lysauth.ErrBlocked, w)
-			srvApp.InfoLog.Debug(fmt.Sprintf("authTrackLoginAttempt: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
+			srvApp.Logger.Debug(fmt.Sprintf("authTrackLoginAttempt: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
 			return netip.Addr{}, false
 		}
 
@@ -361,18 +361,18 @@ func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, 
 
 			// reject
 			lys.HandleUserError(lysauth.ErrMaxAttemptsExceeded, w)
-			srvApp.InfoLog.Debug(fmt.Sprintf("authTrackLoginAttempt: max attempts exceeded for IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
+			srvApp.Logger.Debug(fmt.Sprintf("authTrackLoginAttempt: max attempts exceeded for IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
 
 			// persist blocked IP to db
 			_, err := srvApp.BlockedIPStore.Insert(ctx, sysblockedip.Input{Ip: remoteHostIP})
 			if err != nil {
-				lys.HandleError(ctx, fmt.Errorf("%s: srvApp.BlockedIPStore.Insert failed: %w", caller, err), srvApp.ErrorLog, w)
+				lys.HandleError(ctx, fmt.Errorf("%s: srvApp.BlockedIPStore.Insert failed: %w", caller, err), srvApp.Logger, w)
 			}
 			return netip.Addr{}, false
 		}
 
 		// other error: shouldn't happen
-		lys.HandleError(ctx, fmt.Errorf("%s: srvApp.LoginAttempts.Add failed: %w", caller, err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("%s: srvApp.LoginAttempts.Add failed: %w", caller, err), srvApp.Logger, w)
 		return netip.Addr{}, false
 	}
 
@@ -399,14 +399,14 @@ func (srvApp *httpServerApplication) authUnblockIp(w http.ResponseWriter, r *htt
 	// remove from login attempts
 	_, err = srvApp.LoginAttempts.DeleteByIp(ip)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authUnblockIp: srvApp.LoginAttempts.DeleteByIp failed for IP %s: %w", ip, err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authUnblockIp: srvApp.LoginAttempts.DeleteByIp failed for IP %s: %w", ip, err), srvApp.Logger, w)
 		return
 	}
 
 	// delete from db blocked IPs
 	err = srvApp.BlockedIPStore.DeleteByIp(ctx, ip)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("authUnblockIp: srvApp.BlockedIPStore.DeleteByIp failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("authUnblockIp: srvApp.BlockedIPStore.DeleteByIp failed: %w", err), srvApp.Logger, w)
 		return
 	}
 

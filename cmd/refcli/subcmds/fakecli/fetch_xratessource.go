@@ -18,7 +18,7 @@ func FetchXRatesSourceCmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
-			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "xratessource", 2, cliApp.InfoLog, args[0])
+			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "xratessource", 2, cliApp.Logger, args[0])
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
 					return

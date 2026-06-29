@@ -40,7 +40,7 @@ func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 
 			// (re-)create test db
 			if err := lyspgdb.CreateLocalDb(cmd.Context(), ddl.SQLAssets, cliApp.Config.Db, dbSuperUser, cliApp.Config.DbOwnerUser, true, false,
-				fileReplacements, cliApp.InfoLog); err != nil {
+				fileReplacements, cliApp.Logger); err != nil {
 				return fmt.Errorf("lyspgdb.CreateLocalDb failed: %w", err)
 			}
 

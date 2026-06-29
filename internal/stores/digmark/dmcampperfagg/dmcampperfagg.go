@@ -58,7 +58,7 @@ type Store struct {
 	Db *pgxpool.Pool
 }
 
-func (s Store) Create(ctx context.Context, infoLog *slog.Logger) error {
+func (s Store) Create(ctx context.Context, logger *slog.Logger) error {
 
 	for _, p := range perfperiod.All {
 
@@ -71,7 +71,7 @@ func (s Store) Create(ctx context.Context, infoLog *slog.Logger) error {
 		if err != nil {
 			return fmt.Errorf("s.createByPeriod failed for period %v: %w", p, err)
 		}
-		infoLog.Debug("created camp perf agg records", slog.String("period", p.String()), slog.Int64("rowsDeleted", rowsDeleted), slog.Int64("rowsInserted", rowsInserted))
+		logger.Debug("created camp perf agg records", slog.String("period", p.String()), slog.Int64("rowsDeleted", rowsDeleted), slog.Int64("rowsInserted", rowsInserted))
 	}
 
 	return nil

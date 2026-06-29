@@ -16,7 +16,7 @@ func (srvApp *httpServerApplication) techHubStatus(w http.ResponseWriter, r *htt
 	// get userId -> name map
 	userIdNameMap, err := srvApp.UserStore.SelectIdNameMap(ctx)
 	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("wsHubStatus: srvApp.UserStore.SelectIdNameMap failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("wsHubStatus: srvApp.UserStore.SelectIdNameMap failed: %w", err), srvApp.Logger, w)
 		return
 	}
 

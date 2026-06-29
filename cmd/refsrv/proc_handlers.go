@@ -29,7 +29,7 @@ func (srvApp *httpServerApplication) procGetStepAvailableDependencies(w http.Res
 	stepStore := procstep.Store{Db: srvApp.Db}
 	items, err := stepStore.SelectAvailableDependencies(ctx, stepId)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("stepStore.SelectAvailableDependencies failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("stepStore.SelectAvailableDependencies failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -62,14 +62,14 @@ func (srvApp *httpServerApplication) procRunStep(w http.ResponseWriter, r *http.
 	// get req body
 	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// marshal req body into an Input
 	input, err := lys.DecodeJsonBody[Input](body)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (srvApp *httpServerApplication) procRunStep(w http.ResponseWriter, r *http.
 	// create new run
 	runId, err := srvApp.ProcSvc.CreateRunFromStep(ctx, srvApp.Db, stepId, strings.Split(input.ParamString, " "), input.WithDependencies)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("srvApp.ProcSvc.CreateRunFromStep failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("srvApp.ProcSvc.CreateRunFromStep failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (srvApp *httpServerApplication) procRunStep(w http.ResponseWriter, r *http.
 
 			// log error for now (don't use lys.HandleError since it needs the ResponseWriter, which is unavailable in this async context)
 			// but note that it is also written into the point's err_msg column
-			srvApp.ErrorLog.Error(fmt.Sprintf("%s failed: %v", fName, err), "runId", runId)
+			srvApp.Logger.Error(fmt.Sprintf("%s failed: %v", fName, err), "runId", runId)
 			return
 		}
 	}(runId)
@@ -135,14 +135,14 @@ func (srvApp *httpServerApplication) procSwapDisplayOrder(w http.ResponseWriter,
 	// get req body
 	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
 	// marshal req body into an Input
 	input, err := lys.DecodeJsonBody[Input](body)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -156,7 +156,7 @@ func (srvApp *httpServerApplication) procSwapDisplayOrder(w http.ResponseWriter,
 	stepStore := procstep.Store{Db: srvApp.Db}
 	err = stepStore.SwapDisplayOrder(ctx, input.StepId1, input.StepId2)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("stepStore.SwapDisplayOrder failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("stepStore.SwapDisplayOrder failed: %w", err), srvApp.Logger, w)
 		return
 	}
 

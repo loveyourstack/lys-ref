@@ -17,7 +17,7 @@ func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWrite
 	// get user from request
 	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
 	if !ok {
-		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: user not authenticated"), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: user not authenticated"), srvApp.Logger, w)
 		return
 	}
 
@@ -45,7 +45,7 @@ func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWrite
 	}
 	sysNotStore := sysnotification.Store{Db: srvApp.Db}
 	if _, err := sysNotStore.Insert(ctx, input); err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: sysNotStore.Insert failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: sysNotStore.Insert failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (srvApp *httpServerApplication) sysGetUiStoreData(w http.ResponseWriter, r 
 
 	uiStoreData, err := srvApp.SysSvc.SelectUiStoreData(ctx, srvApp.Db)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SelectUiStoreData failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SelectUiStoreData failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (srvApp *httpServerApplication) sysGetUserUnreadNotificationCount(w http.Re
 	notsStore := sysnotification.Store{Db: srvApp.Db}
 	cnt, err := notsStore.SelectUserUnreadCount(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("notsStore.SelectUserUnreadCount failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("notsStore.SelectUserUnreadCount failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -98,7 +98,7 @@ func (srvApp *httpServerApplication) sysSetAllNotificationsToRead(w http.Respons
 	notsStore := sysnotification.Store{Db: srvApp.Db}
 	err := notsStore.SetAllUsersToRead(ctx)
 	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("notsStore.SetAllUsersToRead failed: %w", err), srvApp.ErrorLog, w)
+		lys.HandleError(ctx, fmt.Errorf("notsStore.SetAllUsersToRead failed: %w", err), srvApp.Logger, w)
 		return
 	}
 
@@ -122,7 +122,7 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 		// get req body
 		body, err := lys.ExtractJsonBody(r, env.PostOptions.MaxBodySize)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: ExtractJsonBody failed: %w", err), env.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: ExtractJsonBody failed: %w", err), env.Logger, w)
 			return
 		}
 
@@ -130,7 +130,7 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 		var inp input
 		err = json.Unmarshal(body, &inp)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: json.Unmarshal failed: %w", err), env.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("sysSetNotificationsToRead: json.Unmarshal failed: %w", err), env.Logger, w)
 			return
 		}
 
@@ -138,7 +138,7 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 		notsStore := sysnotification.Store{Db: srvApp.Db}
 		err = notsStore.SetUsersToRead(ctx, inp.Ids)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), srvApp.ErrorLog, w)
+			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
