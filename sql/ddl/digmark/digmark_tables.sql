@@ -65,3 +65,53 @@ CREATE UNLOGGED TABLE digmark.campaign_performance_aggregated
   UNIQUE (period, campaign_fk) -- natural key
 );
 COMMENT ON TABLE digmark.campaign_performance_aggregated IS 'shortname: dm_cpa';
+
+
+-- abstract table for partner-specific launchers (Facebook, Google Ads, etc.)
+CREATE TABLE digmark.launcher
+(
+  id bigint,
+  created_at tracking_at,
+  created_at_day date NOT NULL GENERATED ALWAYS AS (date(created_at AT TIME ZONE 'Europe/Berlin')) STORED, -- for easy filtering by date
+  daily_budget_eur numeric NOT NULL CHECK (daily_budget_eur BETWEEN 0 AND 10000),
+  manager digmark.manager NOT NULL,
+  message text NOT NULL DEFAULT '',
+  name text_short_mandatory NOT NULL,
+  partner digmark.partner NOT NULL,
+  status digmark.launcher_status NOT NULL,
+  updated_at tracking_at,
+  CHECK (false) NO INHERIT -- prevents direct inserts, but not to children. Additional check only: main abstraction enforcement is REVOKE below
+);
+COMMENT ON TABLE digmark.launcher IS 'shortname: dm_l';
+
+-- make digmark.launcher abstract
+REVOKE INSERT,UPDATE,DELETE ON digmark.launcher FROM lysref_server;
+REVOKE INSERT,UPDATE,DELETE ON digmark.launcher FROM lysref_cli;
+
+
+CREATE TABLE digmark.launcher_fb
+(
+  fb_campaign_id text NOT NULL
+)
+INHERITS (digmark.launcher);
+ALTER TABLE digmark.launcher_fb ADD PRIMARY KEY (id);
+ALTER TABLE digmark.launcher_fb ALTER COLUMN id SET DEFAULT nextval('digmark.launcher_seq'::regclass); -- shared sequence
+ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_name_uq UNIQUE (name);
+ALTER TABLE digmark.launcher_fb ALTER COLUMN partner SET DEFAULT 'Facebook';
+
+COMMENT ON TABLE digmark.launcher_fb IS 'shortname: dm_l_fb';
+CREATE INDEX launcher_fb_day_idx ON digmark.launcher_fb USING btree(created_at_day);
+
+
+CREATE TABLE digmark.launcher_gads
+(
+  gads_campaign_id bigint NOT NULL
+)
+INHERITS (digmark.launcher);
+ALTER TABLE digmark.launcher_gads ADD PRIMARY KEY (id);
+ALTER TABLE digmark.launcher_gads ALTER COLUMN id SET DEFAULT nextval('digmark.launcher_seq'::regclass); -- shared sequence
+ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_name_uq UNIQUE (name);
+ALTER TABLE digmark.launcher_gads ALTER COLUMN partner SET DEFAULT 'Google Ads';
+
+COMMENT ON TABLE digmark.launcher_gads IS 'shortname: dm_l_gads';
+CREATE INDEX launcher_gads_day_idx ON digmark.launcher_gads USING btree(created_at_day);

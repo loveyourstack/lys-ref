@@ -21,6 +21,9 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaignopt"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampperf"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunch"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchfb"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchgads"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbcurr"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbcurrmd"
@@ -264,6 +267,31 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		endpoint = "/campaign-performance-latest-summary"
 
 		r.HandleFunc(endpoint, lys.GetSimple(apiEnv, campPerfStore.SelectLatestPerfSummary)).Methods("GET")
+
+		endpoint = "/launchers" // abstract
+
+		launchStore := dmlaunch.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, launchStore, nil)).Methods("GET")
+
+		endpoint = "/launchers-fb"
+
+		launchFbStore := dmlaunchfb.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, launchFbStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, launchFbStore)).Methods("GET")
+		writeR.HandleFunc(endpoint, lys.Post(apiEnv, launchFbStore)).Methods("POST")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, launchFbStore)).Methods("PUT")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, launchFbStore)).Methods("PATCH")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, launchFbStore)).Methods("DELETE")
+
+		endpoint = "/launchers-gads"
+
+		launchGadsStore := dmlaunchgads.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, launchGadsStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, launchGadsStore)).Methods("GET")
+		writeR.HandleFunc(endpoint, lys.Post(apiEnv, launchGadsStore)).Methods("POST")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, launchGadsStore)).Methods("PUT")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, launchGadsStore)).Methods("PATCH")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, launchGadsStore)).Methods("DELETE")
 
 		r.HandleFunc("/managers", lys.GetEnumValues(apiEnv, srvApp.Db, schemaName, "manager")).Methods("GET")
 

@@ -143,7 +143,8 @@ func (svc Service) CreateRunFromStep(ctx context.Context, db *pgxpool.Pool, step
 		if err != nil {
 			return 0, fmt.Errorf("procpoint.UpdateDependsOnIdsTx failed: %w", err)
 		}
-		fmt.Println("numUpdated", numUpdated)
+		_ = numUpdated
+		//fmt.Println("numUpdated", numUpdated)
 	}
 
 	// success: commit tx
