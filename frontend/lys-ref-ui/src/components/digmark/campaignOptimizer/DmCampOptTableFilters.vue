@@ -9,7 +9,7 @@
       @update:modelValue="emit('update')" @close="filterCountryFKs = undefined; emit('update')">
     </l-filter-chip-select>
 
-    <l-filter-chip-select name="Verticals" v-model="filterVerticalFks" :items="digmarkStore.verticals" multiple
+    <l-filter-chip-select name="Verticals" v-model="filterVerticalFks" :items="digmarkStore.mandatoryVerticals" multiple
       @update:modelValue="emit('update')" @close="filterVerticalFks = undefined; emit('update')">
     </l-filter-chip-select>
 

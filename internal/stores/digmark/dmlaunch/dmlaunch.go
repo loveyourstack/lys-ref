@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	name           string = "Digmark launchers"
+	name           string = "Digmark campaign launchers"
 	schemaName     string = "digmark"
 	tableName      string = "launcher"
 	viewName       string = "launcher"
@@ -20,23 +20,37 @@ const (
 	defaultOrderBy string = "name"
 )
 
-// abstract table - only selection allowed
+// abstract table containing no records. Only selection allowed. Selection returns child table records
 
+// Input contains the shared input fields for all launchers.
 type Input struct {
-	DailyBudgetEur float64           `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=0,lte=10000"`
-	Manager        string            `db:"manager" json:"manager,omitempty" validate:"max=64"`
-	Message        string            `db:"message" json:"message,omitempty"`
-	Name           string            `db:"name" json:"name,omitempty" validate:"max=256"`
-	Partner        string            `db:"partner" json:"partner,omitempty" validate:"max=64"`
-	Status         launchstatus.Enum `db:"status" json:"status,omitempty" validate:"max=64"`
+	Account        string  `db:"account" json:"account,omitempty" validate:"required,max=64"`
+	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=0,lte=10000"`
+	Manager        string  `db:"manager" json:"manager,omitempty" validate:"required,max=64"`
+	Name           string  `db:"name" json:"name,omitempty" validate:"required,max=256"`
 }
 
-type Model struct {
+// Computed contains the shared computed fields for all launchers.
+type Computed struct {
+	CountryFk  int64             `db:"country_fk" json:"country_fk,omitempty"`   // set during preparation
+	Message    string            `db:"message" json:"message,omitempty"`         // set during preparation and processing
+	Status     launchstatus.Enum `db:"status" json:"status,omitempty"`           // set during preparation and processing
+	VerticalFk int64             `db:"vertical_fk" json:"vertical_fk,omitempty"` // set during preparation
+}
+
+// DbManaged contains the shared database-managed fields for all launchers.
+type DbManaged struct {
 	Id           int64            `db:"id" json:"id,omitempty"`
 	CreatedAt    lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	CreatedAtDay lystype.Date     `db:"created_at_day" json:"created_at_day,omitzero"`
+	Partner      string           `db:"partner" json:"partner,omitempty"`
 	UpdatedAt    lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
+}
+
+type Model struct {
 	Input
+	Computed
+	DbManaged
 }
 
 var (

@@ -24,7 +24,7 @@
         ></v-autocomplete>
 
         <v-autocomplete label="Vertical" v-model="item.vertical_fk"
-          :items="digmarkStore.verticals" item-value="id" item-title="name"
+          :items="digmarkStore.mandatoryVerticals" item-value="id" item-title="name"
           :rules="[(v: number) => !!v || 'Vertical is required']"
         ></v-autocomplete>
 

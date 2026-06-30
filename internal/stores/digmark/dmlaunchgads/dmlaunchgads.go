@@ -6,14 +6,14 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/loveyourstack/lys-ref/internal/enums/launchstatus"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunch"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
-	"github.com/loveyourstack/lys/lystype"
 )
 
 const (
-	name           string = "Digmark launchers: Google Ads"
+	name           string = "Digmark campaign launchers: Google Ads"
 	schemaName     string = "digmark"
 	tableName      string = "launcher_gads"
 	viewName       string = "launcher_gads"
@@ -22,19 +22,23 @@ const (
 )
 
 type Input struct {
-	dmlaunch.Input       // inherited from parent table
-	GadsCampaignId int64 `db:"gads_campaign_id" json:"gads_campaign_id,omitempty" validate:"gte=1"`
+	dmlaunch.Input
+}
+
+type Computed struct {
+	GAdsAccountId  int64 `db:"gads_account_id" json:"gads_account_id,omitempty"`   // set during preparation
+	GAdsCampaignId int64 `db:"gads_campaign_id" json:"gads_campaign_id,omitempty"` // set during processing
+	dmlaunch.Computed
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
-	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
+	Computed
+	dmlaunch.DbManaged
 }
 
 var (
-	plan, inputPlan lysmeta.Plan
+	plan, compPlan lysmeta.Plan
 )
 
 func init() {
@@ -43,7 +47,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("lysmeta.Analyze failed for %s.%s: %s", schemaName, tableName, err.Error())
 	}
-	inputPlan, _ = lysmeta.Analyze(Input{})
+	compPlan, _ = lysmeta.Analyze(Computed{})
 }
 
 type Store struct {
@@ -73,12 +77,36 @@ func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error)
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
+func (s Store) SetPrepared(ctx context.Context, computed Computed, id int64) (err error) {
+	assignmentsMap := map[string]any{
+		"country_fk":  computed.CountryFk,
+		"message":     "",
+		"status":      launchstatus.Ready,
+		"vertical_fk": computed.VerticalFk,
+
+		"gads_account_id": computed.GAdsAccountId,
+	}
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+}
+
+func (s Store) SetUnprepared(ctx context.Context, msg string, id int64) (err error) {
+	assignmentsMap := map[string]any{
+		"country_fk":  -1,
+		"message":     msg,
+		"status":      launchstatus.Invalid,
+		"vertical_fk": -1,
+
+		"gads_account_id": 0,
+	}
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+}
+
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {
 	return lyspg.Update(ctx, s.Db, schemaName, tableName, pkColName, input, id)
 }
 
 func (s Store) UpdatePartial(ctx context.Context, assignmentsMap map[string]any, id int64) (err error) {
-	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, inputPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
 func (s Store) Validate(validate *validator.Validate, input Input) error {

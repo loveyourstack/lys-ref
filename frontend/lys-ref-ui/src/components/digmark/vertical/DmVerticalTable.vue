@@ -89,7 +89,7 @@ const { excelDlUrl } = useTableExcelDlUrl(baseUrl)
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
   loadItems, refreshItems,
-} = useTableState<Vertical>({ ax, baseUrl })
+} = useTableState<Vertical>({ ax, baseUrl, getFilterStr })
 
 const editID = ref(0)
 const showEdit = ref(false)
@@ -102,5 +102,9 @@ const { resetTable } = useJsonLs({
     sortBy,
   },
 })
+
+function getFilterStr(): string {
+  return '&id=>0'
+}
 
 </script>

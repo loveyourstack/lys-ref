@@ -1,4 +1,5 @@
 
+INSERT INTO digmark.vertical (id, name) VALUES (-1, 'None');
 INSERT INTO digmark.vertical (name) VALUES
   ('Dating'),
   ('E-commerce'),
