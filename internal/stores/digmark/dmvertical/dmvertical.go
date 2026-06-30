@@ -64,6 +64,10 @@ func (s Store) Insert(ctx context.Context, input Input) (newId int64, err error)
 	return lyspg.Insert[Input, int64](ctx, s.Db, schemaName, tableName, pkColName, input)
 }
 
+func (s Store) NameIdValueMap(ctx context.Context) (valMap map[string]int64, err error) {
+	return lyspg.ValueMap[string, int64](ctx, s.Db, schemaName, tableName, "name", "id", nil)
+}
+
 func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []Model, unpagedCount lyspg.TotalCount, err error) {
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
 }

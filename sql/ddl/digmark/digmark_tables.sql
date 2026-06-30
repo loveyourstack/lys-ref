@@ -68,6 +68,7 @@ COMMENT ON TABLE digmark.campaign_performance_aggregated IS 'shortname: dm_cpa';
 
 
 -- abstract table for partner-specific launchers (Facebook, Google Ads, etc.)
+
 CREATE TABLE digmark.launcher
 (
   id bigint,
@@ -77,10 +78,12 @@ CREATE TABLE digmark.launcher
   created_at_day date NOT NULL GENERATED ALWAYS AS (date(created_at AT TIME ZONE 'Europe/Berlin')) STORED, -- for easy filtering by date
   daily_budget_eur numeric NOT NULL CHECK (daily_budget_eur BETWEEN 0 AND 10000),
   manager digmark.manager NOT NULL,
+  max_steps int NOT NULL, -- default set by sub-table
   message text NOT NULL DEFAULT '', -- set during preparation and processing
   name text_short_mandatory NOT NULL,
-  partner digmark.partner NOT NULL,
-  status digmark.launcher_status NOT NULL,
+  partner digmark.partner NOT NULL, -- default set by sub-table
+  step int NOT NULL DEFAULT 0, -- set during processing
+  status digmark.launcher_status NOT NULL DEFAULT 'Checking',
   updated_at tracking_at,
   vertical_fk bigint NOT NULL DEFAULT -1, -- set during preparation
   CHECK (false) NO INHERIT -- prevents direct inserts, but not to children. Additional check only: main abstraction enforcement is REVOKE below
@@ -96,13 +99,15 @@ CREATE TABLE digmark.launcher_fb
 (
   fan_page text NOT NULL,
   fb_account_id text NOT NULL DEFAULT '', -- set during preparation
-  fb_campaign_id text NOT NULL DEFAULT '' -- set during processing
+  fb_campaign_id text NOT NULL DEFAULT '', -- set during processing (step 2)
+  fb_creative_id text NOT NULL DEFAULT '' -- set during processing (step 1)
 )
 INHERITS (digmark.launcher);
 ALTER TABLE digmark.launcher_fb ADD PRIMARY KEY (id);
 ALTER TABLE digmark.launcher_fb ALTER COLUMN id SET DEFAULT nextval('digmark.launcher_seq'::regclass); -- shared sequence
 ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_country_fk_fkey FOREIGN KEY(country_fk) REFERENCES geo.country(id);
 ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_name_uq UNIQUE (name);
+ALTER TABLE digmark.launcher_fb ALTER COLUMN max_steps SET DEFAULT 2;
 ALTER TABLE digmark.launcher_fb ALTER COLUMN partner SET DEFAULT 'Facebook';
 ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_vertical_fk_fkey FOREIGN KEY(vertical_fk) REFERENCES digmark.vertical(id);
 
@@ -113,13 +118,16 @@ CREATE INDEX launcher_fb_day_idx ON digmark.launcher_fb USING btree(created_at_d
 CREATE TABLE digmark.launcher_gads
 (
   gads_account_id bigint NOT NULL DEFAULT 0, -- set during preparation
-  gads_campaign_id bigint NOT NULL DEFAULT 0 -- set during processing
+  gads_ad_id bigint NOT NULL DEFAULT 0, -- set during processing (step 3)
+  gads_adset_id bigint NOT NULL DEFAULT 0, -- set during processing (step 2)
+  gads_campaign_id bigint NOT NULL DEFAULT 0 -- set during processing (step 1)
 )
 INHERITS (digmark.launcher);
 ALTER TABLE digmark.launcher_gads ADD PRIMARY KEY (id);
 ALTER TABLE digmark.launcher_gads ALTER COLUMN id SET DEFAULT nextval('digmark.launcher_seq'::regclass); -- shared sequence
 ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_country_fk_fkey FOREIGN KEY(country_fk) REFERENCES geo.country(id);
 ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_name_uq UNIQUE (name);
+ALTER TABLE digmark.launcher_gads ALTER COLUMN max_steps SET DEFAULT 3;
 ALTER TABLE digmark.launcher_gads ALTER COLUMN partner SET DEFAULT 'Google Ads';
 ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_vertical_fk_fkey FOREIGN KEY(vertical_fk) REFERENCES digmark.vertical(id);
 

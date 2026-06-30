@@ -35,6 +35,7 @@ type Computed struct {
 	CountryFk  int64             `db:"country_fk" json:"country_fk,omitempty"`   // set during preparation
 	Message    string            `db:"message" json:"message,omitempty"`         // set during preparation and processing
 	Status     launchstatus.Enum `db:"status" json:"status,omitempty"`           // set during preparation and processing
+	Step       int               `db:"step" json:"step,omitempty"`               // set during processing
 	VerticalFk int64             `db:"vertical_fk" json:"vertical_fk,omitempty"` // set during preparation
 }
 
@@ -43,6 +44,7 @@ type DbManaged struct {
 	Id           int64            `db:"id" json:"id,omitempty"`
 	CreatedAt    lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	CreatedAtDay lystype.Date     `db:"created_at_day" json:"created_at_day,omitzero"`
+	MaxSteps     int              `db:"max_steps" json:"max_steps,omitempty"`
 	Partner      string           `db:"partner" json:"partner,omitempty"`
 	UpdatedAt    lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 }
