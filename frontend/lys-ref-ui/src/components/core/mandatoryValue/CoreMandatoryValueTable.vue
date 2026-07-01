@@ -9,7 +9,7 @@
   </l-dialog-card>
 
   <l-dialog-card v-model="showImport">
-    <l-text-array-entry title="Enter mandatory values" :saving="importing" :max-items="maxImportItems" :enterDisabled="!auth.isWriter()"
+    <l-text-array-entry :title="$t('mandatory_values.import_enter')" :saving="importing" :max-items="maxImportItems" :enterDisabled="!auth.isWriter()"
       :subtitle="`The expected columns are: ${mandatoryValueImportColumns.join(', ')}`"
       sampleSheetLink="https://docs.google.com/spreadsheets/d/10klDBUMBk5ByLsXmJ5T2jMqp1aeoHJOV-hT6_7-IFrM/edit?pli=1&gid=0#gid=0"
       :enterLabel="$t('actions.enter')"

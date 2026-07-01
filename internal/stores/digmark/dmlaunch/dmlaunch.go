@@ -24,7 +24,6 @@ const (
 
 // Input contains the shared input fields for all launchers.
 type Input struct {
-	Account        string  `db:"account" json:"account,omitempty" validate:"required,max=64"`
 	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=0,lte=10000"`
 	Manager        string  `db:"manager" json:"manager,omitempty" validate:"required,max=64"`
 	Name           string  `db:"name" json:"name,omitempty" validate:"required,max=256"`
@@ -42,11 +41,14 @@ type Computed struct {
 // DbManaged contains the shared database-managed fields for all launchers.
 type DbManaged struct {
 	Id           int64            `db:"id" json:"id,omitempty"`
+	Country      string           `db:"country" json:"country,omitempty"`
+	CountryIso2  string           `db:"country_iso2" json:"country_iso2,omitempty"`
 	CreatedAt    lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	CreatedAtDay lystype.Date     `db:"created_at_day" json:"created_at_day,omitzero"`
 	MaxSteps     int              `db:"max_steps" json:"max_steps,omitempty"`
 	Partner      string           `db:"partner" json:"partner,omitempty"`
 	UpdatedAt    lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
+	Vertical     string           `db:"vertical" json:"vertical,omitempty"`
 }
 
 type Model struct {

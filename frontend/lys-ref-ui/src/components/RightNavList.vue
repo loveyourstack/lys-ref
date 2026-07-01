@@ -20,6 +20,7 @@
     <div v-if="showParProcItems">
       <v-list-item link :title="$t('flows.nav')" to="/process/flows" prepend-icon="mdi-sitemap-outline"></v-list-item>
       <v-list-item link :title="$t('runs.nav')" to="/process/runs" prepend-icon="mdi-repeat"></v-list-item>
+      <v-list-item link :title="$t('launchers.nav')" to="/digital-marketing/launchers" prepend-icon="mdi-rocket"></v-list-item>
     </div>
 
     <v-list-subheader :title="$t('nav_header.saas')" class="mt-2 clickable" @click="showMultiTenItems = !showMultiTenItems"></v-list-subheader>

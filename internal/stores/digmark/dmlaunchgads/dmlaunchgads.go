@@ -18,7 +18,7 @@ const (
 	name           string = "Digmark campaign launchers: Google Ads"
 	schemaName     string = "digmark"
 	tableName      string = "launcher_gads"
-	viewName       string = "launcher_gads"
+	viewName       string = "v_launcher_gads"
 	pkColName      string = "id"
 	defaultOrderBy string = "name"
 )
@@ -81,9 +81,9 @@ func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []M
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
 }
 
-func (s Store) SelectPreparationBatch(ctx context.Context, tx pgx.Tx, batchSize int) (items []Model, err error) {
-	stmt := fmt.Sprintf(`SELECT * FROM %s.%s WHERE status = 'Checking' ORDER BY id LIMIT $1 FOR UPDATE SKIP LOCKED;`, schemaName, tableName)
-	return lyspg.SelectT[Model](ctx, tx, stmt, batchSize)
+func (s Store) SelectUncheckedTx(ctx context.Context, tx pgx.Tx) (items []Model, err error) {
+	stmt := fmt.Sprintf(`SELECT * FROM %s.%s WHERE status = 'Unchecked' ORDER BY id FOR UPDATE SKIP LOCKED;`, schemaName, tableName)
+	return lyspg.SelectT[Model](ctx, tx, stmt)
 }
 
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
@@ -114,7 +114,7 @@ func (s Store) SetCampaignId(ctx context.Context, campaignId int64, id int64) (e
 	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetPrepared(ctx context.Context, tx pgx.Tx, computed Computed, id int64) (err error) {
+func (s Store) SetPreparedTx(ctx context.Context, tx pgx.Tx, computed Computed, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"country_fk":  computed.CountryFk,
 		"message":     "",
@@ -126,7 +126,7 @@ func (s Store) SetPrepared(ctx context.Context, tx pgx.Tx, computed Computed, id
 	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetUnprepared(ctx context.Context, tx pgx.Tx, msg string, id int64) (err error) {
+func (s Store) SetUnpreparedTx(ctx context.Context, tx pgx.Tx, msg string, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"country_fk":  -1,
 		"message":     msg,

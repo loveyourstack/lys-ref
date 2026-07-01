@@ -86,6 +86,7 @@
         "nav": "Standardwerte",
         "title": "Standardwerte",
         "new_item": "Neuer Standardwert",
+        "import_enter": "Standardwerte eingeben",
         "p1": "Zwischen echten (obligatorischen) Standardwerten und Standardwerten im Sinne eines vorgeschlagenen Wertes unterscheiden."
     },
     "exchange_rates": {
@@ -210,10 +211,18 @@
             "p1": "Interne Ansicht: alle Lieferantenprodukte sind sichtbar, aber nicht bearbeitbar."
         }
     },
+    "launchers": {
+        "nav": "Launcher",
+        "title": "Launcher",
+        "new_item": "Neuer Launcher",
+        "import_enter": "Launcher eingeben",
+        "p1": "Launcher werden verwendet, um Kampagnen auf Werbeplattformen zu starten."
+    },
     "mandatory_values": {
         "nav": "Obligatorische Werte",
         "title": "Obligatorische Werte",
         "new_item": "Neuer obligatorischer Wert",
+        "import_enter": "Obligatorische Werte eingeben",
         "p1": "Alle Spalten erfordern einen Wert. Text darf nicht leer sein (''). Diese Tabelle zeigt auch die Filterfunktionalität pro Typ.",
         "p2": "Einige weitere Punkte, die für alle Tabellen in dieser App gelten:",
         "p2_list": {
@@ -270,6 +279,7 @@
         "nav": "Optionale Werte",
         "title": "Optionale Werte",
         "new_item": "Neuer optionaler Wert",
+        "import_enter": "Optionale Werte eingeben",
         "p1": "Alle Spalten sind optional. Wo kein Wert angegeben ist, werden typabhängige Nullwerte eingefügt."
     },
     "runs": {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type prepareHelpers struct {
@@ -11,16 +13,16 @@ type prepareHelpers struct {
 	VerticalNameIdMap map[string]int64
 }
 
-func (svc Service) selectPrepareHelpers(ctx context.Context) (helpers prepareHelpers, err error) {
+func (svc Service) selectPrepareHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareHelpers, err error) {
 
-	helpers.CountryIso2IdMap, err = svc.CoStore.Iso2IdValueMap(ctx)
+	helpers.CountryIso2IdMap, err = svc.CoStore.Iso2IdValueMapTx(ctx, tx)
 	if err != nil {
-		return helpers, fmt.Errorf("svc.CoStore.Iso2IdValueMap failed: %w", err)
+		return helpers, fmt.Errorf("svc.CoStore.Iso2IdValueMapTx failed: %w", err)
 	}
 
-	helpers.VerticalNameIdMap, err = svc.VertStore.NameIdValueMap(ctx)
+	helpers.VerticalNameIdMap, err = svc.VertStore.NameIdValueMapTx(ctx, tx)
 	if err != nil {
-		return helpers, fmt.Errorf("svc.VertStore.NameIdValueMap failed: %w", err)
+		return helpers, fmt.Errorf("svc.VertStore.NameIdValueMapTx failed: %w", err)
 	}
 
 	return helpers, nil
@@ -55,37 +57,37 @@ func prepare(helpers prepareHelpers, params prepareParams) (result prepareResult
 
 // -------------------------------------------------------------------------------------------------------------------
 
-type PrepareFbHelpers struct {
+type prepareFbHelpers struct {
 	fbAccountIdMap map[string]string
 	prepareHelpers
 }
 
-func (svc Service) selectPrepareFbHelpers(ctx context.Context) (helpers PrepareFbHelpers, err error) {
-	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx)
+func (svc Service) selectPrepareFbHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareFbHelpers, err error) {
+	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx, tx)
 	if err != nil {
 		return helpers, fmt.Errorf("svc.selectPrepareHelpers failed: %w", err)
 	}
 
 	// fake fb account id map: would normally be selected from store
 	helpers.fbAccountIdMap = map[string]string{
-		"FB 1": "ABC",
-		"FB 2": "DEF",
+		"Acc1": "ABC",
+		"Acc2": "DEF",
 	}
 
 	return helpers, nil
 }
 
-type PrepareFbParams struct {
+type prepareFbParams struct {
 	Account string
 	prepareParams
 }
 
-type PrepareFbResult struct {
+type prepareFbResult struct {
 	FbAccountId string
 	prepareResult
 }
 
-func PrepareFb(helpers PrepareFbHelpers, params PrepareFbParams) (result PrepareFbResult, err error) {
+func prepareFb(helpers prepareFbHelpers, params prepareFbParams) (result prepareFbResult, err error) {
 	result.prepareResult, err = prepare(helpers.prepareHelpers, params.prepareParams)
 
 	if fbAccountId, ok := helpers.fbAccountIdMap[params.Account]; ok {
@@ -99,37 +101,37 @@ func PrepareFb(helpers PrepareFbHelpers, params PrepareFbParams) (result Prepare
 
 // -------------------------------------------------------------------------------------------------------------------
 
-type PrepareGAdsHelpers struct {
+type prepareGAdsHelpers struct {
 	gadsAccountIdMap map[string]int64
 	prepareHelpers
 }
 
-func (svc Service) selectPrepareGAdsHelpers(ctx context.Context) (helpers PrepareGAdsHelpers, err error) {
-	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx)
+func (svc Service) selectPrepareGAdsHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareGAdsHelpers, err error) {
+	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx, tx)
 	if err != nil {
 		return helpers, fmt.Errorf("svc.selectPrepareHelpers failed: %w", err)
 	}
 
 	// fake gads account id map: would normally be selected from store
 	helpers.gadsAccountIdMap = map[string]int64{
-		"GAds 1": 123,
-		"GAds 2": 456,
+		"Acc1": 123,
+		"Acc2": 456,
 	}
 
 	return helpers, nil
 }
 
-type PrepareGAdsParams struct {
+type prepareGAdsParams struct {
 	Account string
 	prepareParams
 }
 
-type PrepareGAdsResult struct {
+type prepareGAdsResult struct {
 	GAdsAccountId int64
 	prepareResult
 }
 
-func PrepareGAds(helpers PrepareGAdsHelpers, params PrepareGAdsParams) (result PrepareGAdsResult, err error) {
+func prepareGAds(helpers prepareGAdsHelpers, params prepareGAdsParams) (result prepareGAdsResult, err error) {
 	result.prepareResult, err = prepare(helpers.prepareHelpers, params.prepareParams)
 
 	if gadsAccountId, ok := helpers.gadsAccountIdMap[params.Account]; ok {

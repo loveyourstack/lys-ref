@@ -8,7 +8,7 @@ func (e Enum) String() string {
 }
 
 const (
-	Checking   Enum = "Checking"
+	Unchecked  Enum = "Unchecked"
 	Completed  Enum = "Completed"
 	Failed     Enum = "Failed"
 	InProgress Enum = "In progress"

@@ -13,16 +13,19 @@ type CampaignNameParts struct {
 
 func ParseCampaignName(name string) (parts CampaignNameParts, err error) {
 
-	// account - countryIso2 - vertical
+	// FB - account - countryIso2 - vertical
 
 	partsS := strings.Split(name, " - ")
-	if len(partsS) != 3 {
+	if len(partsS) != 4 {
 		return CampaignNameParts{}, fmt.Errorf("invalid campaign name: %s", name)
 	}
+	if partsS[0] != "FB" {
+		return CampaignNameParts{}, fmt.Errorf("invalid campaign name prefix: %s", partsS[0])
+	}
 
-	parts.Account = partsS[0]
-	parts.CountryIso2 = partsS[1]
-	parts.Vertical = partsS[2]
+	parts.Account = partsS[1]
+	parts.CountryIso2 = partsS[2]
+	parts.Vertical = partsS[3]
 
 	return parts, nil
 }

@@ -127,6 +127,145 @@ export interface CampaignPerfLatestSummary {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 
+export interface LauncherInput {
+  daily_budget_eur: number | undefined
+  manager: string | undefined
+  name: string | undefined
+}
+export interface Launcher {
+  id: number
+  country: string
+  country_fk: number
+  country_iso2: string
+  created_at: Date
+  created_at_day: Date
+  max_steps: number
+  message: string
+  partner: string
+  status: string
+  step: number
+  updated_at: Date
+  vertical: string
+  vertical_fk: number
+}
+
+// ---------------------------------------------------------
+
+export interface LauncherInputFb extends LauncherInput {
+  fan_page: string | undefined
+}
+export interface LauncherFb extends LauncherInputFb, Launcher {
+  fb_account_id: string
+  fb_campaign_id: string
+  fb_creative_id: string
+}
+export function NewLauncherFb(): LauncherFb {
+  return {
+    daily_budget_eur: undefined,
+    manager: undefined,
+    name: undefined,
+
+    fan_page: undefined,
+
+    id: 0,
+    country: '',
+    country_fk: 0,
+    country_iso2: '',
+    created_at: new Date(),
+    created_at_day: new Date(),
+    max_steps: 0,
+    message: '',
+    partner: '',
+    status: '',
+    step: 0,
+    updated_at: new Date(),
+    vertical: '',
+    vertical_fk: 0,
+
+    fb_account_id: '',
+    fb_campaign_id: '',
+    fb_creative_id: '',
+  }
+}
+export function GetLauncherInputFbFromItem(item: LauncherFb): LauncherInputFb {
+  return  {
+    daily_budget_eur: item.daily_budget_eur,
+    manager: item.manager,
+    name: item.name,
+
+    fan_page: item.fan_page,
+  }
+}
+export interface LauncherFbImport {
+  name: string
+  manager: string
+  fan_page: string
+  daily_budget_eur: number
+}
+export const launcherFbImportColumns = [
+  'name',
+  'manager',
+  'fan_page',
+  'daily_budget_eur',
+] as const satisfies readonly (keyof LauncherFbImport)[]
+
+// ---------------------------------------------------------
+
+export interface LauncherInputGAds extends LauncherInput {
+}
+export interface LauncherGAds extends LauncherInputGAds, Launcher {
+  gads_account_id: number
+  gads_ad_id: number
+  gads_ad_group_id: number
+  gads_campaign_id: number
+}
+export function NewLauncherGAds(): LauncherGAds {
+  return {
+    daily_budget_eur: undefined,
+    manager: undefined,
+    name: undefined,
+
+    id: 0,
+    country: '',
+    country_fk: 0,
+    country_iso2: '',
+    created_at: new Date(),
+    created_at_day: new Date(),
+    max_steps: 0,
+    message: '',
+    partner: '',
+    status: '',
+    step: 0,
+    updated_at: new Date(),
+    vertical: '',
+    vertical_fk: 0,
+
+    gads_account_id: 0,
+    gads_ad_id: 0,
+    gads_ad_group_id: 0,
+    gads_campaign_id: 0,
+  }
+}
+export function GetLauncherInputGAdsFromItem(item: LauncherGAds): LauncherInputGAds {
+  return  {
+    daily_budget_eur: item.daily_budget_eur,
+    manager: item.manager,
+    name: item.name,
+  }
+}
+export interface LauncherGAdsImport {
+  name: string
+  manager: string
+  daily_budget_eur: number
+}
+export const launcherGAdsImportColumns = [
+  'name',
+  'manager',
+  'daily_budget_eur',
+] as const satisfies readonly (keyof LauncherGAdsImport)[]
+
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
 export type McpColumnDef = {
   key: string
   label: string

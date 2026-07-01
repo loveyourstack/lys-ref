@@ -69,8 +69,8 @@ func (s Store) Insert(ctx context.Context, input Input) (newId int64, err error)
 	return lyspg.Insert[Input, int64](ctx, s.Db, schemaName, tableName, pkColName, input)
 }
 
-func (s Store) Iso2IdValueMap(ctx context.Context) (valMap map[string]int64, err error) {
-	return lyspg.ValueMap[string, int64](ctx, s.Db, schemaName, tableName, "iso2", "id", nil)
+func (s Store) Iso2IdValueMapTx(ctx context.Context, tx pgx.Tx) (valMap map[string]int64, err error) {
+	return lyspg.ValueMap[string, int64](ctx, tx, schemaName, tableName, "iso2", "id", nil)
 }
 
 // needed for coreoptionalvalue import route

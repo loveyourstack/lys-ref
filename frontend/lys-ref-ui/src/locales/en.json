@@ -86,6 +86,7 @@
         "nav": "Default values",
         "title": "Default values",
         "new_item": "New default value",
+        "import_enter": "Enter default values",
         "p1": "Differentiate between true (mandatory) defaults and defaults in the sense of a suggested value."
     },
     "exchange_rates": {
@@ -210,10 +211,18 @@
             "p1": "Internal view: all supplier products are visible but not editable."
         }
     },
+    "launchers": {
+        "nav": "Launchers",
+        "title": "Launchers",
+        "new_item": "New launcher",
+        "import_enter": "Enter launchers",
+        "p1": "Launchers are used to launch campaigns on ad platforms."
+    },
     "mandatory_values": {
         "nav": "Mandatory values",
         "title": "Mandatory values",
         "new_item": "New mandatory value",
+        "import_enter": "Enter mandatory values",
         "p1": "All columns require a value. Text may not be empty (''). This table also demonstrates filter functionality per type.",
         "p2": "Some further points which apply to all tables in this app:",
         "p2_list": {
@@ -270,6 +279,7 @@
         "nav": "Optional values",
         "title": "Optional values",
         "new_item": "New optional value",
+        "import_enter": "Enter optional values",
         "p1": "All columns are optional. Zero-values by type are inserted where no value is given."
     },
     "runs": {

@@ -82,6 +82,11 @@ const routes = [
             component: () => import('@/pages/DmCampaignPerf.vue'),
           },
           {
+            path: 'launchers',
+            name: 'Launchers',
+            component: () => import('@/pages/DmLaunchers.vue'),
+          },
+          {
             path: 'mcp-server',
             name: 'MCP Server',
             component: () => import('@/pages/DmMcpServer.vue'),

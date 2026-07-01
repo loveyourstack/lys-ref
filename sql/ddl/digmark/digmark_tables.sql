@@ -68,11 +68,9 @@ COMMENT ON TABLE digmark.campaign_performance_aggregated IS 'shortname: dm_cpa';
 
 
 -- abstract table for partner-specific launchers (Facebook, Google Ads, etc.)
-
 CREATE TABLE digmark.launcher
 (
   id bigint,
-  account text NOT NULL,
   country_fk bigint NOT NULL DEFAULT -1, -- set during preparation
   created_at tracking_at,
   created_at_day date NOT NULL GENERATED ALWAYS AS (date(created_at AT TIME ZONE 'Europe/Berlin')) STORED, -- for easy filtering by date
@@ -82,8 +80,8 @@ CREATE TABLE digmark.launcher
   message text NOT NULL DEFAULT '', -- set during preparation and processing
   name text_short_mandatory NOT NULL,
   partner digmark.partner NOT NULL, -- default set by sub-table
+  status digmark.launcher_status NOT NULL DEFAULT 'Unchecked',
   step int NOT NULL DEFAULT 0, -- set during processing
-  status digmark.launcher_status NOT NULL DEFAULT 'Checking',
   updated_at tracking_at,
   vertical_fk bigint NOT NULL DEFAULT -1, -- set during preparation
   CHECK (false) NO INHERIT -- prevents direct inserts, but not to children. Additional check only: main abstraction enforcement is REVOKE below
@@ -113,13 +111,14 @@ ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_vertical_fk_fkey FORE
 
 COMMENT ON TABLE digmark.launcher_fb IS 'shortname: dm_l_fb';
 CREATE INDEX launcher_fb_day_idx ON digmark.launcher_fb USING btree(created_at_day);
+CREATE INDEX launcher_fb_status_unchecked_idx ON digmark.launcher_fb USING btree(status) WHERE status = 'Unchecked';
 
 
 CREATE TABLE digmark.launcher_gads
 (
   gads_account_id bigint NOT NULL DEFAULT 0, -- set during preparation
   gads_ad_id bigint NOT NULL DEFAULT 0, -- set during processing (step 3)
-  gads_adset_id bigint NOT NULL DEFAULT 0, -- set during processing (step 2)
+  gads_ad_group_id bigint NOT NULL DEFAULT 0, -- set during processing (step 2)
   gads_campaign_id bigint NOT NULL DEFAULT 0 -- set during processing (step 1)
 )
 INHERITS (digmark.launcher);
@@ -133,3 +132,4 @@ ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_vertical_fk_fkey 
 
 COMMENT ON TABLE digmark.launcher_gads IS 'shortname: dm_l_gads';
 CREATE INDEX launcher_gads_day_idx ON digmark.launcher_gads USING btree(created_at_day);
+CREATE INDEX launcher_gads_status_unchecked_idx ON digmark.launcher_gads USING btree(status) WHERE status = 'Unchecked';
