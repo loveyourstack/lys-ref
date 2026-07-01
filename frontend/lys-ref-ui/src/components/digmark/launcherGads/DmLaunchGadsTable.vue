@@ -14,7 +14,7 @@
       sampleSheetLink="https://docs.google.com/spreadsheets/d/10klDBUMBk5ByLsXmJ5T2jMqp1aeoHJOV-hT6_7-IFrM/edit?pli=1&gid=826607128#gid=826607128"
       :enterLabel="$t('actions.enter')"
       @cancel="showImport = false"
-      @enter="(valA: string[]) => { const success = importItems(valA); if (success) { showImport = false } }"
+      @enter="async (valA: string[]) => { const success = await importItems(valA); if (success) { showImport = false } }"
     ></l-text-array-entry>
   </l-dialog-card>
 
@@ -99,11 +99,10 @@ const headers = [
   { title: 'Created', key: 'created_at_day' },
   { title: 'Name', key: 'name' },
   { title: 'Manager', key: 'manager' },
-  { title: 'Country', key: 'country' },
-  { title: 'Vertical', key: 'vertical' },
   { title: 'Daily budget', key: 'daily_budget_eur', align: 'end' },
   { title: 'Status', key: 'status' },
   { title: 'Step', key: 'step' },
+  { title: 'Message', key: 'message' },
   { title: 'Actions', key: 'actions', sortable: false },
 ] as const
 const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
@@ -156,22 +155,25 @@ function getFilterStr(): string {
   return ret
 }
 
-function importItems(entryA: string[]): boolean {
+async function importItems(entryA: string[]): Promise<boolean> {
 
   // validate and convert raw string array to item array
   const itemA = getLauncherGAdsImportItems(entryA, maxImportItems)
   if (!itemA.ok) { alert(itemA.error); return false }
 
   importing.value = true
-  ax.post(baseUrl+'/import', JSON.stringify(itemA.value))
-    .then(response => {
-      refreshItems()
-    })
-    .catch() // handled by interceptor
-    .finally(() => { importing.value = false })
-  
-  // return true to close the import dialog before the request completes. Import button will show the loading state
-  return true
+  try {
+    await ax.post(baseUrl+'/import', JSON.stringify(itemA.value))
+    // add slight delay to allow listener process to prepare the new items
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    refreshItems()
+    return true
+  } catch (error) {
+    // handled by interceptor
+    return false
+  } finally {
+    importing.value = false
+  }
 }
 
 </script>

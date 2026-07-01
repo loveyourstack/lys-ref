@@ -9,6 +9,7 @@ import (
 	"github.com/loveyourstack/connectors/aws/awsapi"
 	"github.com/loveyourstack/connectors/aws/awssvc"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
+	"github.com/loveyourstack/lys-ref/internal/services/launchsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
 	"github.com/loveyourstack/lys/lyslog"
@@ -26,9 +27,10 @@ type Application struct {
 	AwsClient *awsapi.Client
 
 	// services
-	AwsSvc  awssvc.Service
-	ProcSvc procsvc.Service
-	SysSvc  syssvc.Service
+	AwsSvc    awssvc.Service
+	LaunchSvc launchsvc.Service
+	ProcSvc   procsvc.Service
+	SysSvc    syssvc.Service
 }
 
 // NewApplication returns an Application with default settings. Not all fields get initialized.

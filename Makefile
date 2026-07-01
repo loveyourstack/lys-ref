@@ -39,6 +39,11 @@ srv:
 suppsrv:
 	go run ./cmd/suppsrv
 
+# db listener start
+.PHONY: lis
+lis:
+	go run ./cmd/reflis
+
 ###########################################################
 
 # run all tests
@@ -68,9 +73,14 @@ srvb:
 suppsrvb:
 	go build -o ./bin ./cmd/suppsrv
 
+# build db listener
+.PHONY: lisb
+lisb:
+	go build -o ./bin ./cmd/reflis
+
 # build all apps
 .PHONY: build
-build: clib mcpb srvb suppsrvb
+build: clib mcpb srvb suppsrvb lisb
 
 ###########################################################
 
@@ -93,6 +103,11 @@ copysrv: srvb
 .PHONY: copysuppsrv
 copysuppsrv: suppsrvb
 	rsync -az -e ssh ./bin/suppsrv lysref:/home/ubuntu/bin
+
+# build and copy db listener to remote
+.PHONY: copylis
+copylis: lisb
+	rsync -az -e ssh ./bin/reflis lysref:/home/ubuntu/bin
 
 # build and copy ui/dist to remote
 .PHONY: copyui

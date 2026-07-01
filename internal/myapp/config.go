@@ -88,6 +88,7 @@ type Config struct {
 	DbOwnerUser  lyspgdb.User
 	DbServerUser lyspgdb.User
 	DbCliUser    lyspgdb.User
+	DbLisUser    lyspgdb.User
 	API          api
 	UI           ui
 	Developer    developer
