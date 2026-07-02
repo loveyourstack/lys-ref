@@ -5,7 +5,7 @@ $BODY$
 DECLARE
   payload TEXT;
 BEGIN
-  -- exit if the trigger is fired by lysref_lis to stop internal processing from generating update events
+  -- exit if the trigger is fired by lysref_lis to stop reflis internal processing from generating update events
   IF current_user = 'lysref_lis' THEN
     RETURN null;
   END IF;

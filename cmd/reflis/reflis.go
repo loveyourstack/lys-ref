@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -24,6 +24,12 @@ type dbListenerApplication struct {
 }
 
 func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() error {
 
 	configFileName := "ref_config.toml"
 
@@ -36,7 +42,7 @@ func main() {
 	conf := myapp.Config{}
 	err := conf.LoadFromFile(*configFilePath)
 	if err != nil {
-		log.Fatalf("initialization: conf.LoadFromFile (%s) failed: %s", *configFilePath, err.Error())
+		return fmt.Errorf("initialization: conf.LoadFromFile (%s) failed: %w", *configFilePath, err)
 	}
 
 	// create context that listens for interrupt and termination signals to allow for graceful shutdown
@@ -51,20 +57,24 @@ func main() {
 		Application: app,
 	}
 
-	// connect to db and assign pool to srvApp
+	// connect to db and assign pool to lisApp
 	lisApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbLisUser, lisApp.Config.General.AppName+" Lis", myapp.TypesToRegister)
 	if err != nil {
-		log.Fatalf("initialization: failed to create regular db connection pool: %s", err.Error())
+		return fmt.Errorf("initialization: failed to create db connection pool: %w", err)
 	}
 	defer lisApp.Db.Close()
 
 	// attach services
 	lisApp.LaunchSvc = launchsvc.NewService(lisApp.Db, lisApp.Logger)
 
+	// create prep runners
+	fbPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunFbPreparation, lisApp.Logger)
+	gadsPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunGAdsPreparation, lisApp.Logger)
+
 	// acquire a connection from the pool for listening
 	conn, err := lisApp.Db.Acquire(ctx)
 	if err != nil {
-		log.Fatalf("initialization: failed to acquire connection: %s", err.Error())
+		return fmt.Errorf("initialization: failed to acquire connection: %w", err)
 	}
 	defer conn.Release()
 
@@ -72,83 +82,93 @@ func main() {
 	pgChanName := "change"
 	_, err = conn.Exec(ctx, fmt.Sprintf("LISTEN %s;", pgx.Identifier{pgChanName}.Sanitize()))
 	if err != nil {
-		log.Fatalf("initialization: failed to listen to '%s' channel", pgChanName)
+		return fmt.Errorf("initialization: failed to listen to '%s' channel: %w", pgChanName, err)
 	}
+
+	// trigger prep runners once at startup in case listener was down when changes were made
+	fbPrepRunner.trigger()
+	gadsPrepRunner.trigger()
 
 	// display startup message
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))
 
+	// wait for notifications and handle them
+	err = waitForNotifications(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, lisApp.Logger)
+
+	// wait for runners to complete before exit
+	fbPrepRunner.wait()
+	gadsPrepRunner.wait()
+
+	if err != nil {
+		lisApp.Logger.Error("reflis shutdown: waitForNotifications failed", "error", err)
+		return err
+	}
+
+	lisApp.Logger.Info("reflis shutdown signal received")
+	return nil
+}
+
+func waitForNotifications(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *preparationRunner,
+	logger *slog.Logger) (err error) {
+
 	// wait for pg_notify events
 	for {
-		not, err := conn.Conn().WaitForNotification(ctx)
+		not, err := conn.WaitForNotification(ctx)
 		if err != nil {
-			// exit normally on ctx cancellation
+			// break without err on ctx cancellation
 			if ctx.Err() != nil {
-				return
+				break
 			}
-			lisApp.Logger.Error("conn.Conn().WaitForNotification failed", "error", err)
-			os.Exit(1)
+			// return error on other failures
+			return fmt.Errorf("conn.WaitForNotification failed: %w", err)
 		}
 
 		// parse payload
 		changeP := changePayload{}
 		err = json.Unmarshal([]byte(not.Payload), &changeP)
 		if err != nil {
-			lisApp.Logger.Error("json.Unmarshal failed", "error", err)
+			// log and continue
+			logger.Error("json.Unmarshal failed", "error", err)
 			continue
 		}
 
-		lisApp.Logger.Debug("event", "action", changeP.Action, "schema", changeP.Schema, "table", changeP.Table)
+		logger.Debug("event", "action", changeP.Action, "schema", changeP.Schema, "table", changeP.Table)
 
+		// dispatch event based on schema, table and action
 		switch changeP.Schema {
 		case "digmark":
 			switch changeP.Table {
 			case "launcher_fb":
 				switch changeP.Action {
 				case "insert":
-					go func() {
-						if err := lisApp.LaunchSvc.RunFbPreparation(ctx); err != nil {
-							lisApp.Logger.Error("lisApp.LaunchSvc.RunFbPreparation failed", "error", err)
-						}
-					}()
+					fbPrepRunner.trigger()
 				case "update":
-					go func() {
-						if err := lisApp.LaunchSvc.RunFbPreparation(ctx); err != nil {
-							lisApp.Logger.Error("lisApp.LaunchSvc.RunFbPreparation failed", "error", err)
-						}
-					}()
+					fbPrepRunner.trigger()
 
 					// TODO - run queued items
 				default:
-					lisApp.Logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
+					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}
 			case "launcher_gads":
 				switch changeP.Action {
 				case "insert":
-					go func() {
-						if err := lisApp.LaunchSvc.RunGAdsPreparation(ctx); err != nil {
-							lisApp.Logger.Error("lisApp.LaunchSvc.RunGAdsPreparation failed", "error", err)
-						}
-					}()
+					gadsPrepRunner.trigger()
 				case "update":
-					go func() {
-						if err := lisApp.LaunchSvc.RunGAdsPreparation(ctx); err != nil {
-							lisApp.Logger.Error("lisApp.LaunchSvc.RunGAdsPreparation failed", "error", err)
-						}
-					}()
+					gadsPrepRunner.trigger()
 
 					// TODO - run queued items
 				default:
-					lisApp.Logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
+					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}
 			default:
-				lisApp.Logger.Error("no handler for table", "schema", changeP.Schema, "table", changeP.Table)
+				logger.Error("no handler for table", "schema", changeP.Schema, "table", changeP.Table)
 			}
 		default:
-			lisApp.Logger.Error("no handler for schema", "schema", changeP.Schema)
+			logger.Error("no handler for schema", "schema", changeP.Schema)
 		}
-
 	}
+
+	return nil
 }
 
 // changePayload matches the payload defined in system.notify_change_trigger()
