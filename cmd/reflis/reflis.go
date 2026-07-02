@@ -71,6 +71,10 @@ func run() error {
 	fbPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunFbPreparation, lisApp.Logger)
 	gadsPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunGAdsPreparation, lisApp.Logger)
 
+	// create processing runners
+	fbProcessingRunner := newProcessingRunner(ctx, lisApp.LaunchSvc.RunFbProcessing, lisApp.Logger, conf.Reflis.WorkerCount)
+	gadsProcessingRunner := newProcessingRunner(ctx, lisApp.LaunchSvc.RunGAdsProcessing, lisApp.Logger, conf.Reflis.WorkerCount)
+
 	// acquire a connection from the pool for listening
 	conn, err := lisApp.Db.Acquire(ctx)
 	if err != nil {
@@ -93,11 +97,14 @@ func run() error {
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))
 
 	// listen for notifications and handle them
-	err = listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, lisApp.Logger)
+	err = listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, fbProcessingRunner, gadsProcessingRunner, lisApp.Logger)
 
 	// wait for runners to complete before exit
 	fbPrepRunner.wait()
 	gadsPrepRunner.wait()
+
+	fbProcessingRunner.wait()
+	gadsProcessingRunner.wait()
 
 	if err != nil {
 		lisApp.Logger.Error("reflis shutdown: listen failed", "error", err)
@@ -109,6 +116,7 @@ func run() error {
 }
 
 func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *preparationRunner,
+	fbProcessingRunner, gadsProcessingRunner *processingRunner,
 	logger *slog.Logger) (err error) {
 
 	// wait for pg_notify events
@@ -144,8 +152,7 @@ func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *p
 					fbPrepRunner.trigger()
 				case "update":
 					fbPrepRunner.trigger()
-
-					// TODO - run queued items
+					fbProcessingRunner.trigger()
 				default:
 					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}
@@ -155,8 +162,7 @@ func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *p
 					gadsPrepRunner.trigger()
 				case "update":
 					gadsPrepRunner.trigger()
-
-					// TODO - run queued items
+					gadsProcessingRunner.trigger()
 				default:
 					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}

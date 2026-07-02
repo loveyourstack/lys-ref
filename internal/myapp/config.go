@@ -40,6 +40,10 @@ type developer struct {
 	Password   string
 }
 
+type reflis struct {
+	WorkerCount int
+}
+
 type McpServer struct {
 	BinaryPath     string
 	ConfigFilePath string
@@ -92,6 +96,7 @@ type Config struct {
 	API          api
 	UI           ui
 	Developer    developer
+	Reflis       reflis
 	McpServer    McpServer
 
 	Aws     awsapi.Conf
