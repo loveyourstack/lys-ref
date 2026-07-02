@@ -19,6 +19,7 @@
   </l-dialog-card>
 
   <v-data-table-server
+    v-model="selected"
     v-model:items-per-page="itemsPerPage"
     v-model:page="page"
     v-model:sortBy="sortBy"
@@ -30,6 +31,7 @@
     :search="search"
     show-current-page
     item-value="id"
+    show-select
     @update:options="loadItems"
   >
     <template #top>
@@ -38,17 +40,26 @@
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>
+        <v-btn icon flat v-tooltip="'Refresh'" @click="refreshItems()">
+          <v-icon icon="mdi-refresh"></v-icon>
+        </v-btn>
       </l-dt-top>
 
       <v-row density="compact">
         <v-col>
-          <dm-launch-fb-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
+          <dm-launch-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
             v-model:filterCountryFKs="filterCountryFKs"
             v-model:filterDailyBudget="filterDailyBudget"
             v-model:filterManagers="filterManagers"
             v-model:filterName="filterName"
             v-model:filterVerticalFks="filterVerticalFks"
           />
+        </v-col>
+      </v-row>
+
+      <v-row v-if="selected.length > 0" density="compact" class="mt-0">
+        <v-col>
+          <dm-launch-table-bulk-edit :launch-ids="selected" :base-url="baseUrl" partner="Facebook" @update="refreshItems()" />
         </v-col>
       </v-row>
     </template>
@@ -61,10 +72,12 @@
       {{ formatterDec2.format(item.daily_budget_eur!) + ' €' }}
     </template>
 
+    <template v-slot:[`item.status`]="{ item }">
+      <v-chip :color="statusColor(item.status)">{{ item.status }}</v-chip>
+    </template>
+
     <template v-slot:[`item.step`]="{ item }">
-      <v-rating v-model="item.step" :length="item.max_steps" empty-icon="mdi-circle-outline" full-icon="mdi-circle" 
-        readonly color="primary" density="compact"
-      ></v-rating>
+      <dm-launch-step-indicator :step="item.step" :max-steps="item.max_steps" />
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
@@ -88,6 +101,7 @@ import { type NumericFilter, getNumericFilterUrlParams, getTextFilterUrlParam } 
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
+import { statusColor } from '@/components/digmark/launcher/launcher_funcs'
 import { getLauncherFbImportItems } from '@/components/digmark/launcherFb/launcher_fb_import'
 import { type LauncherFb, launcherFbImportColumns } from '@/types/digmark'
 
@@ -113,7 +127,7 @@ const { excelDlUrl } = useTableExcelDlUrl(baseUrl, getFilterStr)
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
   loadItems, refreshItems, refreshItemsDebounced
-} = useTableState<LauncherFb>({ ax, baseUrl, getFilterStr })
+} = useTableState<LauncherFb>({ ax, baseUrl, getFilterStr, onFetchSuccess: () => { selected.value = [] } })
 
 const filterCountryFKs = ref<number[]>()
 const filterDailyBudget = ref<NumericFilter>()
@@ -129,6 +143,8 @@ const importing = ref(false)
 const maxImportItems = 10
 
 const formatterDec2 = new Intl.NumberFormat(undefined , { maximumFractionDigits: 2, minimumFractionDigits: 2})
+
+const selected = ref<number[]>([])
 
 const { resetTable } = useJsonLs({
   lsKey: 'launchers_fb_dt',

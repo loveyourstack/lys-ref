@@ -15,6 +15,7 @@
         "logout": "Logout",
         "move_down": "Move down",
         "move_up": "Move up",
+        "queue": "Queue",
         "reset_table": "Reset table",
         "restore": "Restore",
         "run": "Run",
@@ -216,6 +217,7 @@
         "title": "Launchers",
         "new_item": "New launcher",
         "import_enter": "Enter launchers",
+        "selected_launchers": "selected launcher(s)",
         "p1": "Launchers are used to launch campaigns on ad platforms."
     },
     "mandatory_values": {

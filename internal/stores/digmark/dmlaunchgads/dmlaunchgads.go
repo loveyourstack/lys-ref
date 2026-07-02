@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"slices"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys-ref/internal/enums/launchstatus"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunch"
+	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
 )
@@ -59,7 +61,46 @@ type Store struct {
 }
 
 func (s Store) Delete(ctx context.Context, id int64) error {
+
+	// select item from id
+	item, err := s.SelectById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("s.SelectById failed: %w", err)
+	}
+
+	// reject if status does not allow deletion
+	if !slices.Contains(launchstatus.Editable[:], item.Status) {
+		return lyserr.User{Message: fmt.Sprintf("deletion not allowed for status: %s", item.Status)}
+	}
+
 	return lyspg.DeleteUnique(ctx, s.Db, schemaName, tableName, pkColName, id)
+}
+
+func (s Store) DeleteMany(ctx context.Context, ids []int64) (numDeleted int64, err error) {
+
+	// select items from ids
+	items, err := lyspg.SelectT[Model](ctx, s.Db, fmt.Sprintf("SELECT id, status FROM %s.%s WHERE id = ANY($1);", schemaName, tableName), ids)
+	if err != nil {
+		return 0, fmt.Errorf("lyspg.SelectT failed: %w", err)
+	}
+
+	var deleteableIds []int64
+
+	// only allow deletion of records where status allows it, ignore others
+	for _, item := range items {
+		if slices.Contains(launchstatus.Editable[:], item.Status) {
+			deleteableIds = append(deleteableIds, item.Id)
+		}
+	}
+
+	// delete
+	stmt := fmt.Sprintf("DELETE FROM %s.%s WHERE id = ANY($1);", schemaName, tableName)
+	res, err := s.Db.Exec(ctx, stmt, deleteableIds)
+	if err != nil {
+		return 0, lyserr.Db{Err: fmt.Errorf("s.Db.Exec failed: %w", err), Stmt: stmt}
+	}
+
+	return res.RowsAffected(), nil
 }
 
 func (s Store) GetName() string {

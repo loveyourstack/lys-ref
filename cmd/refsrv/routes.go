@@ -278,6 +278,7 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		launchFbStore := dmlaunchfb.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, launchFbStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, launchFbStore)).Methods("GET")
+		writeR.HandleFunc(endpoint+"/delete-many", lys.ProcessSlice(apiEnv, launchFbStore.DeleteMany)).Methods("POST")
 		writeR.HandleFunc(endpoint+"/import", lys.Import(apiEnv, srvApp.Db, launchFbStore)).Methods("POST")
 		writeR.HandleFunc(endpoint, lys.Post(apiEnv, launchFbStore)).Methods("POST")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, launchFbStore)).Methods("PUT")
@@ -289,6 +290,7 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		launchGAdsStore := dmlaunchgads.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, launchGAdsStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, launchGAdsStore)).Methods("GET")
+		writeR.HandleFunc(endpoint+"/delete-many", lys.ProcessSlice(apiEnv, launchGAdsStore.DeleteMany)).Methods("POST")
 		writeR.HandleFunc(endpoint+"/import", lys.Import(apiEnv, srvApp.Db, launchGAdsStore)).Methods("POST")
 		writeR.HandleFunc(endpoint, lys.Post(apiEnv, launchGAdsStore)).Methods("POST")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, launchGAdsStore)).Methods("PUT")

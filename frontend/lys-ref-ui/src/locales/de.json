@@ -15,6 +15,7 @@
         "logout": "Abmelden",
         "move_down": "Nach unten verschieben",
         "move_up": "Nach oben verschieben",
+        "queue": "In Warteschlange stellen",
         "reset_table": "Tabelle zurücksetzen",
         "restore": "Wiederherstellen",
         "run": "Ausführen",
@@ -216,6 +217,7 @@
         "title": "Launcher",
         "new_item": "Neuer Launcher",
         "import_enter": "Launcher eingeben",
+        "selected_launchers": "ausgewählte Launcher",
         "p1": "Launcher werden verwendet, um Kampagnen auf Werbeplattformen zu starten."
     },
     "mandatory_values": {

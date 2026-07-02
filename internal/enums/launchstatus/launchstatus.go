@@ -8,11 +8,15 @@ func (e Enum) String() string {
 }
 
 const (
-	Unchecked  Enum = "Unchecked"
 	Completed  Enum = "Completed"
 	Failed     Enum = "Failed"
 	InProgress Enum = "In progress"
 	Invalid    Enum = "Invalid"
 	Queued     Enum = "Queued"
 	Ready      Enum = "Ready"
+	Unchecked  Enum = "Unchecked"
+)
+
+var (
+	Editable = [...]Enum{Invalid, Ready, Unchecked}
 )
