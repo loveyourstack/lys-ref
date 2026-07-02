@@ -92,15 +92,15 @@ func run() error {
 	// display startup message
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))
 
-	// wait for notifications and handle them
-	err = waitForNotifications(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, lisApp.Logger)
+	// listen for notifications and handle them
+	err = listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, lisApp.Logger)
 
 	// wait for runners to complete before exit
 	fbPrepRunner.wait()
 	gadsPrepRunner.wait()
 
 	if err != nil {
-		lisApp.Logger.Error("reflis shutdown: waitForNotifications failed", "error", err)
+		lisApp.Logger.Error("reflis shutdown: listen failed", "error", err)
 		return err
 	}
 
@@ -108,7 +108,7 @@ func run() error {
 	return nil
 }
 
-func waitForNotifications(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *preparationRunner,
+func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *preparationRunner,
 	logger *slog.Logger) (err error) {
 
 	// wait for pg_notify events

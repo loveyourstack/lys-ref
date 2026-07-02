@@ -127,24 +127,44 @@ func (s Store) SelectUncheckedTx(ctx context.Context, tx pgx.Tx) (items []Model,
 	return lyspg.SelectT[Model](ctx, tx, stmt)
 }
 
+func (s Store) SelectNextQueuedTx(ctx context.Context, tx pgx.Tx) (item Model, err error) {
+	stmt := fmt.Sprintf(`SELECT * FROM %s.%s WHERE status = 'Queued' ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED;`, schemaName, tableName)
+	items, err := lyspg.SelectT[Model](ctx, tx, stmt)
+	if err != nil {
+		return Model{}, fmt.Errorf("lyspg.SelectT failed: %w", err)
+	}
+	if len(items) == 0 {
+		return Model{}, pgx.ErrNoRows
+	}
+	return items[0], nil
+}
+
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
-func (s Store) SetCampaignId(ctx context.Context, campaignId string, id int64) (err error) {
+func (s Store) SetCampaignIdTx(ctx context.Context, tx pgx.Tx, campaignId string, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"fb_campaign_id": campaignId,
 		"step":           2,
 	}
-	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetCreativeId(ctx context.Context, creativeId string, id int64) (err error) {
+func (s Store) SetCreativeIdTx(ctx context.Context, tx pgx.Tx, creativeId string, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"fb_creative_id": creativeId,
 		"step":           1,
 	}
-	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+}
+
+func (s Store) SetFailedTx(ctx context.Context, tx pgx.Tx, msg string, id int64) (err error) {
+	assignmentsMap := map[string]any{
+		"message": msg,
+		"status":  launchstatus.Failed,
+	}
+	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
 func (s Store) SetPreparedTx(ctx context.Context, tx pgx.Tx, computed Computed, id int64) (err error) {
@@ -155,6 +175,13 @@ func (s Store) SetPreparedTx(ctx context.Context, tx pgx.Tx, computed Computed, 
 		"vertical_fk": computed.VerticalFk,
 
 		"fb_account_id": computed.FbAccountId,
+	}
+	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+}
+
+func (s Store) SetStatusTx(ctx context.Context, tx pgx.Tx, status launchstatus.Enum, id int64) (err error) {
+	assignmentsMap := map[string]any{
+		"status": status,
 	}
 	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
