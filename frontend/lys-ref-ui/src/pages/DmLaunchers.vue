@@ -12,11 +12,22 @@
         </v-col>
       </v-row>
 
-      <v-row density="comfortable">
+      <v-row density="compact">
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text class="pb-0">
-              <span class="dt-subtitle">{{ $t('launchers.p1') }}</span>
+              <div class="dt-subtitle">{{ $t('launchers.p1') }}</div>
+              <div class="dt-subtitle">{{ $t('launchers.p2') }}</div>
+              <div class="dt-subtitle">{{ $t('launchers.p3') }}</div>
+              <div class="dt-subtitle">{{ $t('launchers.p4') }}</div>
+              <div class="dt-subtitle">{{ $t('launchers.p5') }}
+                <ul class="mt-1 mb-1">
+                  <li>{{ $t('launchers.p5_list.item_1') }}</li>
+                  <li>{{ $t('launchers.p5_list.item_2') }}</li>
+                  <li>{{ $t('launchers.p5_list.item_3') }}</li>
+                </ul>
+              </div>
+
             </v-card-text>
           </v-card>
         </v-col>

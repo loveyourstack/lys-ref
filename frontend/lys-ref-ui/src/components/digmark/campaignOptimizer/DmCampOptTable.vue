@@ -26,8 +26,7 @@
       <v-row density="comfortable">
         <v-col class="mb-2">
           <div class="dt-subtitle">{{ $t('optimizer.p1') }}</div>
-          <div class="dt-subtitle">
-            {{ $t('optimizer.p2') }}
+          <div class="dt-subtitle">{{ $t('optimizer.p2') }}
             <ul class="mt-1 mb-1">
               <li>{{ $t('optimizer.p2_list.item_1') }}</li>
               <li>{{ $t('optimizer.p2_list.item_2') }}</li>

@@ -40,7 +40,7 @@
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn color="secondary" @click="editID = 0; showEdit = true">{{ $t('actions.add') }}</v-btn>
         <v-btn color="secondary" :loading="importing" @click="showImport = true">{{ $t('actions.import') }}</v-btn>
-        <v-btn icon flat v-tooltip="'Refresh'" @click="refreshItems()">
+        <v-btn icon flat v-tooltip="$t('actions.refresh')" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>
         </v-btn>
       </l-dt-top>

@@ -16,6 +16,7 @@
         "move_down": "Move down",
         "move_up": "Move up",
         "queue": "Queue",
+        "refresh": "Refresh",
         "reset_table": "Reset table",
         "restore": "Restore",
         "run": "Run",
@@ -218,7 +219,16 @@
         "new_item": "New launcher",
         "import_enter": "Enter launchers",
         "selected_launchers": "selected launcher(s)",
-        "p1": "Launchers are used to launch campaigns on ad platforms."
+        "p1": "Launchers are used to launch digital marketing campaigns on partner platforms based on settings supplied by the user.",
+        "p2": "As soon as new launcher settings are added, a background worker checks them and sets the status to Ready or Invalid.",
+        "p3": "The user can then queue Ready records for processing, which is a long multi-step operation that can fail at any point.",
+        "p4": "As soon as records are queued, background workers are spawned which process the records in parallel. The records are updated at each step, and the progress can be observed below by clicking Refresh.",
+        "p5": "In the backend, this demonstrates:",
+        "p5_list": {
+            "item_1": "Table inheritance and generic functions, since the launcher tables of each partner share fields and behaviour",
+            "item_2": "A background process using LISTEN/NOTIFY, with debouncing of notifications to prevent excessive processing",
+            "item_3": "Parallel processing from a queue, including progress tracking"
+        }
     },
     "mandatory_values": {
         "nav": "Mandatory values",

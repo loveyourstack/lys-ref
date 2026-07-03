@@ -16,6 +16,7 @@
         "move_down": "Nach unten verschieben",
         "move_up": "Nach oben verschieben",
         "queue": "In Warteschlange stellen",
+        "refresh": "Aktualisieren",
         "reset_table": "Tabelle zurücksetzen",
         "restore": "Wiederherstellen",
         "run": "Ausführen",
@@ -218,7 +219,16 @@
         "new_item": "Neuer Launcher",
         "import_enter": "Launcher eingeben",
         "selected_launchers": "ausgewählte Launcher",
-        "p1": "Launcher werden verwendet, um Kampagnen auf Werbeplattformen zu starten."
+        "p1": "Launchers werden verwendet, um digitale Marketingkampagnen auf Partnerplattformen basierend auf den vom Benutzer bereitgestellten Einstellungen zu starten.",
+        "p2": "Sobald neue Launcher-Einstellungen hinzugefügt werden, überprüft ein Hintergrundarbeiter diese und setzt den Status auf Bereit oder Ungültig.",
+        "p3": "Der Benutzer kann dann Bereit-Datensätze zur Verarbeitung in die Warteschlange stellen, was ein langer mehrstufiger Vorgang ist, der jederzeit fehlschlagen kann.",
+        "p4": "Sobald Datensätze in die Warteschlange gestellt werden, werden Hintergrundarbeiter gestartet, die die Datensätze parallel verarbeiten. Die Datensätze werden bei jedem Schritt aktualisiert, und der Fortschritt kann unten durch Klicken auf Aktualisieren beobachtet werden.",
+        "p5": "Im Backend zeigt dies:",
+        "p5_list": {
+            "item_1": "Tabellenvererbung und generische Funktionen, da die Launcher-Tabellen jedes Partners Felder und Verhalten teilen",
+            "item_2": "Ein Hintergrundprozess unter Verwendung von LISTEN/NOTIFY, mit Entprellung von Benachrichtigungen, um übermäßige Verarbeitung zu verhindern",
+            "item_3": "Parallele Verarbeitung aus einer Warteschlange, einschließlich Fortschrittsverfolgung"
+        }
     },
     "mandatory_values": {
         "nav": "Obligatorische Werte",

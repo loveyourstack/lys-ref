@@ -3,7 +3,7 @@
     <v-col class="d-flex align-center">
       <div class="dt-title">Hub status</div>
       <div class="v-spacer"></div>
-      <v-btn icon flat v-tooltip="'Refresh'" @click="loadItems()">
+      <v-btn icon flat v-tooltip="$t('actions.refresh')" @click="loadItems()">
         <v-icon icon="mdi-refresh"></v-icon>
       </v-btn>
     </v-col>
