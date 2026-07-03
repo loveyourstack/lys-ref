@@ -28,23 +28,23 @@ func (svc Service) RunFbProcessing(ctx context.Context, workerCount int) (err er
 	// create an errgroup to manage the workers
 	g, gctx := errgroup.WithContext(workerCtx)
 
-	for i := range workerCount {
+	for range workerCount {
 		g.Go(func() error {
 			for {
 				// exit if queue is empty
 				if stopOnEmpty.Load() {
-					svc.Logger.Debug("worker stopping due to empty queue atomic", "id", i)
+					//svc.Logger.Debug("worker stopping due to empty queue atomic", "id", i)
 					return nil
 				}
 
 				// exit on context cancellation
 				if gctx.Err() != nil {
-					svc.Logger.Debug("worker stopping due to context cancellation", "id", i)
+					//svc.Logger.Debug("worker stopping due to context cancellation", "id", i)
 					return nil
 				}
 
 				// process one item
-				svc.Logger.Debug("worker trying to process next item", "id", i)
+				//svc.Logger.Debug("worker trying to process next item", "id", i)
 				err := svc.processFbWorker(gctx)
 				if err == nil {
 					continue
@@ -52,7 +52,7 @@ func (svc Service) RunFbProcessing(ctx context.Context, workerCount int) (err er
 
 				// if queue is empty, signal other workers to stop and exit normally
 				if errors.Is(err, errQueueEmpty) {
-					svc.Logger.Debug("worker stopping due to empty queue", "id", i)
+					//svc.Logger.Debug("worker stopping due to empty queue", "id", i)
 					stopOnEmpty.Store(true)
 					return nil
 				}
