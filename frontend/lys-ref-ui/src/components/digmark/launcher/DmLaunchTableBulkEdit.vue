@@ -4,7 +4,7 @@
 
       <div class="d-flex align-center ga-6 pt-2">
         <v-btn :disabled="!auth.isWriter" :loading="queueing" color="primary" @click="queueByIds">{{ $t('actions.queue') }}</v-btn>
-        <v-btn color="secondary" disabled>{{ $t('actions.cancel') }}</v-btn>
+        <v-btn :disabled="!auth.isWriter" :loading="cancelling" color="grey" @click="cancelByIds">{{ $t('actions.cancel') }}</v-btn>
 
         <v-spacer></v-spacer>
 
@@ -33,8 +33,24 @@ const emit = defineEmits<{
 
 const appStore = useAppStore()
 
+const cancelling = ref(false)
 const deleting = ref(false)
 const queueing = ref(false)
+
+function cancelByIds() {
+  cancelling.value = true
+
+  ax.post(props.baseUrl + '/cancel-many', props.launchIds)
+    .then((resp) => {
+      const numCancelled = resp.data.data
+      notify(appStore.company, numCancelled + ' ' + props.partner + ' launcher(s) cancelled', appStore.logoUrl)
+    })
+    .catch() // handled by interceptor
+    .finally(() => {
+      cancelling.value = false
+      emit('update')
+    })
+}
 
 function deleteByIds() {
   deleting.value = true

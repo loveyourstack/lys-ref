@@ -57,6 +57,10 @@ type Store struct {
 	Db *pgxpool.Pool
 }
 
+func (s Store) CancelMany(ctx context.Context, ids []int64) (numDeleted int64, err error) {
+	return dmlaunch.CancelMany(ctx, s.Db, schemaName, tableName, ids)
+}
+
 // ClaimForPreparation selects a batch of unprepared items and sets their status to Preparing, returning the items.
 func (s Store) ClaimForPreparation(ctx context.Context, batchSize int) (items []Model, err error) {
 	return dmlaunch.ClaimForPreparation[Model](ctx, s.Db, schemaName, tableName, batchSize)

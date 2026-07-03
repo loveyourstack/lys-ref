@@ -78,6 +78,41 @@ type Store struct {
 	Db *pgxpool.Pool
 }
 
+type statusCheck struct {
+	Status launchstatus.Enum `db:"status"`
+}
+type idStatusCheck struct {
+	Id     int64             `db:"id"`
+	Status launchstatus.Enum `db:"status"`
+}
+
+func CancelMany(ctx context.Context, db *pgxpool.Pool, pSchema, pTable string, ids []int64) (numDeleted int64, err error) {
+
+	// select items from ids
+	items, err := lyspg.SelectT[idStatusCheck](ctx, db, fmt.Sprintf("SELECT id, status FROM %s.%s WHERE id = ANY($1);", pSchema, pTable), ids)
+	if err != nil {
+		return 0, fmt.Errorf("lyspg.SelectT failed: %w", err)
+	}
+
+	var cancelableIds []int64
+
+	// only allow cancellation of records where status is Queued, ignore others
+	for _, item := range items {
+		if item.Status == launchstatus.Queued {
+			cancelableIds = append(cancelableIds, item.Id)
+		}
+	}
+
+	// set back to Ready
+	stmt := fmt.Sprintf("UPDATE %s.%s SET status = 'Ready' WHERE id = ANY($1);", pSchema, pTable)
+	res, err := db.Exec(ctx, stmt, cancelableIds)
+	if err != nil {
+		return 0, lyserr.Db{Err: fmt.Errorf("db.Exec failed: %w", err), Stmt: stmt}
+	}
+
+	return res.RowsAffected(), nil
+}
+
 // ClaimForPreparation selects a batch of unprepared items and sets their status to Preparing, returning the items.
 func ClaimForPreparation[T any](ctx context.Context, db *pgxpool.Pool, pSchema, pTable string, batchSize int) (items []T, err error) {
 	stmt := fmt.Sprintf(`WITH picked AS (SELECT id FROM %s.%s WHERE status = 'Unprepared' ORDER BY id LIMIT $1 FOR UPDATE SKIP LOCKED) 
@@ -102,10 +137,6 @@ func ClaimNextForProcessing[T any](ctx context.Context, db *pgxpool.Pool, pSchem
 	return items[0], nil
 }
 
-type statusCheck struct {
-	Status launchstatus.Enum `db:"status"`
-}
-
 // DeleteEditableByID deletes a row only when status is editable.
 func DeleteEditableByID(ctx context.Context, db *pgxpool.Pool, pSchema, pTable, pView, pPkCol string, id int64) error {
 
@@ -121,11 +152,6 @@ func DeleteEditableByID(ctx context.Context, db *pgxpool.Pool, pSchema, pTable, 
 	}
 
 	return lyspg.DeleteUnique(ctx, db, pSchema, pTable, pPkCol, id)
-}
-
-type idStatusCheck struct {
-	Id     int64             `db:"id"`
-	Status launchstatus.Enum `db:"status"`
 }
 
 func DeleteMany(ctx context.Context, db *pgxpool.Pool, pSchema, pTable string, ids []int64) (numDeleted int64, err error) {
