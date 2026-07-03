@@ -19,7 +19,7 @@ const (
 	tableName      string = "launcher_fb"
 	viewName       string = "v_launcher_fb"
 	pkColName      string = "id"
-	defaultOrderBy string = "name"
+	defaultOrderBy string = "created_at DESC"
 )
 
 type Input struct {
@@ -130,7 +130,19 @@ func (s Store) SetFailed(ctx context.Context, msg string, id int64) (err error) 
 	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetPrepared(ctx context.Context, computed Computed, id int64) (err error) {
+func (s Store) SetInvalid(ctx context.Context, msg string, id int64) (err error) {
+	assignmentsMap := map[string]any{
+		"country_fk":  -1,
+		"message":     msg,
+		"status":      launchstatus.Invalid,
+		"vertical_fk": -1,
+
+		"fb_account_id": "",
+	}
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+}
+
+func (s Store) SetReady(ctx context.Context, computed Computed, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"country_fk":  computed.CountryFk,
 		"message":     "",
@@ -149,20 +161,8 @@ func (s Store) SetStatus(ctx context.Context, status launchstatus.Enum, id int64
 	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetUnprepared(ctx context.Context, msg string, id int64) (err error) {
-	assignmentsMap := map[string]any{
-		"country_fk":  -1,
-		"message":     msg,
-		"status":      launchstatus.Invalid,
-		"vertical_fk": -1,
-
-		"fb_account_id": "",
-	}
-	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
-}
-
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {
-	return lyspg.Update(ctx, s.Db, schemaName, tableName, pkColName, input, id)
+	return dmlaunch.Update(ctx, s.Db, schemaName, tableName, viewName, pkColName, input, id)
 }
 
 func (s Store) UpdatePartial(ctx context.Context, assignmentsMap map[string]any, id int64) (err error) {

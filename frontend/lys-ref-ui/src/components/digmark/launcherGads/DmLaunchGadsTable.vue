@@ -64,8 +64,12 @@
       </v-row>
     </template>
 
-    <template v-slot:[`item.created_at_day`]="{ item }">
-      <span>{{ useDateFormat(item.created_at_day, 'DD MMM YYYY') }}</span>
+    <template v-slot:header.step="{ column }">
+      {{ column.title }} <v-icon color="primary" v-tooltip="'Campaign created · Ad group created · Ad created'" icon="mdi-information"></v-icon>
+    </template>
+
+    <template v-slot:[`item.created_at`]="{ item }">
+      <span>{{ useDateFormat(item.created_at, 'DD MMM YYYY HH:mm:ss') }}</span>
     </template>
 
      <template v-slot:[`item.daily_budget_eur`]="{ item }">
@@ -110,12 +114,12 @@ const props = defineProps<{
 }>()
 
 const headers = [
-  { title: 'Created', key: 'created_at_day' },
+  { title: 'Created', key: 'created_at' },
   { title: 'Name', key: 'name' },
   { title: 'Manager', key: 'manager' },
   { title: 'Daily budget', key: 'daily_budget_eur', align: 'end' },
   { title: 'Status', key: 'status' },
-  { title: 'Step', key: 'step' },
+  { title: 'Progress', key: 'step' },
   { title: 'Message', key: 'message' },
   { title: 'Actions', key: 'actions', sortable: false },
 ] as const

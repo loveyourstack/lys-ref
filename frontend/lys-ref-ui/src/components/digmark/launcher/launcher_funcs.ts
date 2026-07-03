@@ -1,4 +1,14 @@
 
+export function itemEditable(status: string): boolean {
+  switch (status) {
+    case 'Invalid':
+    case 'Ready':
+      return true
+    default:
+      return false
+  }
+}
+
 export function statusColor(status: string): string {
   switch (status) {
     case 'Completed':

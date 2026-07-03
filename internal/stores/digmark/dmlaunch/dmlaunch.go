@@ -21,14 +21,14 @@ const (
 	tableName      string = "launcher"
 	viewName       string = "launcher"
 	pkColName      string = "id"
-	defaultOrderBy string = "name"
+	defaultOrderBy string = "created_at DESC"
 )
 
 // abstract table containing no records. Only selection allowed. Selection returns child table records
 
 // Input contains the shared input fields for all launchers.
 type Input struct {
-	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=0,lte=10000"`
+	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=1,lte=10000"`
 	Manager        string  `db:"manager" json:"manager,omitempty" validate:"required,max=64"`
 	Name           string  `db:"name" json:"name,omitempty" validate:"required,max=256"`
 }
@@ -220,4 +220,27 @@ func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []M
 
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
+}
+
+func Update[inputT any](ctx context.Context, db *pgxpool.Pool, pSchema, pTable, pView, pPkCol string, input inputT, id int64) (err error) {
+
+	// select status from id
+	item, err := lyspg.SelectUniqueRowFields[statusCheck](ctx, db, []string{"status"}, pSchema, pView, pPkCol, id)
+	if err != nil {
+		return fmt.Errorf("lyspg.SelectUniqueRowField failed: %w", err)
+	}
+
+	// if updating an invalid record, assume it has been fixed, and reset to Unprepared
+	if item.Status == launchstatus.Invalid {
+		if err = lyspg.UpdateWithExtras(ctx, db, pSchema, pTable, pPkCol, input, id, []string{"status"}, []any{launchstatus.Unprepared}); err != nil {
+			return fmt.Errorf("lyspg.UpdateWithExtras failed: %w", err)
+		}
+	} else {
+		// otherwise update as normal
+		if err = lyspg.Update(ctx, db, pSchema, pTable, pPkCol, input, id); err != nil {
+			return fmt.Errorf("lyspg.Update failed: %w", err)
+		}
+	}
+
+	return nil
 }

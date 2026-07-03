@@ -19,18 +19,18 @@
         <v-text-field label="Daily budget (EUR)" type="number" v-model.number="item.daily_budget_eur"
           :rules="[
             (v: number) => v != undefined || 'Daily budget is required',
-            (v: number) => v >= 0 && v <= 2000 || 'Daily budget must be between 0 and 2,000'
+            (v: number) => v >= 1 && v <= 2000 || 'Daily budget must be between 1 and 2,000'
           ]"
         ></v-text-field>
 
       </v-col>
     </v-row>
 
-    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" :saveDisabled="!auth.isWriter()"
-      @cancel="emit('cancel')" @save="saveItem">
+    <l-cancel-and-save-actions :saving="saving" :showSaved="showSaved" :saveBtnLabel="$t(`actions.${saveBtnLabel.toLowerCase()}`)" 
+      :saveDisabled="!auth.isWriter() || !itemEditable(item.status)" @cancel="emit('cancel')" @save="saveItem">
       <template #extra>
         <v-spacer />
-        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter()" color="error" @click="deleteItem">{{ $t('actions.delete') }}</v-btn>
+        <v-btn v-if="props.id !== 0" :disabled="!auth.isWriter() || !itemEditable(item.status)" color="error" @click="deleteItem">{{ $t('actions.delete') }}</v-btn>
       </template>
     </l-cancel-and-save-actions>
 
@@ -43,6 +43,7 @@ import { useI18n } from 'vue-i18n'
 import { useFormCrud } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
+import { itemEditable } from '@/components/digmark/launcher/launcher_funcs'
 import { useDigmarkStore } from '@/stores/digmark'
 import { type LauncherGAds, NewLauncherGAds, GetLauncherInputGAdsFromItem } from '@/types/digmark'
 

@@ -74,7 +74,7 @@ CREATE TABLE digmark.launcher
   country_fk bigint NOT NULL DEFAULT -1, -- set during preparation
   created_at tracking_at,
   created_at_day date NOT NULL GENERATED ALWAYS AS (date(created_at AT TIME ZONE 'Europe/Berlin')) STORED, -- for easy filtering by date
-  daily_budget_eur numeric NOT NULL CHECK (daily_budget_eur BETWEEN 0 AND 10000),
+  daily_budget_eur numeric NOT NULL CHECK (daily_budget_eur BETWEEN 1 AND 10000),
   manager digmark.manager NOT NULL,
   max_steps int NOT NULL, -- default set by sub-table
   message text NOT NULL DEFAULT '', -- set during preparation and processing

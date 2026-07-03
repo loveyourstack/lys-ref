@@ -33,17 +33,17 @@ func (svc Service) RunFbPreparation(ctx context.Context) (err error) {
 		// for each item
 		for _, item := range items {
 
-			// parse campaign name, set unprepared if invalid
+			// try to parse campaign name
 			parts, err := dmlaunchfb.ParseCampaignName(item.Name)
 			if err != nil {
-				err2 := svc.FbLaunchStore.SetUnprepared(ctx, err.Error(), item.Id)
+				err2 := svc.FbLaunchStore.SetInvalid(ctx, err.Error(), item.Id)
 				if err2 != nil {
-					return fmt.Errorf("svc.FbLaunchStore.SetUnprepared (parse camp name) failed: %w", err2)
+					return fmt.Errorf("svc.FbLaunchStore.SetInvalid (parse camp name) failed: %w", err2)
 				}
 				continue
 			}
 
-			// prepare item, set unprepared if invalid
+			// try to prepare item
 			result, err := prepareFb(helpers, prepareFbParams{
 				Account: parts.Account,
 				prepareParams: prepareParams{
@@ -52,14 +52,14 @@ func (svc Service) RunFbPreparation(ctx context.Context) (err error) {
 				},
 			})
 			if err != nil {
-				err2 := svc.FbLaunchStore.SetUnprepared(ctx, err.Error(), item.Id)
+				err2 := svc.FbLaunchStore.SetInvalid(ctx, err.Error(), item.Id)
 				if err2 != nil {
-					return fmt.Errorf("svc.FbLaunchStore.SetUnprepared (prepare item) failed: %w", err2)
+					return fmt.Errorf("svc.FbLaunchStore.SetInvalid (prepare item) failed: %w", err2)
 				}
 				continue
 			}
 
-			// success: set prepared
+			// success: set ready
 			comp := dmlaunchfb.Computed{
 				Computed: dmlaunch.Computed{
 					CountryFk:  result.CountryFk,
@@ -67,9 +67,9 @@ func (svc Service) RunFbPreparation(ctx context.Context) (err error) {
 				},
 				FbAccountId: result.FbAccountId,
 			}
-			err = svc.FbLaunchStore.SetPrepared(ctx, comp, item.Id)
+			err = svc.FbLaunchStore.SetReady(ctx, comp, item.Id)
 			if err != nil {
-				return fmt.Errorf("svc.FbLaunchStore.SetPrepared failed: %w", err)
+				return fmt.Errorf("svc.FbLaunchStore.SetReady failed: %w", err)
 			}
 		}
 	}
@@ -101,17 +101,17 @@ func (svc Service) RunGAdsPreparation(ctx context.Context) (err error) {
 		// for each item
 		for _, item := range items {
 
-			// parse campaign name, set unprepared if invalid
+			// try to parse campaign name
 			parts, err := dmlaunchgads.ParseCampaignName(item.Name)
 			if err != nil {
-				err2 := svc.GAdsLaunchStore.SetUnprepared(ctx, err.Error(), item.Id)
+				err2 := svc.GAdsLaunchStore.SetInvalid(ctx, err.Error(), item.Id)
 				if err2 != nil {
-					return fmt.Errorf("svc.GAdsLaunchStore.SetUnprepared (parse camp name) failed: %w", err2)
+					return fmt.Errorf("svc.GAdsLaunchStore.SetInvalid (parse camp name) failed: %w", err2)
 				}
 				continue
 			}
 
-			// prepare item, set unprepared if invalid
+			// try to prepare item
 			result, err := prepareGAds(helpers, prepareGAdsParams{
 				Account: parts.Account,
 				prepareParams: prepareParams{
@@ -120,14 +120,14 @@ func (svc Service) RunGAdsPreparation(ctx context.Context) (err error) {
 				},
 			})
 			if err != nil {
-				err2 := svc.GAdsLaunchStore.SetUnprepared(ctx, err.Error(), item.Id)
+				err2 := svc.GAdsLaunchStore.SetInvalid(ctx, err.Error(), item.Id)
 				if err2 != nil {
-					return fmt.Errorf("svc.GAdsLaunchStore.SetUnprepared (prepare item) failed: %w", err2)
+					return fmt.Errorf("svc.GAdsLaunchStore.SetInvalid (prepare item) failed: %w", err2)
 				}
 				continue
 			}
 
-			// success: set prepared
+			// success: set ready
 			comp := dmlaunchgads.Computed{
 				Computed: dmlaunch.Computed{
 					CountryFk:  result.CountryFk,
@@ -135,9 +135,9 @@ func (svc Service) RunGAdsPreparation(ctx context.Context) (err error) {
 				},
 				GAdsAccountId: result.GAdsAccountId,
 			}
-			err = svc.GAdsLaunchStore.SetPrepared(ctx, comp, item.Id)
+			err = svc.GAdsLaunchStore.SetReady(ctx, comp, item.Id)
 			if err != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetPrepared failed: %w", err)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetReady failed: %w", err)
 			}
 		}
 	}
