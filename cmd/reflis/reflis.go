@@ -15,6 +15,7 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/launchsvc"
+	"github.com/loveyourstack/lys/lysexec"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
 
@@ -90,11 +91,11 @@ func run() error {
 	}
 
 	// trigger runners once at startup in case listener was down when changes were made
-	fbPrepRunner.trigger()
-	gadsPrepRunner.trigger()
+	fbPrepRunner.Trigger()
+	gadsPrepRunner.Trigger()
 
-	fbProcessingRunner.trigger()
-	gadsProcessingRunner.trigger()
+	fbProcessingRunner.Trigger()
+	gadsProcessingRunner.Trigger()
 
 	// display startup message
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))
@@ -103,11 +104,11 @@ func run() error {
 	err = listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, fbProcessingRunner, gadsProcessingRunner, lisApp.Logger)
 
 	// wait for runners to complete before exit
-	fbPrepRunner.wait()
-	gadsPrepRunner.wait()
+	fbPrepRunner.Wait()
+	gadsPrepRunner.Wait()
 
-	fbProcessingRunner.wait()
-	gadsProcessingRunner.wait()
+	fbProcessingRunner.Wait()
+	gadsProcessingRunner.Wait()
 
 	if err != nil {
 		lisApp.Logger.Error("reflis shutdown: listen failed", "error", err)
@@ -118,8 +119,8 @@ func run() error {
 	return nil
 }
 
-func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *preparationRunner,
-	fbProcessingRunner, gadsProcessingRunner *processingRunner,
+func listen(ctx context.Context, conn *pgx.Conn,
+	fbPrepRunner, gadsPrepRunner, fbProcessingRunner, gadsProcessingRunner *lysexec.CoalescingRunner,
 	logger *slog.Logger) (err error) {
 
 	// wait for pg_notify events
@@ -152,20 +153,20 @@ func listen(ctx context.Context, conn *pgx.Conn, fbPrepRunner, gadsPrepRunner *p
 			case "launcher_fb":
 				switch changeP.Action {
 				case "insert":
-					fbPrepRunner.trigger()
+					fbPrepRunner.Trigger()
 				case "update":
-					fbPrepRunner.trigger()
-					fbProcessingRunner.trigger()
+					fbPrepRunner.Trigger()
+					fbProcessingRunner.Trigger()
 				default:
 					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}
 			case "launcher_gads":
 				switch changeP.Action {
 				case "insert":
-					gadsPrepRunner.trigger()
+					gadsPrepRunner.Trigger()
 				case "update":
-					gadsPrepRunner.trigger()
-					gadsProcessingRunner.trigger()
+					gadsPrepRunner.Trigger()
+					gadsProcessingRunner.Trigger()
 				default:
 					logger.Error("no handler for action", "schema", changeP.Schema, "table", changeP.Table, "action", changeP.Action)
 				}
