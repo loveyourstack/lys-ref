@@ -28,20 +28,23 @@ func (svc Service) RunFbProcessing(ctx context.Context, workerCount int) (err er
 	// create an errgroup to manage the workers
 	g, gctx := errgroup.WithContext(workerCtx)
 
-	for range workerCount {
+	for i := range workerCount {
 		g.Go(func() error {
 			for {
 				// exit if queue is empty
 				if stopOnEmpty.Load() {
+					svc.Logger.Debug("worker stopping due to empty queue atomic", "id", i)
 					return nil
 				}
 
 				// exit on context cancellation
 				if gctx.Err() != nil {
+					svc.Logger.Debug("worker stopping due to context cancellation", "id", i)
 					return nil
 				}
 
 				// process one item
+				svc.Logger.Debug("worker trying to process next item", "id", i)
 				err := svc.processFbWorker(gctx)
 				if err == nil {
 					continue
@@ -49,6 +52,7 @@ func (svc Service) RunFbProcessing(ctx context.Context, workerCount int) (err er
 
 				// if queue is empty, signal other workers to stop and exit normally
 				if errors.Is(err, errQueueEmpty) {
+					svc.Logger.Debug("worker stopping due to empty queue", "id", i)
 					stopOnEmpty.Store(true)
 					return nil
 				}
@@ -70,31 +74,19 @@ func (svc Service) RunFbProcessing(ctx context.Context, workerCount int) (err er
 
 func (svc Service) processFbWorker(ctx context.Context) (err error) {
 
-	// begin tx
-	tx, err := svc.Db.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("svc.Db.Begin failed: %w", err)
-	}
-	defer tx.Rollback(ctx)
-
-	// select next queued item
-	item, err := svc.FbLaunchStore.SelectNextQueuedTx(ctx, tx)
+	// claim next queued item
+	item, err := svc.FbLaunchStore.ClaimNextForProcessing(ctx)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return errQueueEmpty
 		}
-		return fmt.Errorf("svc.FbLaunchStore.SelectNextQueuedTx failed: %w", err)
+		return fmt.Errorf("svc.FbLaunchStore.ClaimNextForProcessing failed: %w", err)
 	}
 
 	// process item
-	if err = svc.ProcessFbLaunchItem(ctx, tx, item); err != nil {
+	if err = svc.ProcessFbLaunchItem(ctx, item); err != nil {
 		// hard error only; API/inconsistency errors should already be handled in ProcessFbLaunchItem
 		return fmt.Errorf("svc.ProcessFbLaunchItem failed: %w", err)
-	}
-
-	// commit tx
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("tx.Commit failed: %w", err)
 	}
 
 	return nil
@@ -150,30 +142,18 @@ func (svc Service) RunGAdsProcessing(ctx context.Context, workerCount int) (err 
 
 func (svc Service) processGAdsWorker(ctx context.Context) (err error) {
 
-	// begin tx
-	tx, err := svc.Db.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("svc.Db.Begin failed: %w", err)
-	}
-	defer tx.Rollback(ctx)
-
-	// select next queued item
-	item, err := svc.GAdsLaunchStore.SelectNextQueuedTx(ctx, tx)
+	// claim next queued item
+	item, err := svc.GAdsLaunchStore.ClaimNextForProcessing(ctx)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return errQueueEmpty
 		}
-		return fmt.Errorf("svc.GAdsLaunchStore.SelectNextQueuedTx failed: %w", err)
+		return fmt.Errorf("svc.GAdsLaunchStore.ClaimNextForProcessing failed: %w", err)
 	}
 
 	// process item
-	if err = svc.ProcessGAdsLaunchItem(ctx, tx, item); err != nil {
+	if err = svc.ProcessGAdsLaunchItem(ctx, item); err != nil {
 		return fmt.Errorf("svc.ProcessGAdsLaunchItem failed: %w", err)
-	}
-
-	// commit tx
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("tx.Commit failed: %w", err)
 	}
 
 	return nil

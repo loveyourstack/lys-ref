@@ -10,13 +10,14 @@ func (e Enum) String() string {
 const (
 	Completed  Enum = "Completed"
 	Failed     Enum = "Failed"
-	InProgress Enum = "In progress"
+	Processing Enum = "Processing"
 	Invalid    Enum = "Invalid"
+	Preparing  Enum = "Preparing"
 	Queued     Enum = "Queued"
 	Ready      Enum = "Ready"
-	Unchecked  Enum = "Unchecked"
+	Unprepared Enum = "Unprepared"
 )
 
 var (
-	Editable = [...]Enum{Invalid, Ready, Unchecked}
+	Editable = [...]Enum{Invalid, Ready, Unprepared}
 )

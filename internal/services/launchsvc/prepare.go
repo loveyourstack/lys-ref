@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type prepareHelpers struct {
@@ -13,16 +11,16 @@ type prepareHelpers struct {
 	VerticalNameIdMap map[string]int64
 }
 
-func (svc Service) selectPrepareHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareHelpers, err error) {
+func (svc Service) selectPrepareHelpers(ctx context.Context) (helpers prepareHelpers, err error) {
 
-	helpers.CountryIso2IdMap, err = svc.CoStore.Iso2IdValueMapTx(ctx, tx)
+	helpers.CountryIso2IdMap, err = svc.CoStore.Iso2IdValueMap(ctx)
 	if err != nil {
-		return helpers, fmt.Errorf("svc.CoStore.Iso2IdValueMapTx failed: %w", err)
+		return helpers, fmt.Errorf("svc.CoStore.Iso2IdValueMap failed: %w", err)
 	}
 
-	helpers.VerticalNameIdMap, err = svc.VertStore.NameIdValueMapTx(ctx, tx)
+	helpers.VerticalNameIdMap, err = svc.VertStore.NameIdValueMap(ctx)
 	if err != nil {
-		return helpers, fmt.Errorf("svc.VertStore.NameIdValueMapTx failed: %w", err)
+		return helpers, fmt.Errorf("svc.VertStore.NameIdValueMap failed: %w", err)
 	}
 
 	return helpers, nil
@@ -62,8 +60,8 @@ type prepareFbHelpers struct {
 	prepareHelpers
 }
 
-func (svc Service) selectPrepareFbHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareFbHelpers, err error) {
-	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx, tx)
+func (svc Service) selectPrepareFbHelpers(ctx context.Context) (helpers prepareFbHelpers, err error) {
+	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx)
 	if err != nil {
 		return helpers, fmt.Errorf("svc.selectPrepareHelpers failed: %w", err)
 	}
@@ -106,8 +104,8 @@ type prepareGAdsHelpers struct {
 	prepareHelpers
 }
 
-func (svc Service) selectPrepareGAdsHelpers(ctx context.Context, tx pgx.Tx) (helpers prepareGAdsHelpers, err error) {
-	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx, tx)
+func (svc Service) selectPrepareGAdsHelpers(ctx context.Context) (helpers prepareGAdsHelpers, err error) {
+	helpers.prepareHelpers, err = svc.selectPrepareHelpers(ctx)
 	if err != nil {
 		return helpers, fmt.Errorf("svc.selectPrepareHelpers failed: %w", err)
 	}

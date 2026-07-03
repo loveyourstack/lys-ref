@@ -4,23 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/loveyourstack/lys-ref/internal/enums/launchstatus"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchfb"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchgads"
 )
 
-func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmlaunchfb.Model) (err error) {
+func (svc Service) ProcessFbLaunchItem(ctx context.Context, item dmlaunchfb.Model) (err error) {
 
-	// status must be Queued
-	if item.Status != launchstatus.Queued {
-		return fmt.Errorf("status must be Queued, but is %s", item.Status)
-	}
-
-	// set status to In progress
-	err = svc.FbLaunchStore.SetStatusTx(ctx, tx, launchstatus.InProgress, item.Id)
-	if err != nil {
-		return fmt.Errorf("svc.FbLaunchStore.SetStatusTx (InProgress) failed: %w", err)
+	// status must be Processing
+	if item.Status != launchstatus.Processing {
+		return fmt.Errorf("status must be Processing, but is %s", item.Status)
 	}
 
 	// step 1: create creative unless already created
@@ -30,9 +23,9 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		if item.Step != 0 {
 
 			// set status to Failed and write error message
-			err2 := svc.FbLaunchStore.SetFailedTx(ctx, tx, fmt.Sprintf("inconsistent state: step must be 0, but is %d", item.Step), item.Id)
+			err2 := svc.FbLaunchStore.SetFailed(ctx, fmt.Sprintf("inconsistent state: step must be 0, but is %d", item.Step), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.FbLaunchStore.SetFailedTx (Creative) failed: %w", err2)
+				return fmt.Errorf("svc.FbLaunchStore.SetFailed (Creative) failed: %w", err2)
 			}
 			return nil
 		}
@@ -42,9 +35,9 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		if err != nil {
 
 			// set status to Failed and write error message
-			err2 := svc.FbLaunchStore.SetFailedTx(ctx, tx, err.Error(), item.Id)
+			err2 := svc.FbLaunchStore.SetFailed(ctx, err.Error(), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.FbLaunchStore.SetFailedTx (Creative) failed: %w", err2)
+				return fmt.Errorf("svc.FbLaunchStore.SetFailed (Creative) failed: %w", err2)
 			}
 			return nil
 		}
@@ -52,9 +45,9 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		// set creative id and step to 1
 		item.FbCreativeId = creativeId
 		item.Step = 1
-		err = svc.FbLaunchStore.SetCreativeIdTx(ctx, tx, creativeId, item.Id)
+		err = svc.FbLaunchStore.SetCreativeId(ctx, creativeId, item.Id)
 		if err != nil {
-			return fmt.Errorf("svc.FbLaunchStore.SetCreativeIdTx failed: %w", err)
+			return fmt.Errorf("svc.FbLaunchStore.SetCreativeId failed: %w", err)
 		}
 	}
 
@@ -64,9 +57,9 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		// step must be 1
 		if item.Step != 1 {
 			// set status to Failed and write error message
-			err2 := svc.FbLaunchStore.SetFailedTx(ctx, tx, fmt.Sprintf("inconsistent state: step must be 1, but is %d", item.Step), item.Id)
+			err2 := svc.FbLaunchStore.SetFailed(ctx, fmt.Sprintf("inconsistent state: step must be 1, but is %d", item.Step), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.FbLaunchStore.SetFailedTx (Campaign) failed: %w", err2)
+				return fmt.Errorf("svc.FbLaunchStore.SetFailed (Campaign) failed: %w", err2)
 			}
 			return nil
 		}
@@ -76,9 +69,9 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		if err != nil {
 
 			// set status to Failed and write error message
-			err2 := svc.FbLaunchStore.SetFailedTx(ctx, tx, err.Error(), item.Id)
+			err2 := svc.FbLaunchStore.SetFailed(ctx, err.Error(), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.FbLaunchStore.SetFailedTx (Campaign) failed: %w", err2)
+				return fmt.Errorf("svc.FbLaunchStore.SetFailed (Campaign) failed: %w", err2)
 			}
 			return nil
 		}
@@ -86,32 +79,26 @@ func (svc Service) ProcessFbLaunchItem(ctx context.Context, tx pgx.Tx, item dmla
 		// set campaign id and step to 2
 		item.FbCampaignId = campaignId
 		item.Step = 2
-		err = svc.FbLaunchStore.SetCampaignIdTx(ctx, tx, campaignId, item.Id)
+		err = svc.FbLaunchStore.SetCampaignId(ctx, campaignId, item.Id)
 		if err != nil {
-			return fmt.Errorf("svc.FbLaunchStore.SetCampaignIdTx failed: %w", err)
+			return fmt.Errorf("svc.FbLaunchStore.SetCampaignId failed: %w", err)
 		}
 	}
 
 	// set status to Completed
-	err = svc.FbLaunchStore.SetStatusTx(ctx, tx, launchstatus.Completed, item.Id)
+	err = svc.FbLaunchStore.SetStatus(ctx, launchstatus.Completed, item.Id)
 	if err != nil {
-		return fmt.Errorf("svc.FbLaunchStore.SetStatusTx (Completed) failed: %w", err)
+		return fmt.Errorf("svc.FbLaunchStore.SetStatus (Completed) failed: %w", err)
 	}
 
 	return nil
 }
 
-func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dmlaunchgads.Model) (err error) {
+func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, item dmlaunchgads.Model) (err error) {
 
-	// status must be Queued
-	if item.Status != launchstatus.Queued {
-		return fmt.Errorf("status must be Queued, but is %s", item.Status)
-	}
-
-	// set status to In progress
-	err = svc.GAdsLaunchStore.SetStatusTx(ctx, tx, launchstatus.InProgress, item.Id)
-	if err != nil {
-		return fmt.Errorf("svc.GAdsLaunchStore.SetStatusTx (InProgress) failed: %w", err)
+	// status must be Processing
+	if item.Status != launchstatus.Processing {
+		return fmt.Errorf("status must be Processing, but is %s", item.Status)
 	}
 
 	// step 1: create campaign unless already created
@@ -120,9 +107,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		// step must be 0
 		if item.Step != 0 {
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, fmt.Sprintf("inconsistent state: step must be 0, but is %d", item.Step), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, fmt.Sprintf("inconsistent state: step must be 0, but is %d", item.Step), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Campaign) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Campaign) failed: %w", err2)
 			}
 			return nil
 		}
@@ -132,9 +119,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		if err != nil {
 
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, err.Error(), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, err.Error(), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Campaign) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Campaign) failed: %w", err2)
 			}
 			return nil
 		}
@@ -142,9 +129,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		// set campaign id and step to 1
 		item.GAdsCampaignId = campaignId
 		item.Step = 1
-		err = svc.GAdsLaunchStore.SetCampaignIdTx(ctx, tx, campaignId, item.Id)
+		err = svc.GAdsLaunchStore.SetCampaignId(ctx, campaignId, item.Id)
 		if err != nil {
-			return fmt.Errorf("svc.GAdsLaunchStore.SetCampaignIdTx failed: %w", err)
+			return fmt.Errorf("svc.GAdsLaunchStore.SetCampaignId failed: %w", err)
 		}
 	}
 
@@ -155,9 +142,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		if item.Step != 1 {
 
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, fmt.Sprintf("inconsistent state: step must be 1, but is %d", item.Step), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, fmt.Sprintf("inconsistent state: step must be 1, but is %d", item.Step), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Ad Group) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Ad Group) failed: %w", err2)
 			}
 			return nil
 		}
@@ -167,9 +154,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		if err != nil {
 
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, err.Error(), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, err.Error(), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Ad Group) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Ad Group) failed: %w", err2)
 			}
 			return nil
 		}
@@ -177,9 +164,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		// set ad group id and step to 2
 		item.GAdsAdGroupId = adGroupId
 		item.Step = 2
-		err = svc.GAdsLaunchStore.SetAdGroupIdTx(ctx, tx, adGroupId, item.Id)
+		err = svc.GAdsLaunchStore.SetAdGroupId(ctx, adGroupId, item.Id)
 		if err != nil {
-			return fmt.Errorf("svc.GAdsLaunchStore.SetAdGroupIdTx failed: %w", err)
+			return fmt.Errorf("svc.GAdsLaunchStore.SetAdGroupId failed: %w", err)
 		}
 	}
 
@@ -190,9 +177,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		if item.Step != 2 {
 
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, fmt.Sprintf("inconsistent state: step must be 2, but is %d", item.Step), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, fmt.Sprintf("inconsistent state: step must be 2, but is %d", item.Step), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Ad) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Ad) failed: %w", err2)
 			}
 			return nil
 		}
@@ -202,9 +189,9 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		if err != nil {
 
 			// set status to Failed and write error message
-			err2 := svc.GAdsLaunchStore.SetFailedTx(ctx, tx, err.Error(), item.Id)
+			err2 := svc.GAdsLaunchStore.SetFailed(ctx, err.Error(), item.Id)
 			if err2 != nil {
-				return fmt.Errorf("svc.GAdsLaunchStore.SetFailedTx (Ad) failed: %w", err2)
+				return fmt.Errorf("svc.GAdsLaunchStore.SetFailed (Ad) failed: %w", err2)
 			}
 			return nil
 		}
@@ -212,16 +199,16 @@ func (svc Service) ProcessGAdsLaunchItem(ctx context.Context, tx pgx.Tx, item dm
 		// set ad id and step to 3
 		item.GAdsAdId = adId
 		item.Step = 3
-		err = svc.GAdsLaunchStore.SetAdIdTx(ctx, tx, adId, item.Id)
+		err = svc.GAdsLaunchStore.SetAdId(ctx, adId, item.Id)
 		if err != nil {
-			return fmt.Errorf("svc.GAdsLaunchStore.SetAdIdTx failed: %w", err)
+			return fmt.Errorf("svc.GAdsLaunchStore.SetAdId failed: %w", err)
 		}
 	}
 
 	// set status to Completed
-	err = svc.GAdsLaunchStore.SetStatusTx(ctx, tx, launchstatus.Completed, item.Id)
+	err = svc.GAdsLaunchStore.SetStatus(ctx, launchstatus.Completed, item.Id)
 	if err != nil {
-		return fmt.Errorf("svc.GAdsLaunchStore.SetStatusTx (Completed) failed: %w", err)
+		return fmt.Errorf("svc.GAdsLaunchStore.SetStatus (Completed) failed: %w", err)
 	}
 
 	return nil

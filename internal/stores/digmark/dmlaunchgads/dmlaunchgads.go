@@ -60,6 +60,29 @@ type Store struct {
 	Db *pgxpool.Pool
 }
 
+// ClaimNextForProcessing selects the next queued item and sets its status to Processing, returning the item.
+func (s Store) ClaimNextForProcessing(ctx context.Context) (item Model, err error) {
+	stmt := fmt.Sprintf(`WITH picked AS (SELECT id FROM %s.%s WHERE status = 'Queued' ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED) 
+		UPDATE %s.%s dm_l_gads SET status = 'Processing', message = '' FROM picked 
+		WHERE dm_l_gads.id = picked.id RETURNING dm_l_gads.*;`, schemaName, tableName, schemaName, tableName)
+	items, err := lyspg.SelectT[Model](ctx, s.Db, stmt)
+	if err != nil {
+		return Model{}, fmt.Errorf("lyspg.SelectT failed: %w", err)
+	}
+	if len(items) == 0 {
+		return Model{}, pgx.ErrNoRows
+	}
+	return items[0], nil
+}
+
+// ClaimForPreparation selects a batch of unprepared items and sets their status to Preparing, returning the items.
+func (s Store) ClaimForPreparation(ctx context.Context, batchSize int) (items []Model, err error) {
+	stmt := fmt.Sprintf(`WITH picked AS (SELECT id FROM %s.%s WHERE status = 'Unprepared' ORDER BY id LIMIT $1 FOR UPDATE SKIP LOCKED) 
+		UPDATE %s.%s dm_l_gads SET status = 'Preparing', message = '' FROM picked 
+		WHERE dm_l_gads.id = picked.id RETURNING dm_l_gads.*;`, schemaName, tableName, schemaName, tableName)
+	return lyspg.SelectT[Model](ctx, s.Db, stmt, batchSize)
+}
+
 func (s Store) Delete(ctx context.Context, id int64) error {
 
 	// select item from id
@@ -118,64 +141,73 @@ func (s Store) InsertTx(ctx context.Context, tx pgx.Tx, input Input) (newId int6
 	return lyspg.Insert[Input, int64](ctx, tx, schemaName, tableName, pkColName, input)
 }
 
+func (s Store) QueueMany(ctx context.Context, ids []int64) (numDeleted int64, err error) {
+
+	// select items from ids
+	items, err := lyspg.SelectT[Model](ctx, s.Db, fmt.Sprintf("SELECT id, status FROM %s.%s WHERE id = ANY($1);", schemaName, tableName), ids)
+	if err != nil {
+		return 0, fmt.Errorf("lyspg.SelectT failed: %w", err)
+	}
+
+	// only allow queueing of Ready records, ignore others
+	var queueableIds []int64
+	for _, item := range items {
+		if item.Status == launchstatus.Ready {
+			queueableIds = append(queueableIds, item.Id)
+		}
+	}
+
+	// queue
+	stmt := fmt.Sprintf("UPDATE %s.%s SET status = 'Queued' WHERE id = ANY($1);", schemaName, tableName)
+	res, err := s.Db.Exec(ctx, stmt, queueableIds)
+	if err != nil {
+		return 0, lyserr.Db{Err: fmt.Errorf("s.Db.Exec failed: %w", err), Stmt: stmt}
+	}
+
+	return res.RowsAffected(), nil
+}
+
 func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []Model, unpagedCount lyspg.TotalCount, err error) {
 	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
-}
-
-func (s Store) SelectUncheckedTx(ctx context.Context, tx pgx.Tx) (items []Model, err error) {
-	stmt := fmt.Sprintf(`SELECT * FROM %s.%s WHERE status = 'Unchecked' ORDER BY id FOR UPDATE SKIP LOCKED;`, schemaName, tableName)
-	return lyspg.SelectT[Model](ctx, tx, stmt)
-}
-
-func (s Store) SelectNextQueuedTx(ctx context.Context, tx pgx.Tx) (item Model, err error) {
-	stmt := fmt.Sprintf(`SELECT * FROM %s.%s WHERE status = 'Queued' ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED;`, schemaName, tableName)
-	items, err := lyspg.SelectT[Model](ctx, tx, stmt)
-	if err != nil {
-		return Model{}, fmt.Errorf("lyspg.SelectT failed: %w", err)
-	}
-	if len(items) == 0 {
-		return Model{}, pgx.ErrNoRows
-	}
-	return items[0], nil
 }
 
 func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
-func (s Store) SetAdIdTx(ctx context.Context, tx pgx.Tx, adId int64, id int64) (err error) {
+func (s Store) SetAdId(ctx context.Context, adId int64, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"gads_ad_id": adId,
 		"step":       3,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetAdGroupIdTx(ctx context.Context, tx pgx.Tx, adGroupId int64, id int64) (err error) {
+func (s Store) SetAdGroupId(ctx context.Context, adGroupId int64, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"gads_ad_group_id": adGroupId,
 		"step":             2,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetCampaignIdTx(ctx context.Context, tx pgx.Tx, campaignId int64, id int64) (err error) {
+func (s Store) SetCampaignId(ctx context.Context, campaignId int64, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"gads_campaign_id": campaignId,
 		"step":             1,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetFailedTx(ctx context.Context, tx pgx.Tx, msg string, id int64) (err error) {
+func (s Store) SetFailed(ctx context.Context, msg string, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"message": msg,
 		"status":  launchstatus.Failed,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetPreparedTx(ctx context.Context, tx pgx.Tx, computed Computed, id int64) (err error) {
+func (s Store) SetPrepared(ctx context.Context, computed Computed, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"country_fk":  computed.CountryFk,
 		"message":     "",
@@ -184,17 +216,17 @@ func (s Store) SetPreparedTx(ctx context.Context, tx pgx.Tx, computed Computed, 
 
 		"gads_account_id": computed.GAdsAccountId,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetStatusTx(ctx context.Context, tx pgx.Tx, status launchstatus.Enum, id int64) (err error) {
+func (s Store) SetStatus(ctx context.Context, status launchstatus.Enum, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"status": status,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
-func (s Store) SetUnpreparedTx(ctx context.Context, tx pgx.Tx, msg string, id int64) (err error) {
+func (s Store) SetUnprepared(ctx context.Context, msg string, id int64) (err error) {
 	assignmentsMap := map[string]any{
 		"country_fk":  -1,
 		"message":     msg,
@@ -203,7 +235,7 @@ func (s Store) SetUnpreparedTx(ctx context.Context, tx pgx.Tx, msg string, id in
 
 		"gads_account_id": 0,
 	}
-	return lyspg.UpdatePartial(ctx, tx, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
+	return lyspg.UpdatePartial(ctx, s.Db, schemaName, tableName, pkColName, compPlan.JsonKeyDbNameMap(), assignmentsMap, id)
 }
 
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {

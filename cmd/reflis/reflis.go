@@ -65,7 +65,7 @@ func run() error {
 	defer lisApp.Db.Close()
 
 	// attach services
-	lisApp.LaunchSvc = launchsvc.NewService(lisApp.Db, lisApp.Logger)
+	lisApp.LaunchSvc = launchsvc.NewService(lisApp.Db, conf.Reflis.PrepBatchSize, lisApp.Logger)
 
 	// create prep runners
 	fbPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunFbPreparation, lisApp.Logger)
@@ -89,9 +89,12 @@ func run() error {
 		return fmt.Errorf("initialization: failed to listen to '%s' channel: %w", pgChanName, err)
 	}
 
-	// trigger prep runners once at startup in case listener was down when changes were made
+	// trigger runners once at startup in case listener was down when changes were made
 	fbPrepRunner.trigger()
 	gadsPrepRunner.trigger()
+
+	fbProcessingRunner.trigger()
+	gadsProcessingRunner.trigger()
 
 	// display startup message
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))

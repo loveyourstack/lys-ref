@@ -1,6 +1,7 @@
 package launchsvc
 
 import (
+	"log"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +12,8 @@ import (
 )
 
 type Service struct {
+	PrepBatchSize int
+
 	FbLaunchStore   dmlaunchfb.Store
 	GAdsLaunchStore dmlaunchgads.Store
 
@@ -21,11 +24,17 @@ type Service struct {
 	Logger *slog.Logger
 }
 
-func NewService(db *pgxpool.Pool, logger *slog.Logger) (svc Service) {
+func NewService(db *pgxpool.Pool, prepBatchSize int, logger *slog.Logger) (svc Service) {
+
+	if prepBatchSize <= 0 {
+		log.Fatal("prepBatchSize must be > 0")
+	}
 
 	svcShortname := "launch"
 
 	return Service{
+		PrepBatchSize: prepBatchSize,
+
 		FbLaunchStore:   dmlaunchfb.Store{Db: db},
 		GAdsLaunchStore: dmlaunchgads.Store{Db: db},
 

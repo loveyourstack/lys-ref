@@ -3,7 +3,7 @@
     <legend class="pl-2 pr-2">{{ launchIds.length }} {{ $t('launchers.selected_launchers') }}</legend>
 
       <div class="d-flex align-center ga-6 pt-2">
-        <v-btn color="primary" disabled>{{ $t('actions.queue') }}</v-btn>
+        <v-btn :disabled="!auth.isWriter" :loading="queueing" color="primary" @click="queueByIds">{{ $t('actions.queue') }}</v-btn>
         <v-btn color="secondary" disabled>{{ $t('actions.cancel') }}</v-btn>
 
         <v-spacer></v-spacer>
@@ -34,6 +34,7 @@ const emit = defineEmits<{
 const appStore = useAppStore()
 
 const deleting = ref(false)
+const queueing = ref(false)
 
 function deleteByIds() {
   deleting.value = true
@@ -46,6 +47,21 @@ function deleteByIds() {
     .catch() // handled by interceptor
     .finally(() => {
       deleting.value = false
+      emit('update')
+    })
+}
+
+function queueByIds() {
+  queueing.value = true
+
+  ax.post(props.baseUrl + '/queue-many', props.launchIds)
+    .then((resp) => {
+      const numQueued = resp.data.data
+      notify(appStore.company, numQueued + ' ' + props.partner + ' launcher(s) queued', appStore.logoUrl)
+    })
+    .catch() // handled by interceptor
+    .finally(() => {
+      queueing.value = false
       emit('update')
     })
 }

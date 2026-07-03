@@ -43,6 +43,10 @@ password = ""
 binaryPath = "/path/to/mcpsrv"
 configFilePath = "/path/to/mcp_config.toml"
 
+[reflis]
+prepBatchSize = 10 # number of unprepared items to claim for preparation at once
+workerCount = 5 # number of concurrent workers per partner for processing queued items
+
 [aws]
 accessKeyId = ""
 region = ""

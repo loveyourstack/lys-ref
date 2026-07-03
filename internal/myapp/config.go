@@ -40,13 +40,14 @@ type developer struct {
 	Password   string
 }
 
-type reflis struct {
-	WorkerCount int
-}
-
 type McpServer struct {
 	BinaryPath     string
 	ConfigFilePath string
+}
+
+type reflis struct {
+	PrepBatchSize int
+	WorkerCount   int
 }
 
 // Process contains the config for the process schema
@@ -96,8 +97,8 @@ type Config struct {
 	API          api
 	UI           ui
 	Developer    developer
-	Reflis       reflis
 	McpServer    McpServer
+	Reflis       reflis
 
 	Aws     awsapi.Conf
 	MaxMind mmapi.Conf

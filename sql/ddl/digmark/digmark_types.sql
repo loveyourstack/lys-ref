@@ -1,5 +1,5 @@
 
-CREATE TYPE digmark.launcher_status AS ENUM ('Unchecked', 'Invalid', 'Ready', 'Queued', 'In progress', 'Failed', 'Completed');
+CREATE TYPE digmark.launcher_status AS ENUM ('Unprepared', 'Preparing', 'Invalid', 'Ready', 'Queued', 'Processing', 'Failed', 'Completed');
 
 CREATE TYPE digmark.manager AS ENUM ('All', 'Anna', 'Michael', 'Paul');
 

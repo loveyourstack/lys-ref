@@ -80,7 +80,7 @@ CREATE TABLE digmark.launcher
   message text NOT NULL DEFAULT '', -- set during preparation and processing
   name text_short_mandatory NOT NULL,
   partner digmark.partner NOT NULL, -- default set by sub-table
-  status digmark.launcher_status NOT NULL DEFAULT 'Unchecked',
+  status digmark.launcher_status NOT NULL DEFAULT 'Unprepared',
   step int NOT NULL DEFAULT 0, -- set during processing
   updated_at tracking_at,
   vertical_fk bigint NOT NULL DEFAULT -1, -- set during preparation
@@ -111,7 +111,7 @@ ALTER TABLE digmark.launcher_fb ADD CONSTRAINT launcher_fb_vertical_fk_fkey FORE
 
 COMMENT ON TABLE digmark.launcher_fb IS 'shortname: dm_l_fb';
 CREATE INDEX launcher_fb_day_idx ON digmark.launcher_fb USING btree(created_at_day);
-CREATE INDEX launcher_fb_status_unchecked_idx ON digmark.launcher_fb USING btree(status) WHERE status = 'Unchecked';
+CREATE INDEX launcher_fb_status_unprepared_idx ON digmark.launcher_fb USING btree(status) WHERE status = 'Unprepared';
 
 
 CREATE TABLE digmark.launcher_gads
@@ -132,4 +132,4 @@ ALTER TABLE digmark.launcher_gads ADD CONSTRAINT launcher_gads_vertical_fk_fkey 
 
 COMMENT ON TABLE digmark.launcher_gads IS 'shortname: dm_l_gads';
 CREATE INDEX launcher_gads_day_idx ON digmark.launcher_gads USING btree(created_at_day);
-CREATE INDEX launcher_gads_status_unchecked_idx ON digmark.launcher_gads USING btree(status) WHERE status = 'Unchecked';
+CREATE INDEX launcher_gads_status_unprepared_idx ON digmark.launcher_gads USING btree(status) WHERE status = 'Unprepared';

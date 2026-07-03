@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"sync"
 	"time"
@@ -22,6 +23,11 @@ type processingRunner struct {
 
 func newProcessingRunner(ctx context.Context, runProcessingFunc func(ctx context.Context, workerCount int) error,
 	logger *slog.Logger, workerCount int) *processingRunner {
+
+	if workerCount <= 0 {
+		log.Fatalf("workerCount must be > 0, but is %d", workerCount)
+	}
+
 	return &processingRunner{
 		ctx:               ctx,
 		logger:            logger,
