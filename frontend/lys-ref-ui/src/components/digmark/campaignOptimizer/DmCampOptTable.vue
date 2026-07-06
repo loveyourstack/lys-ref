@@ -88,7 +88,7 @@
     </template>
 
     <template v-slot:[`item.daily_budget_eur`]="{ item }">
-      <span v-if="item.editing_daily_budget" class="d-flex justify-content align-center">
+      <span v-if="item.editing_daily_budget" class="d-flex justify-content align-center ga-1">
         <v-form ref="dailyBudgetForm">
           <v-text-field v-model.number="item.daily_budget_eur" hide-details density="compact" style="min-width: 110px;"
             :append-inner-icon="item.patch_daily_budget_icon"
@@ -97,12 +97,18 @@
             :rules="[(v: number) => v >= 0 && v <= 2000 || 'Daily budget must be between 0 and 2,000']"
           ></v-text-field>
         </v-form>
-        <v-icon class="ml-4" color="secondary" icon="mdi-content-save" :disabled="!auth.isWriter()" @click="patchDailyBudget(item)"></v-icon>
-        <v-icon class="ml-4" color="secondary" icon="mdi-close" @click="refreshItems()"></v-icon>
+        <v-btn icon flat size="small" :disabled="!auth.isWriter()" @click="patchDailyBudget(item)">
+          <v-icon color="secondary" icon="mdi-content-save"></v-icon>
+        </v-btn>
+        <v-btn icon flat size="small" @click="refreshItems()">
+          <v-icon color="secondary" icon="mdi-close"></v-icon>
+        </v-btn>
       </span>
-      <span v-else class="d-flex text-no-wrap" style="justify-content: flex-end;">
+      <span v-else class="d-flex justify-sm-end align-center text-no-wrap">
         {{ formatterDec2.format(item.daily_budget_eur!) + ' €' }}
-        <v-icon class="ml-3" color="secondary" icon="mdi-square-edit-outline" :disabled="!auth.isWriter()" @click="item.editing_daily_budget = true"></v-icon>
+        <v-btn icon flat size="small" :disabled="!auth.isWriter()" @click="item.editing_daily_budget = true">
+          <v-icon class="ml-3" color="primary" icon="mdi-square-edit-outline"></v-icon>
+        </v-btn>
       </span>
     </template>
 
