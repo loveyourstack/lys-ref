@@ -226,7 +226,7 @@
         "p5": "In the backend, this demonstrates:",
         "p5_list": {
             "item_1": "Table inheritance and generic functions, since the launcher tables of each partner share fields and behaviour",
-            "item_2": "A background process using LISTEN/NOTIFY, with debouncing of notifications to prevent excessive processing",
+            "item_2": "A background process using listen/notify, with debouncing of notifications to prevent excessive processing",
             "item_3": "Parallel processing from a queue, including progress tracking"
         }
     },

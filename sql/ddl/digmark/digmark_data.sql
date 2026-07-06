@@ -82,3 +82,19 @@ BEGIN
   END LOOP;
 END
 $do$;
+
+
+INSERT INTO digmark.launcher_fb (name, manager, fan_page, daily_budget_eur, status, step, message) VALUES 
+  ('FB - Acc1 - BR - Daating', 'Anna', 'Page1', 10, 'Invalid', 0, 'invalid vertical: Daating'),
+  ('FB - Acc1 - BS - E-commerce', 'Michael', 'Page2', 15, 'Ready', 0, ''),
+  ('FB - Acc2 - BT - Education', 'Paul', 'Page3', 20, 'Processing', 1, ''),
+  ('FB - Acc1 - BV - Health & Wellness', 'Anna', 'Page1', 10, 'Completed', 2, ''),
+  ('FB - Acc1 - BW - Home Services', 'Michael', 'Page2', 15, 'Failed', 0, 'Facebook API error');
+
+
+INSERT INTO digmark.launcher_gads (name, manager, daily_budget_eur, status, step, message) VALUES 
+  ('GAds - Acc2 - XX - Housing', 'Paul', 20, 'Invalid', 0, 'invalid country: XX'),
+  ('GAds - Acc1 - BZ - Legal Services', 'Anna', 10, 'Ready', 0, ''),
+  ('GAds - Acc1 - CA - Mobile Apps', 'Michael', 15, 'Processing', 1, ''),
+  ('GAds - Acc2 - CC - Personal Finance', 'Paul', 20, 'Processing', 2, ''),
+  ('GAds - Acc1 - CD - Travel', 'Anna', 10, 'Completed', 3, '');

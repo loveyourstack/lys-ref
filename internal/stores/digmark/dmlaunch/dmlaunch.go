@@ -223,24 +223,6 @@ func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error)
 }
 
 func Update[inputT any](ctx context.Context, db *pgxpool.Pool, pSchema, pTable, pView, pPkCol string, input inputT, id int64) (err error) {
-
-	// select status from id
-	item, err := lyspg.SelectUniqueRowFields[statusCheck](ctx, db, []string{"status"}, pSchema, pView, pPkCol, id)
-	if err != nil {
-		return fmt.Errorf("lyspg.SelectUniqueRowField failed: %w", err)
-	}
-
-	// if updating an invalid record, assume it has been fixed, and reset to Unprepared
-	if item.Status == launchstatus.Invalid {
-		if err = lyspg.UpdateWithExtras(ctx, db, pSchema, pTable, pPkCol, input, id, []string{"status"}, []any{launchstatus.Unprepared}); err != nil {
-			return fmt.Errorf("lyspg.UpdateWithExtras failed: %w", err)
-		}
-	} else {
-		// otherwise update as normal
-		if err = lyspg.Update(ctx, db, pSchema, pTable, pPkCol, input, id); err != nil {
-			return fmt.Errorf("lyspg.Update failed: %w", err)
-		}
-	}
-
-	return nil
+	// updating a record requires it to be checked again: set status to Unprepared
+	return lyspg.UpdateWithExtras(ctx, db, pSchema, pTable, pPkCol, input, id, []string{"status"}, []any{launchstatus.Unprepared})
 }

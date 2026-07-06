@@ -226,7 +226,7 @@
         "p5": "Im Backend zeigt dies:",
         "p5_list": {
             "item_1": "Tabellenvererbung und generische Funktionen, da die Launcher-Tabellen jedes Partners Felder und Verhalten teilen",
-            "item_2": "Ein Hintergrundprozess unter Verwendung von LISTEN/NOTIFY, mit Entprellung von Benachrichtigungen, um übermäßige Verarbeitung zu verhindern",
+            "item_2": "Ein Hintergrundprozess unter Verwendung von listen/notify, mit Entprellung von Benachrichtigungen, um übermäßige Verarbeitung zu verhindern",
             "item_3": "Parallele Verarbeitung aus einer Warteschlange, einschließlich Fortschrittsverfolgung"
         }
     },

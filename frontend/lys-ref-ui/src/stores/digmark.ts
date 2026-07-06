@@ -5,10 +5,16 @@ import ax from '@/api'
 
 export const useDigmarkStore = defineStore('digmark', () => {
 
+  const launcherStati = ref<string[]>([])
   const managers = ref<string[]>([])
   const managersSelectable = ref<string[]>([])
   const verticals = ref<SelectionItem[]>([])
   const mandatoryVerticals = ref<SelectionItem[]>([])
+
+  function loadLauncherStati() {
+    const myUrl = '/a/digmark/launcher-stati'
+    fetchOnce({ ax, myUrl, result: launcherStati })
+  }
 
   function loadManagers() {
     const myUrl = '/a/digmark/managers'
@@ -29,8 +35,8 @@ export const useDigmarkStore = defineStore('digmark', () => {
   })
 
   return { 
-    managers, managersSelectable, mandatoryVerticals, verticals,
-    loadManagers, loadVerticals,
+    launcherStati, managers, managersSelectable, mandatoryVerticals, verticals,
+    loadLauncherStati, loadManagers, loadVerticals,
   }
 })
 

@@ -49,9 +49,11 @@
         <v-col>
           <dm-launch-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
             v-model:filterCountryFKs="filterCountryFKs"
+            v-model:filterCreated="filterCreated"
             v-model:filterDailyBudget="filterDailyBudget"
             v-model:filterManagers="filterManagers"
             v-model:filterName="filterName"
+            v-model:filterStati="filterStati"
             v-model:filterVerticalFks="filterVerticalFks"
           />
         </v-col>
@@ -101,7 +103,7 @@
 import { ref } from 'vue'
 import { useDateFormat } from '@vueuse/core'
 import { type SortItem } from 'vuetify/lib/components/VDataTable/composables/sort.mjs'
-import { type NumericFilter, getNumericFilterUrlParams, getTextFilterUrlParam } from 'lys-vue'
+import { type DateFilter, type NumericFilter, getDateFilterUrlParams, getNumericFilterUrlParams, getTextFilterUrlParam } from 'lys-vue'
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
 import auth from '@/auth'
@@ -134,9 +136,11 @@ const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstim
 } = useTableState<LauncherFb>({ ax, baseUrl, getFilterStr, onFetchSuccess: () => { selected.value = [] } })
 
 const filterCountryFKs = ref<number[]>()
+const filterCreated = ref<DateFilter>()
 const filterDailyBudget = ref<NumericFilter>()
 const filterManagers = ref<string[]>()
 const filterName = ref<string>()
+const filterStati = ref<string[]>()
 const filterVerticalFks = ref<number[]>()
 
 const editID = ref(0)
@@ -155,9 +159,11 @@ const { resetTable } = useJsonLs({
   refs: {
     excludedHeaders,
     filterCountryFKs,
+    filterCreated,
     filterDailyBudget,
     filterManagers,
     filterName,
+    filterStati,
     filterVerticalFks,
     itemsPerPage,
     sortBy,
@@ -168,9 +174,11 @@ function getFilterStr(): string {
   let ret = ''
 
   if (filterCountryFKs.value && filterCountryFKs.value.length > 0) { ret += '&country_fk=' + filterCountryFKs.value.join('|') }
+  ret += getDateFilterUrlParams('created_at_day', filterCreated.value)
   ret += getNumericFilterUrlParams('daily_budget_eur', filterDailyBudget.value)
   if (filterManagers.value && filterManagers.value.length > 0) { ret += '&manager=' + filterManagers.value.join('|') }
   ret += getTextFilterUrlParam('name', filterName.value)
+  if (filterStati.value && filterStati.value.length > 0) { ret += '&status=' + filterStati.value.join('|') }
   if (filterVerticalFks.value && filterVerticalFks.value.length > 0) { ret += '&vertical_fk=' + filterVerticalFks.value.join('|') }
 
   return ret

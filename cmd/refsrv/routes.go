@@ -301,6 +301,8 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, launchGAdsStore)).Methods("PATCH")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, launchGAdsStore)).Methods("DELETE")
 
+		r.HandleFunc("/launcher-stati", lys.GetEnumValues(apiEnv, srvApp.Db, schemaName, "launcher_status")).Methods("GET")
+
 		r.HandleFunc("/managers", lys.GetEnumValues(apiEnv, srvApp.Db, schemaName, "manager")).Methods("GET")
 
 		endpoint = "/manager-budgets"

@@ -21,8 +21,9 @@ type UiStoreData struct {
 	CoreOptionalEnums  []string `json:"core_optional_enums"`
 	CorePeriods        []string `json:"core_periods"`
 
-	DigmarkManagers  []string           `json:"digmark_managers"`
-	DigmarkVerticals []dmvertical.Model `json:"digmark_verticals"`
+	DigmarkLauncherStati []string           `json:"digmark_launcher_stati"`
+	DigmarkManagers      []string           `json:"digmark_managers"`
+	DigmarkVerticals     []dmvertical.Model `json:"digmark_verticals"`
 
 	EcbActiveCurrenciesExEur []ecbcurr.Model `json:"ecb_active_currencies_ex_eur"`
 
@@ -55,6 +56,11 @@ func (svc Service) SelectUiStoreData(ctx context.Context, db *pgxpool.Pool) (uiS
 	}
 
 	// ----------------------------------------------------------------
+
+	uiStoreData.DigmarkLauncherStati, err = lyspg.SelectEnum(ctx, db, "digmark.launcher_status", nil, nil, "")
+	if err != nil {
+		return UiStoreData{}, fmt.Errorf("lyspg.SelectEnum (digmark.launcher_status) failed: %w", err)
+	}
 
 	uiStoreData.DigmarkManagers, err = lyspg.SelectEnum(ctx, db, "digmark.manager", nil, nil, "")
 	if err != nil {

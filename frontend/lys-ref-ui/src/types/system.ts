@@ -35,6 +35,7 @@ export interface StoreData {
   core_optional_enums: string[]
   core_periods: string[]
 
+  digmark_launcher_stati: string[]
   digmark_managers: string[]
   digmark_verticals: SelectionItem[]
 

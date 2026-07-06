@@ -128,6 +128,7 @@ function loadStoreData() {
     coreStore.optionalEnums = storeData.value.core_optional_enums
     coreStore.periods = storeData.value.core_periods
 
+    digmarkStore.launcherStati = storeData.value.digmark_launcher_stati
     digmarkStore.managers = storeData.value.digmark_managers
     digmarkStore.verticals = storeData.value.digmark_verticals
 

@@ -1,5 +1,8 @@
 <template>
   <v-chip-group column>
+    <l-filter-chip-date name="Created" v-model="filterCreated"
+      @change="emit('update')" @changeDebounced="emit('updateDebounced')" @close="filterCreated = undefined; emit('update')">
+    </l-filter-chip-date>
 
     <l-filter-chip-text name="Name search" v-model="filterName"
       @update:modelValue="emit('updateDebounced')" @close="filterName = undefined; emit('update')">
@@ -21,18 +24,24 @@
       @change="emit('update')" @changeDebounced="emit('updateDebounced')" @close="filterDailyBudget = undefined; emit('update')">
     </l-filter-chip-numeric>
 
+    <l-filter-chip-enum name="Stati" v-model="filterStati" :items="digmarkStore.launcherStati" multiple
+      @update:modelValue="emit('update')" @close="filterStati = undefined; emit('update')">
+    </l-filter-chip-enum>
+
   </v-chip-group>
 </template>
 
 <script lang="ts" setup>
-import { type NumericFilter } from 'lys-vue'
+import { type DateFilter, type NumericFilter } from 'lys-vue'
 import { useDigmarkStore } from '@/stores/digmark'
 import { useGeoStore } from '@/stores/geo'
 
 const filterCountryFKs = defineModel<number[]>('filterCountryFKs')
+const filterCreated = defineModel<DateFilter>('filterCreated')
 const filterDailyBudget = defineModel<NumericFilter>('filterDailyBudget')
 const filterManagers = defineModel<string[]>('filterManagers')
 const filterName = defineModel<string>('filterName')
+const filterStati = defineModel<string[]>('filterStati')
 const filterVerticalFks = defineModel<number[]>('filterVerticalFks')
 
 const emit = defineEmits<{
