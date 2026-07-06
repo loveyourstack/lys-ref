@@ -155,13 +155,13 @@
             "title": "External data",
             "subtitle": "Importing and managing external data sources.",
             "p1": "This section shows data from the European Central Bank's API and the MaxMind API.",
-            "p2": "In the backend, the it shows how to merge data efficiently using hash tables and how to stream from file directly into the database."
+            "p2": "In the backend, it shows how to merge data efficiently using hash tables and how to stream from file directly into the database."
         },
         "parallel_processing": {
             "title": "Parallel processing",
             "subtitle": "Improved data throughput.",
-            "p1": "This section shows an implementation of job workflows, where each step is a fake backend command to manipulate data.",
-            "p2": "When a job is started, each step that can be executed in parallel runs concurrently, and structures are in place to manage failure gracefully."
+            "p1": "This section shows two types of parallel processing: a flow of steps which are executed in parallel where possible, and a group of background workers which process a queue.",
+            "p2": "Structures are in place to manage interruption and failure gracefully."
         },
         "project_stack": {
             "title": "Project stack and repositories",

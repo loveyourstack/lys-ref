@@ -160,8 +160,8 @@
         "parallel_processing": {
             "title": "Parallelverarbeitung",
             "subtitle": "Verbesserter Datendurchsatz.",
-            "p1": "Dieser Abschnitt zeigt eine Implementierung von Job-Workflows, bei denen jeder Schritt ein gefälschter Backend-Befehl zur Datenmanipulation ist.",
-            "p2": "Wenn ein Job gestartet wird, läuft jeder Schritt, der parallel ausgeführt werden kann, gleichzeitig, und es sind Strukturen vorhanden, um Fehler elegant zu verwalten."
+            "p1": "Dieser Abschnitt zeigt zwei Arten der Parallelverarbeitung: einen Ablauf von Schritten, die nach Möglichkeit parallel ausgeführt werden, und eine Gruppe von Hintergrundarbeitern, die eine Warteschlange verarbeiten.",
+            "p2": "Es sind Strukturen vorhanden, um Unterbrechungen und Fehler elegant zu verwalten."
         },
         "project_stack": {
             "title": "Projekt-Stack und Repositories",
