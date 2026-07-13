@@ -53,12 +53,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import { useDateFormat, useTimeAgo } from '@vueuse/core'
-import type { AxiosResponse } from 'axios'
+import { ref } from 'vue'
+import { useDateFormat } from '@vueuse/core'
 import { type SortItem } from 'vuetify/lib/components/VDataTable/composables/sort.mjs'
 import { type DateFilter, getDateFilterUrlParams } from 'lys-vue'
-import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
+import { useJsonLs, useLastSyncAt, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
 import { type ExchangeRate } from '@/types/ecb'
 
@@ -77,30 +76,11 @@ const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
 const baseUrl = '/a/ecb/exchange-rates'
 const { excelDlUrl } = useTableExcelDlUrl(baseUrl, getFilterStr)
 
-const lastSyncAt = ref<Date | null>(null)
-const lastSyncFmt = useDateFormat(
-  computed(() => lastSyncAt.value ?? 0), 'DD MMM YYYY HH:mm:ss'
-)
-const lastSyncAgo = useTimeAgo(
-  computed(() => lastSyncAt.value ?? 0)
-)
-const lastSyncAtMsg = computed(() => {
-  if (!lastSyncAt.value) { return 'Unknown' }
-  const oneYrAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-  if (lastSyncAt.value < oneYrAgo) { return 'Unknown' }
-  
-  return `${lastSyncFmt.value} (${lastSyncAgo.value})`
-})
+const { lastSyncAtMsg, getLastSyncAt } = useLastSyncAt()
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
   loadItems, refreshItems, refreshItemsDebounced
-} = useTableState<ExchangeRate>({ ax, baseUrl, getFilterStr, mapUrl, onFetchSuccess: (resp: AxiosResponse) => { 
-  const lastSyncHdr = resp.headers['last-sync-at']
-  const lastSyncVal = Array.isArray(lastSyncHdr) ? lastSyncHdr[0] : lastSyncHdr
-  if (typeof lastSyncVal === 'string') {
-    lastSyncAt.value = new Date(lastSyncVal)
-  }
-}})
+} = useTableState<ExchangeRate>({ ax, baseUrl, getFilterStr, mapUrl, onFetchSuccess: getLastSyncAt })
 
 const filterDay = ref<DateFilter>()
 const filterToCurrFk = ref<number>()
