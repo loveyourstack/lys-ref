@@ -8,6 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/connectors/aws/awsapi"
 	"github.com/loveyourstack/connectors/aws/awssvc"
+	"github.com/loveyourstack/connectors/ecb/ecbapi"
+	"github.com/loveyourstack/connectors/ecb/ecbsvc"
+	"github.com/loveyourstack/connectors/maxmind/mmapi"
+	"github.com/loveyourstack/connectors/maxmind/mmsvc"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/launchsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
@@ -24,13 +28,17 @@ type Application struct {
 	Validate *validator.Validate
 
 	// clients
-	AwsClient *awsapi.Client
+	AwsClient     *awsapi.Client
+	EcbClient     ecbapi.Client
+	MaxMindClient mmapi.Client
 
 	// services
-	AwsSvc    awssvc.Service
-	LaunchSvc launchsvc.Service
-	ProcSvc   procsvc.Service
-	SysSvc    syssvc.Service
+	AwsSvc     awssvc.Service
+	EcbSvc     ecbsvc.Service
+	LaunchSvc  launchsvc.Service
+	MaxMindSvc mmsvc.Service
+	ProcSvc    procsvc.Service
+	SysSvc     syssvc.Service
 }
 
 // NewApplication returns an Application with default settings. Not all fields get initialized.

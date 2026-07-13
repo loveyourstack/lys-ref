@@ -15,6 +15,10 @@ import (
 	"github.com/loveyourstack/connectors/aws/awsapi"
 	"github.com/loveyourstack/connectors/aws/awssvc"
 	"github.com/loveyourstack/connectors/aws/stores/awsusersgrule"
+	"github.com/loveyourstack/connectors/ecb/ecbapi"
+	"github.com/loveyourstack/connectors/ecb/ecbsvc"
+	"github.com/loveyourstack/connectors/maxmind/mmapi"
+	"github.com/loveyourstack/connectors/maxmind/mmsvc"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
@@ -25,6 +29,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/services/syssvc"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysextdatasync"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssession"
@@ -110,9 +115,14 @@ func main() {
 
 	// attach clients
 	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)
+	srvApp.EcbClient = ecbapi.NewClient(srvApp.Db, srvApp.Logger)
+	srvApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, srvApp.Db, srvApp.Logger)
 
 	// attach services
+	syncStore := sysextdatasync.Store{Db: srvApp.Db}
 	srvApp.AwsSvc = awssvc.NewService(srvApp.Db, srvApp.AwsClient, srvApp.Logger)
+	srvApp.EcbSvc = ecbsvc.NewServiceWithSyncStore(srvApp.EcbClient, srvApp.Logger, syncStore)
+	srvApp.MaxMindSvc = mmsvc.NewServiceWithSyncStore(srvApp.MaxMindClient, srvApp.Config.General.DownloadsPath, srvApp.Logger, syncStore)
 	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.Logger)
 	srvApp.SysSvc = syssvc.NewService(srvApp.Logger)
 

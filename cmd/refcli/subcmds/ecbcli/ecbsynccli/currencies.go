@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/loveyourstack/connectors/ecb/ecbsvc"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbcurr"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysextdatasync"
 	"github.com/spf13/cobra"
 )
 
@@ -85,6 +87,13 @@ func CurrenciesCmd(cliApp *cliapp.App) *cobra.Command {
 					}
 					cliApp.Logger.Info("deleted", slog.String("type", itemType), slog.Any("code", dbItem.Code))
 				}
+			}
+
+			// upsert the last sync time
+			syncStore := sysextdatasync.Store{Db: cliApp.Db}
+			err = syncStore.Upsert(cmd.Context(), ecbsvc.CurrenciesSync)
+			if err != nil {
+				return fmt.Errorf("syncStore.Upsert failed: %w", err)
 			}
 
 			cliApp.Logger.Debug("done")

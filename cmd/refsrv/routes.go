@@ -348,7 +348,9 @@ func (srvApp *httpServerApplication) ecbRoutes(apiEnv lys.Env) lys.RouteAdderFun
 		endpoint = "/currencies"
 
 		currStore := ecbcurr.Store{Db: srvApp.Db}
-		r.HandleFunc(endpoint, lys.Get(apiEnv, currStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint, lys.Get(apiEnv, currStore, &lys.GetOpts[ecbcurr.Model]{
+			GetLastSyncAt: srvApp.EcbSvc.SelectCurrenciesLastSyncAt,
+		})).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, currStore)).Methods("GET")
 
 		endpoint = "/currency-metadata"
@@ -359,7 +361,9 @@ func (srvApp *httpServerApplication) ecbRoutes(apiEnv lys.Env) lys.RouteAdderFun
 		endpoint = "/exchange-rates"
 
 		xrStore := ecbexchangerate.Store{Db: srvApp.Db}
-		r.HandleFunc(endpoint, lys.Get(apiEnv, xrStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint, lys.Get(apiEnv, xrStore, &lys.GetOpts[ecbexchangerate.Model]{
+			GetLastSyncAt: srvApp.EcbSvc.SelectExchangeRatesLastSyncAt,
+		})).Methods("GET")
 
 		endpoint = "/xr-performance-normalized"
 
