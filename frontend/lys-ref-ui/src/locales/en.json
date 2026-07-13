@@ -79,7 +79,8 @@
         "nav": "Currencies",
         "title": "Currencies",
         "p1": "Currency code and name are synced from the European Central Bank API.",
-        "p2": "Active and symbol are user-maintained metadata fields, stored independently of the synced data."
+        "p2": "Active and symbol are user-maintained metadata fields, stored independently of the synced data.",
+        "p3": "Since the data is synced from an external source, the timestamp of the last API sync operation is shown below the table."
     },
     "database": {
         "nav": "Database"
@@ -96,6 +97,9 @@
         "title": "Exchange rates",
         "p1": "This data is synced from the European Central Bank API. The sync methods in the backend demonstrate high-volume data processing.",
         "p2": "When working with large result sets, the total number of results shown in the pagination footer is estimated using database statistics, as indicated by the \"~\" prefix."
+    },
+    "external_data": {
+        "last_synced": "Last synced"
     },
     "flows": {
         "nav": "Flows",

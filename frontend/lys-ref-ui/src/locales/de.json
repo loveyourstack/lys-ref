@@ -79,7 +79,8 @@
         "nav": "Währungen",
         "title": "Währungen",
         "p1": "Währungscode und Name werden von der API der Europäischen Zentralbank synchronisiert.",
-        "p2": "Aktiv und Symbol sind benutzergepflegte Metadatenfelder, die unabhängig von den synchronisierten Daten gespeichert werden."
+        "p2": "Aktiv und Symbol sind benutzergepflegte Metadatenfelder, die unabhängig von den synchronisierten Daten gespeichert werden.",
+        "p3": "Da die Daten aus einer externen Quelle synchronisiert werden, wird der Zeitstempel der letzten API-Synchronisation unter der Tabelle angezeigt."
     },
     "database": {
         "nav": "Datenbank"
@@ -96,6 +97,9 @@
         "title": "Wechselkurse",
         "p1": "Diese Daten werden von der API der Europäischen Zentralbank synchronisiert. Die Synchronisierungsmethoden im Backend demonstrieren die Verarbeitung großer Datenmengen.",
         "p2": "Beim Arbeiten mit großen Ergebnismengen wird die Gesamtzahl der in der Paginierungsfußzeile angezeigten Ergebnisse anhand von Datenbankstatistiken geschätzt, wie durch das Präfix \"~\" angezeigt."
+    },
+    "external_data": {
+        "last_synced": "Zuletzt synchronisiert"
     },
     "flows": {
         "nav": "Abläufe",

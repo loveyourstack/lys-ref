@@ -46,14 +46,16 @@
 
     <template #bottom>
       <l-dt-bottom :itemsPerPage="itemsPerPage" :page="page" :totalItemsIsEstimate="totalItemsIsEstimate" :totalItemsEstimated="totalItemsEstimated"></l-dt-bottom>
+      <span class="ml-1 opacity-70">{{ $t('external_data.last_synced') }}: {{ lastSyncAtMsg }}</span>
     </template>
 
   </v-data-table-server>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useDateFormat } from '@vueuse/core'
+import { ref, computed } from 'vue'
+import { useDateFormat, useTimeAgo } from '@vueuse/core'
+import type { AxiosResponse } from 'axios'
 import { type SortItem } from 'vuetify/lib/components/VDataTable/composables/sort.mjs'
 import { type DateFilter, getDateFilterUrlParams } from 'lys-vue'
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
@@ -75,9 +77,30 @@ const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
 const baseUrl = '/a/ecb/exchange-rates'
 const { excelDlUrl } = useTableExcelDlUrl(baseUrl, getFilterStr)
 
+const lastSyncAt = ref<Date | null>(null)
+const lastSyncFmt = useDateFormat(
+  computed(() => lastSyncAt.value ?? 0), 'DD MMM YYYY HH:mm:ss'
+)
+const lastSyncAgo = useTimeAgo(
+  computed(() => lastSyncAt.value ?? 0)
+)
+const lastSyncAtMsg = computed(() => {
+  if (!lastSyncAt.value) { return 'Unknown' }
+  const oneYrAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+  if (lastSyncAt.value < oneYrAgo) { return 'Unknown' }
+  
+  return `${lastSyncFmt.value} (${lastSyncAgo.value})`
+})
+
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
   loadItems, refreshItems, refreshItemsDebounced
-} = useTableState<ExchangeRate>({ ax, baseUrl, getFilterStr, mapUrl })
+} = useTableState<ExchangeRate>({ ax, baseUrl, getFilterStr, mapUrl, onFetchSuccess: (resp: AxiosResponse) => { 
+  const lastSyncHdr = resp.headers['last-sync-at']
+  const lastSyncVal = Array.isArray(lastSyncHdr) ? lastSyncHdr[0] : lastSyncHdr
+  if (typeof lastSyncVal === 'string') {
+    lastSyncAt.value = new Date(lastSyncVal)
+  }
+}})
 
 const filterDay = ref<DateFilter>()
 const filterToCurrFk = ref<number>()
