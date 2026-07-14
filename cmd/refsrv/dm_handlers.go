@@ -58,7 +58,7 @@ func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r
 		NewActive bool    `json:"new_active"`
 	}
 
-	// marshal req body into inputs
+	// unmarshal req body
 	inp, err := lys.DecodeJsonBody[input](body)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
@@ -114,7 +114,7 @@ func (srvApp *httpServerApplication) dmPatchBudgetPercentByIds(w http.ResponseWr
 		BudgetPercentChange float64 `json:"budget_percent_change"`
 	}
 
-	// marshal req body into inputs
+	// unmarshal req body
 	inp, err := lys.DecodeJsonBody[input](body)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)

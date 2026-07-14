@@ -23,6 +23,7 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
@@ -116,6 +117,7 @@ func main() {
 	// attach clients
 	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)
 	srvApp.EcbClient = ecbapi.NewClient(srvApp.Db, srvApp.Logger)
+	srvApp.GeminiClient = gemapi.NewClient(ctx, srvApp.Db, srvApp.Config.General.GeneratedPath, srvApp.Logger)
 	srvApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, srvApp.Db, srvApp.Logger)
 
 	// attach services

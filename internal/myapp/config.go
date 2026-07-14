@@ -19,6 +19,7 @@ type general struct {
 	Env           appenv.Enum
 	Debug         bool
 	DownloadsPath string
+	GeneratedPath string
 }
 
 // api contains the API config

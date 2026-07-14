@@ -12,6 +12,7 @@ import (
 	"github.com/loveyourstack/connectors/ecb/ecbsvc"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/connectors/maxmind/mmsvc"
+	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/launchsvc"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
@@ -30,6 +31,7 @@ type Application struct {
 	// clients
 	AwsClient     *awsapi.Client
 	EcbClient     ecbapi.Client
+	GeminiClient  gemapi.Client
 	MaxMindClient mmapi.Client
 
 	// services

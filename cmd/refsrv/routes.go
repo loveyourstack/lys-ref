@@ -120,6 +120,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/core", RouteAdder: srvApp.coreRoutes(apiEnv)},
 		{Url: "/digmark", RouteAdder: srvApp.digmarkRoutes(apiEnv)},
 		{Url: "/ecb", RouteAdder: srvApp.ecbRoutes(apiEnv)},
+		{Url: "/gemini", RouteAdder: srvApp.geminiRoutes()},
 		{Url: "/geo", RouteAdder: srvApp.geoRoutes(apiEnv)},
 		{Url: "/maxmind", RouteAdder: srvApp.maxmindRoutes(apiEnv)},
 		{Url: "/pg-monitor", RouteAdder: srvApp.pgMonRoutes(apiEnv)},
@@ -372,6 +373,30 @@ func (srvApp *httpServerApplication) ecbRoutes(apiEnv lys.Env) lys.RouteAdderFun
 		xrPerfNormStoreEnv := apiEnv
 		xrPerfNormStoreEnv.GetOptions.MaxPerPage = 500
 		r.HandleFunc(endpoint, lys.Get(xrPerfNormStoreEnv, xrPerfNormStore, nil)).Methods("GET")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) geminiRoutes() lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+
+		writeR := r.NewRoute().Subrouter()
+		writeR.Use(authorizeRole(sysrole.Writer[:]))
+
+		// disable for now: img generation no longer available in free tier
+		//endpoint := "/generate-image"
+		//writeR.HandleFunc(endpoint, srvApp.gemGenerateImage).Methods("POST")
+
+		endpoint := "/generate-marketing-campaign"
+		writeR.HandleFunc(endpoint, srvApp.gemGenerateMarketingCampaign).Methods("POST")
+
+		endpoint = "/generate-text"
+		writeR.HandleFunc(endpoint, srvApp.gemGenerateText).Methods("POST")
+
+		endpoint = "/list-models"
+		writeR.HandleFunc(endpoint, srvApp.gemListModels).Methods("POST")
 
 		return r
 	}

@@ -1,0 +1,133 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/loveyourstack/lys"
+)
+
+func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// get req body
+	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	type input struct {
+		Model  string `json:"model"`
+		Prompt string `json:"prompt"`
+	}
+
+	// unmarshal req body
+	inp, err := lys.DecodeJsonBody[input](body)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	fName, err := srvApp.GeminiClient.GenerateImage(ctx, inp.Model, inp.Prompt)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateImage failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   fName,
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) gemGenerateMarketingCampaign(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// get req body
+	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	type input struct {
+		Model   string `json:"model"`
+		Product string `json:"product"`
+	}
+
+	// unmarshal req body
+	inp, err := lys.DecodeJsonBody[input](body)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	camp, err := srvApp.GeminiClient.GenerateMarketingCampaign(ctx, inp.Model, inp.Product)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateMarketingCampaign failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   camp,
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) gemGenerateText(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// get req body
+	body, err := lys.ExtractJsonBody(r, srvApp.PostOptions.MaxBodySize)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.ExtractJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	type input struct {
+		Model  string `json:"model"`
+		Prompt string `json:"prompt"`
+	}
+
+	// unmarshal req body
+	inp, err := lys.DecodeJsonBody[input](body)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	txt, err := srvApp.GeminiClient.GenerateText(ctx, inp.Model, inp.Prompt)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateText failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   txt,
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}
+
+func (srvApp *httpServerApplication) gemListModels(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	models, err := srvApp.GeminiClient.ListModels(ctx)
+	if err != nil {
+		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.ListModels failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// success
+	resp := lys.StdResponse{
+		Status: lys.ReqSucceeded,
+		Data:   models,
+	}
+	lys.JsonResponse(resp, http.StatusOK, w)
+}

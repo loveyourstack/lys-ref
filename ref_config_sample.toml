@@ -3,6 +3,7 @@ appName = "LoveYourStack Reference App"
 env     = "dev"
 debug   = true
 downloadsPath = "/home/<user>/downloads"
+generatedPath = "/home/<user>/generated"
 
 [database]
 host   = "localhost"
