@@ -74,7 +74,7 @@ CREATE TABLE digmark.generated_campaign
   call_to_action text_short_mandatory,
   created_at tracking_at,
   headline text_short_mandatory,
-  image_path text NOT NULL,
+  image_filename text NOT NULL,
   model text_short_mandatory,
   product text_short_mandatory
 );

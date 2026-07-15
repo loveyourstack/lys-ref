@@ -131,7 +131,7 @@ export interface GeneratedCampaignInput {
   body: string
   call_to_action: string
   headline: string
-  image_path: string
+  image_filename: string
   model: string
   product: string
 }

@@ -84,9 +84,11 @@ END
 $do$;
 
 
-INSERT INTO digmark.generated_campaign (body, call_to_action, headline, image_path, model, product) VALUES 
+INSERT INTO digmark.generated_campaign (body, call_to_action, headline, image_filename, model, product) VALUES 
   ('Experience the magic of the City of Light. Stroll down the Champs-Élysées, admire the Eiffel Tower at sunset, and indulge in world-class pastries. Your dream Parisian escape awaits, complete with charming cafes and historic wonders. Book now for an unforgettable journey into romance and culture.', 
-    'Book Your Trip', 'Fall in Love with Paris Today', '', 'gemini-3.1-flash-lite', 'trip to Paris');
+    'Book Your Trip', 'Fall in Love with Paris Today', '', 'gemini-3.1-flash-lite', 'trip to Paris'),
+  ('Experience the ultimate indulgence with Dreams, our premium milk chocolate crafted from the finest ethically sourced cocoa. Each bite melts into a velvety symphony of rich, creamy flavor that transports your senses to paradise. Treat yourself to the luxury you deserve and taste the magic of pure chocolate bliss today.', 
+    'Shop Dreams Now', 'Dreams: A Little Piece of Heaven in Every Bite', '', 'gemini-3.1-flash-lite', 'new brand of milk chocolate called ''Dreams''');
 
 
 INSERT INTO digmark.launcher_fb (name, manager, fan_page, daily_budget_eur, status, step, message) VALUES 

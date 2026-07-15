@@ -21,12 +21,12 @@ const (
 )
 
 type Input struct {
-	Body         string `db:"body" json:"body,omitempty" validate:"required"`
-	CallToAction string `db:"call_to_action" json:"call_to_action,omitempty" validate:"required,max=64"`
-	Headline     string `db:"headline" json:"headline,omitempty" validate:"required,max=256"`
-	ImagePath    string `db:"image_path" json:"image_path,omitempty"`
-	Model        string `db:"model" json:"model,omitempty" validate:"required,max=64"`
-	Product      string `db:"product" json:"product,omitempty" validate:"required,max=64"`
+	Body          string `db:"body" json:"body,omitempty" validate:"required"`
+	CallToAction  string `db:"call_to_action" json:"call_to_action,omitempty" validate:"required,max=64"`
+	Headline      string `db:"headline" json:"headline,omitempty" validate:"required,max=256"`
+	ImageFilename string `db:"image_filename" json:"image_filename,omitempty"`
+	Model         string `db:"model" json:"model,omitempty" validate:"required,max=64"`
+	Product       string `db:"product" json:"product,omitempty" validate:"required,max=64"`
 }
 
 type Model struct {
