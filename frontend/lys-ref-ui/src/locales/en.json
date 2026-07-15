@@ -126,6 +126,10 @@
             }
         }
     },
+    "generation": {
+        "nav": "Generation",
+        "title": "Generation"
+    },
     "geo_ip": {
         "nav": "Geo IP",
         "title": "Geo IP information",

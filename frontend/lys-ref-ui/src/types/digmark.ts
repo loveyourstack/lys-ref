@@ -127,6 +127,21 @@ export interface CampaignPerfLatestSummary {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 
+export interface GeneratedCampaignInput {
+  body: string
+  call_to_action: string
+  headline: string
+  image_path: string
+  model: string
+  product: string
+}
+export interface GeneratedCampaign extends GeneratedCampaignInput {
+  id: number
+  created_at: Date
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
 export interface LauncherInput {
   daily_budget_eur: number | undefined
   manager: string | undefined

@@ -84,6 +84,11 @@ END
 $do$;
 
 
+INSERT INTO digmark.generated_campaign (body, call_to_action, headline, image_path, model, product) VALUES 
+  ('Experience the magic of the City of Light. Stroll down the Champs-Élysées, admire the Eiffel Tower at sunset, and indulge in world-class pastries. Your dream Parisian escape awaits, complete with charming cafes and historic wonders. Book now for an unforgettable journey into romance and culture.', 
+    'Book Your Trip', 'Fall in Love with Paris Today', '', 'gemini-3.1-flash-lite', 'trip to Paris');
+
+
 INSERT INTO digmark.launcher_fb (name, manager, fan_page, daily_budget_eur, status, step, message) VALUES 
   ('FB - Acc1 - BR - Daating', 'Anna', 'Page1', 10, 'Invalid', 0, 'invalid vertical: Daating'),
   ('FB - Acc1 - BS - E-commerce', 'Michael', 'Page2', 15, 'Ready', 0, ''),

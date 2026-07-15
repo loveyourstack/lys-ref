@@ -14,7 +14,7 @@ import (
 )
 
 // GenerateImage generates an image from the prompt using the Gemini API and saves it to the configured path.
-// Recommended model: gemini-3.1-flash-lite
+// Recommended model: gemini-3.1-flash-lite-image
 func (c Client) GenerateImage(ctx context.Context, model, prompt string) (fName string, err error) {
 
 	if model == "" {
@@ -65,6 +65,8 @@ type MarketingCampaign struct {
 	Headline     string `json:"headline"`
 }
 
+// GenerateMarketingCampaign generates a marketing campaign for the given product using the Gemini API and returns it as a MarketingCampaign struct.
+// Recommended model: gemini-3.1-flash-lite
 func (c Client) GenerateMarketingCampaign(ctx context.Context, model, product string) (camp MarketingCampaign, err error) {
 
 	if model == "" {
@@ -118,6 +120,8 @@ func (c Client) GenerateMarketingCampaign(ctx context.Context, model, product st
 	return camp, nil
 }
 
+// GenerateText generates text from the prompt using the Gemini API and returns it as a string.
+// Recommended model: gemini-3.1-flash-lite
 func (c Client) GenerateText(ctx context.Context, model string, prompt string) (res string, err error) {
 
 	if model == "" {

@@ -29,6 +29,13 @@ func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *
 		return
 	}
 
+	// only allow model gemini-3.1-flash-lite-image at the moment
+	if inp.Model != "gemini-3.1-flash-lite-image" {
+		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		return
+	}
+
+	// call Gemini API to generate image
 	fName, err := srvApp.GeminiClient.GenerateImage(ctx, inp.Model, inp.Prompt)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateImage failed: %w", err), srvApp.Logger, w)
@@ -65,6 +72,13 @@ func (srvApp *httpServerApplication) gemGenerateMarketingCampaign(w http.Respons
 		return
 	}
 
+	// only allow model gemini-3.1-flash-lite at the moment
+	if inp.Model != "gemini-3.1-flash-lite" {
+		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		return
+	}
+
+	// call Gemini API to generate marketing campaign
 	camp, err := srvApp.GeminiClient.GenerateMarketingCampaign(ctx, inp.Model, inp.Product)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateMarketingCampaign failed: %w", err), srvApp.Logger, w)
@@ -101,6 +115,13 @@ func (srvApp *httpServerApplication) gemGenerateText(w http.ResponseWriter, r *h
 		return
 	}
 
+	// only allow model gemini-3.1-flash-lite at the moment
+	if inp.Model != "gemini-3.1-flash-lite" {
+		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		return
+	}
+
+	// call Gemini API to generate text
 	txt, err := srvApp.GeminiClient.GenerateText(ctx, inp.Model, inp.Prompt)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("srvApp.GeminiClient.GenerateText failed: %w", err), srvApp.Logger, w)

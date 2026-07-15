@@ -82,6 +82,11 @@ const routes = [
             component: () => import('@/pages/DmCampaignPerf.vue'),
           },
           {
+            path: 'generation',
+            name: 'Generation',
+            component: () => import('@/pages/DmGeneration.vue'),
+          },
+          {
             path: 'launchers',
             name: 'Launchers',
             component: () => import('@/pages/DmLaunchers.vue'),

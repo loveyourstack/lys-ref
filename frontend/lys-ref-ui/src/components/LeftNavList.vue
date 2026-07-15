@@ -29,6 +29,7 @@
     <v-list-subheader :title="$t('nav_header.ai')" class="mt-2 clickable" @click="showAiItems = !showAiItems"></v-list-subheader>
 
     <div v-if="showAiItems">
+      <v-list-item link :title="$t('generation.nav')" to="/digital-marketing/generation" prepend-icon="mdi-creation"></v-list-item>
       <v-list-item link :title="$t('mcp_server.nav')" to="/digital-marketing/mcp-server" prepend-icon="mdi-robot"></v-list-item>
     </div>
 

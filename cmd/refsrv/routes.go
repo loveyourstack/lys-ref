@@ -21,6 +21,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaignopt"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampperf"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmgencamp"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunch"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchfb"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmlaunchgads"
@@ -268,6 +269,16 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		endpoint = "/campaign-performance-latest-summary"
 
 		r.HandleFunc(endpoint, lys.GetSimple(apiEnv, campPerfStore.SelectLatestPerfSummary)).Methods("GET")
+
+		endpoint = "/generated-campaigns"
+
+		genCampStore := dmgencamp.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, genCampStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, genCampStore)).Methods("GET")
+		writeR.HandleFunc(endpoint, lys.Post(apiEnv, genCampStore)).Methods("POST")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, genCampStore)).Methods("PUT")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, genCampStore)).Methods("PATCH")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, genCampStore)).Methods("DELETE")
 
 		endpoint = "/launchers" // abstract
 
