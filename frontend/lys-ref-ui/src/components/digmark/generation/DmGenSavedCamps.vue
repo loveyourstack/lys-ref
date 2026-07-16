@@ -6,9 +6,9 @@
 
         <v-card-text>
           <v-row class="align-center">
-            <v-rating :model-value="4.5" color="#D0D0D0" :active-color="'rgb(var(--v-theme-primary))'" 
+            <v-rating :model-value="fakeStatsById[camp.id]?.rating" color="#D0D0D0" :active-color="'rgb(var(--v-theme-primary))'" 
               density="compact" size="small" half-increments readonly></v-rating>
-            <div class="text-grey ms-4">4.5 (413)</div>
+            <div class="text-grey ms-4">{{ fakeStatsById[camp.id]?.rating }} ({{ fakeStatsById[camp.id]?.votes }})</div>
           </v-row>
 
           <div class="mt-4">{{ camp.body }}</div>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useTableState } from 'lys-vue'
 import ax from '@/api'
 import { type GeneratedCampaign } from '@/types/digmark'
@@ -38,7 +38,32 @@ const props = defineProps<{
 
 const baseUrl = '/a/digmark/generated-campaigns'
 
-const { items, loadItems } = useTableState<GeneratedCampaign>({ ax, baseUrl})
+// add fake rating and votes to each campaign for display purposes
+type FakeCardStats = {
+  rating: number
+  votes: number
+}
+const fakeStatsById = ref<Record<number, FakeCardStats>>({})
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const ratingChoices = [4, 4.5, 5]
+function randomRating(): number {
+  return ratingChoices[randomInt(0, ratingChoices.length - 1)] ?? 4.5
+}
+
+const { items, loadItems } = useTableState<GeneratedCampaign>({ ax, baseUrl, onFetchSuccess: (resp) => {
+  for (const camp of resp.data.data) {
+    if (!fakeStatsById.value[camp.id]) {
+      fakeStatsById.value[camp.id] = {
+        rating: randomRating(),
+        votes: randomInt(500, 2500)
+      }
+    }
+  }
+}})
 
 watch(() => props.refresh, () => {
   loadItems({ page: 1, itemsPerPage: 8, sortBy: [] })

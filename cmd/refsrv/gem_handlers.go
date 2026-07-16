@@ -21,8 +21,8 @@ func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *
 	}
 
 	type input struct {
-		Model  string `json:"model"`
-		Prompt string `json:"prompt"`
+		Model  string `json:"model" validate:"required"`
+		Prompt string `json:"prompt" validate:"required,max=1000"`
 	}
 
 	// unmarshal req body
@@ -32,9 +32,17 @@ func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *
 		return
 	}
 
+	inp.Prompt = strings.TrimSpace(inp.Prompt)
+
+	// validate input
+	if err = lysmeta.Validate(srvApp.Validate, inp); err != nil {
+		lys.HandleUserError(lyserr.User{Message: err.Error()}, w)
+		return
+	}
+
 	// only allow model gemini-3.1-flash-lite-image at the moment
 	if inp.Model != "gemini-3.1-flash-lite-image" {
-		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		lys.HandleUserError(lyserr.User{Message: fmt.Sprintf("unsupported model: %s", inp.Model)}, w)
 		return
 	}
 
@@ -85,7 +93,7 @@ func (srvApp *httpServerApplication) gemGenerateMarketingCampaign(w http.Respons
 
 	// only allow model gemini-3.1-flash-lite at the moment
 	if inp.Model != "gemini-3.1-flash-lite" {
-		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		lys.HandleUserError(lyserr.User{Message: fmt.Sprintf("unsupported model: %s", inp.Model)}, w)
 		return
 	}
 
@@ -115,8 +123,8 @@ func (srvApp *httpServerApplication) gemGenerateText(w http.ResponseWriter, r *h
 	}
 
 	type input struct {
-		Model  string `json:"model"`
-		Prompt string `json:"prompt"`
+		Model  string `json:"model" validate:"required"`
+		Prompt string `json:"prompt" validate:"required,max=1000"`
 	}
 
 	// unmarshal req body
@@ -126,9 +134,17 @@ func (srvApp *httpServerApplication) gemGenerateText(w http.ResponseWriter, r *h
 		return
 	}
 
+	inp.Prompt = strings.TrimSpace(inp.Prompt)
+
+	// validate input
+	if err = lysmeta.Validate(srvApp.Validate, inp); err != nil {
+		lys.HandleUserError(lyserr.User{Message: err.Error()}, w)
+		return
+	}
+
 	// only allow model gemini-3.1-flash-lite at the moment
 	if inp.Model != "gemini-3.1-flash-lite" {
-		lys.HandleError(ctx, fmt.Errorf("unsupported model: %s", inp.Model), srvApp.Logger, w)
+		lys.HandleUserError(lyserr.User{Message: fmt.Sprintf("unsupported model: %s", inp.Model)}, w)
 		return
 	}
 
