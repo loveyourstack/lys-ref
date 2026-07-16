@@ -14,7 +14,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'ECB API calls'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+      <l-dt-top :ax="ax" :title="props.title ?? 'Gemini API calls'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn icon flat v-tooltip="$t('actions.refresh')" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>
@@ -27,7 +27,7 @@
             v-model:filterCreatedAtDate="filterCreatedAtDate"
             v-model:filterDurationMs="filterDurationMs"
             v-model:filterEndpoint="filterEndpoint"
-            v-model:filterStatusCodeOk="filterStatusCodeOk"
+            v-model:filterResultOk="filterResultOk"
           />
         </v-col>
       </v-row>
@@ -53,7 +53,7 @@ import { useDateFormat } from '@vueuse/core'
 import { type DateFilter, type NumericFilter, getDateFilterUrlParams, getNumericFilterUrlParams, getTextFilterUrlParam } from 'lys-vue'
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
-import { type ApiCall } from '@/types/ecb'
+import { type ApiCall } from '@/types/gemini'
 
 const props = defineProps<{
   title?: string
@@ -61,17 +61,14 @@ const props = defineProps<{
 
 const headers = [
   { title: 'Created at', key: 'created_at' },
-  { title: 'Method', key: 'method' },
   { title: 'Endpoint', key: 'endpoint' },
-  { title: 'Attempt', key: 'attempt', align: 'end' },
   { title: 'Page', key: 'page', align: 'end' },
-  { title: 'Status code', key: 'status_code', align: 'end' },
   { title: 'Duration (ms)', key: 'duration_ms', align: 'end' },
   { title: 'Result', key: 'result' },
 ] as const
 const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
 
-const baseUrl = '/a/ecb/api-calls'
+const baseUrl = '/a/gemini/api-calls'
 const { excelDlUrl } = useTableExcelDlUrl(baseUrl)
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
@@ -81,18 +78,18 @@ const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstim
 const filterCreatedAtDate = ref<DateFilter>()
 const filterDurationMs = ref<NumericFilter>()
 const filterEndpoint = ref<string>()
-const filterStatusCodeOk = ref<boolean>()
+const filterResultOk = ref<boolean>()
 
 const formatter = new Intl.NumberFormat()
 
 const { resetTable } = useJsonLs({
-  lsKey: 'app_mon_ecb_call_dt',
+  lsKey: 'app_mon_gem_call_dt',
   refs: {
     excludedHeaders,
     filterCreatedAtDate,
     filterDurationMs,
     filterEndpoint,
-    filterStatusCodeOk,
+    filterResultOk,
     itemsPerPage,
     sortBy,
   },
@@ -101,11 +98,11 @@ const { resetTable } = useJsonLs({
 function getFilterStr(): string {
   let ret = ''
 
-  if (filterStatusCodeOk.value != undefined) {
-    if (filterStatusCodeOk.value) {
-      ret += '&status_code=200'
+  if (filterResultOk.value != undefined) {
+    if (filterResultOk.value) {
+      ret += '&result=OK'
     } else {
-      ret += '&status_code=!200'
+      ret += '&result=!OK'
     }
   }
 

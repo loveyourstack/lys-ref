@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/loveyourstack/lys-ref/internal/stores/gemini/gemapicall"
 	"github.com/loveyourstack/lys/lysstring"
 	"github.com/loveyourstack/lys/lystype"
 	"google.golang.org/genai"
@@ -60,7 +61,7 @@ func (c Client) GenerateImage(ctx context.Context, model, prompt string) (fName 
 }
 
 type MarketingCampaign struct {
-	CallToAction string `json:"callToAction"`
+	CallToAction string `json:"call_to_action"`
 	Body         string `json:"body"`
 	Headline     string `json:"headline"`
 }
@@ -77,10 +78,10 @@ func (c Client) GenerateMarketingCampaign(ctx context.Context, model, product st
 	}
 
 	prompt := fmt.Sprintf(
-		"Generate a marketing campaign for the product %q, consisting of a JSON object with exactly these keys: headline, body, callToAction. "+
+		"Generate a marketing campaign for the product %q, consisting of a JSON object with exactly these keys: headline, body, call_to_action. "+
 			"headline is a catchy phrase of up to 10 words. "+
 			"body is a paragraph of up to 50 words selling the product to the reader. "+
-			"callToAction will appear on the button, and is a short phrase of up to 3 words that encourages the user to take action.",
+			"call_to_action will appear on the button, and is a short phrase of up to 3 words that encourages the user to take action.",
 		product,
 	)
 
@@ -89,34 +90,61 @@ func (c Client) GenerateMarketingCampaign(ctx context.Context, model, product st
 		ResponseJsonSchema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
-				"headline":     map[string]any{"type": "string"},
-				"body":         map[string]any{"type": "string"},
-				"callToAction": map[string]any{"type": "string"},
+				"headline":       map[string]any{"type": "string"},
+				"body":           map[string]any{"type": "string"},
+				"call_to_action": map[string]any{"type": "string"},
 			},
-			"required":             []string{"headline", "body", "callToAction"},
+			"required":             []string{"headline", "body", "call_to_action"},
 			"additionalProperties": false,
 		},
 	}
 
+	// prepare call log input
+	callInput := gemapicall.Input{
+		DurationMs: 0, // set in defer
+		Endpoint:   "Models.GenerateContent",
+		Page:       1,
+		Result:     "", // set below depending on success or error
+	}
+
+	start := time.Now()
+
+	// defer call log to capture duration and result
+	defer func() {
+		callInput.DurationMs = time.Since(start).Milliseconds()
+
+		_, err := c.callStore.Insert(context.Background(), callInput) // use background context to ensure call log is inserted even if main context is cancelled
+		if err != nil {
+			c.logger.Error("c.callStore.Insert failed", "error", err, "callInput", callInput)
+		}
+	}()
+
 	resp, err := c.genAiClient.Models.GenerateContent(ctx, model, genai.Text(prompt), cfg)
 	if err != nil {
+		callInput.Result = err.Error()
 		return camp, fmt.Errorf("c.genAiClient.Models.GenerateContent failed: %w", err)
 	}
 
 	raw := strings.TrimSpace(resp.Text())
 	if raw == "" {
-		return camp, fmt.Errorf("empty model response")
+		errStr := "empty model response"
+		callInput.Result = errStr
+		return camp, fmt.Errorf("%s", errStr)
 	}
 
 	err = json.Unmarshal([]byte(raw), &camp)
 	if err != nil {
+		callInput.Result = err.Error()
 		return camp, fmt.Errorf("json.Unmarshal failed: %w", err)
 	}
 
 	if camp.Headline == "" || camp.Body == "" || camp.CallToAction == "" {
-		return MarketingCampaign{}, fmt.Errorf("campaign contains one or more empty fields")
+		errStr := "campaign contains one or more empty fields"
+		callInput.Result = errStr
+		return MarketingCampaign{}, fmt.Errorf("%s", errStr)
 	}
 
+	callInput.Result = "OK"
 	return camp, nil
 }
 

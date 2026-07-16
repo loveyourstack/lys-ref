@@ -10,6 +10,7 @@
         "download_to_excel": "In Excel herunterladen",
         "edit": "Bearbeiten",
         "enter": "Eingeben",
+        "generate": "Generieren",
         "import": "Importieren",
         "login": "Anmelden",
         "logout": "Abmelden",
@@ -128,7 +129,11 @@
     },
     "generation": {
         "nav": "Generierung",
-        "title": "Generierung"
+        "title": "Generierung",
+        "p1": "Im Backend wird die Verwendung von generativer KI über die API demonstriert. Kampagnentexte werden durch Anfordern strukturierter Daten von der Gemini-API generiert.",
+        "generated_campaign": "Generierte Kampagne",
+        "generated_campaign_placeholder": "Die generierte Kampagne wird hier angezeigt.",
+        "saved_campaigns": "Gespeicherte Kampagnen"
     },
     "geo_ip": {
         "nav": "Geo IP",
@@ -257,7 +262,10 @@
         "nav": "MCP-Server",
         "title": "MCP-Server",
         "p1": "Das Backend enthält einen {MCPServer}, der es LLMs ermöglicht, die im Abschnitt \"Entity-Beziehungen\" oben gezeigten Kampagnenleistungsdaten abzufragen.",
-        "p2": "Derzeit ist kein angeschlossenes LLM-Modell vorhanden, sodass die Übersetzung von natürlicher Sprache in MCP-Tools simuliert wird. Die Abfrage und Verarbeitung von Antworten des MCP-Servers ist jedoch vollständig funktionsfähig."
+        "p2": "Derzeit ist kein angeschlossenes LLM-Modell vorhanden, sodass die Übersetzung von natürlicher Sprache in MCP-Tools simuliert wird. Die Abfrage und Verarbeitung von Antworten des MCP-Servers ist jedoch vollständig funktionsfähig.",
+        "response": "Antwort",
+        "response_placeholder": "Die Antwort des MCP-Servers wird hier angezeigt.",
+        "response_no_data": "Keine Daten verfügbar."
     },
     "nav_header": {
         "advanced_tables": "Erweiterte Tabellen",

@@ -23,6 +23,7 @@
                 <v-tab value="hubStatus">Hub status</v-tab>
                 <v-tab value="awsCalls">AWS API</v-tab>
                 <v-tab value="ecbCalls">ECB API</v-tab>
+                <v-tab value="gemCalls">Gemini API</v-tab>
                 <v-tab value="mmCalls">Maxmind API</v-tab>
               </v-tabs>
 
@@ -50,6 +51,10 @@
 
                 <v-window-item value="ecbCalls">
                   <app-mon-ecb-call-table />
+                </v-window-item>
+
+                <v-window-item value="gemCalls">
+                  <app-mon-gem-call-table />
                 </v-window-item>
 
                 <v-window-item value="mmCalls">

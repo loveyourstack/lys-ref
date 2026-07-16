@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/loveyourstack/lys"
+	"github.com/loveyourstack/lys/lyserr"
+	"github.com/loveyourstack/lys/lysmeta"
 )
 
 func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *http.Request) {
@@ -61,14 +64,22 @@ func (srvApp *httpServerApplication) gemGenerateMarketingCampaign(w http.Respons
 	}
 
 	type input struct {
-		Model   string `json:"model"`
-		Product string `json:"product"`
+		Model   string `json:"model" validate:"required"`
+		Product string `json:"product" validate:"required,max=100"`
 	}
 
 	// unmarshal req body
 	inp, err := lys.DecodeJsonBody[input](body)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("lys.DecodeJsonBody failed: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	inp.Product = strings.TrimSpace(inp.Product)
+
+	// validate input
+	if err = lysmeta.Validate(srvApp.Validate, inp); err != nil {
+		lys.HandleUserError(lyserr.User{Message: err.Error()}, w)
 		return
 	}
 

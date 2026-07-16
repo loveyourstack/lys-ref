@@ -23,7 +23,7 @@
 
       <v-row density="compact">
         <v-col>
-          <app-mon-aws-call-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
+          <app-mon-call-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
             v-model:filterCreatedAtDate="filterCreatedAtDate"
             v-model:filterDurationMs="filterDurationMs"
             v-model:filterEndpoint="filterEndpoint"

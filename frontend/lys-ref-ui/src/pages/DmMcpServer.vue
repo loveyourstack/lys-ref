@@ -51,10 +51,10 @@
       <v-row>
         <v-col cols="auto">
           <v-card variant="flat" class="mt-2">
-            <v-card-title>Response</v-card-title>
+            <v-card-title>{{ $t('mcp_server.response') }}</v-card-title>
             <v-card-text>
-              <span v-if="!mcpResp" class="dt-subtitle">The response from the MCP server will be shown here.</span>
-              <span v-else-if="tableRows.length === 0" class="dt-subtitle">No data available.</span>
+              <span v-if="!mcpResp" class="dt-subtitle">{{ $t('mcp_server.response_placeholder') }}</span>
+              <span v-else-if="tableRows.length === 0" class="dt-subtitle">{{ $t('mcp_server.response_no_data') }}</span>
 
               <v-table v-else class="response-table">
                 <thead>

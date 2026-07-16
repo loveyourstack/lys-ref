@@ -117,7 +117,7 @@ func main() {
 	// attach clients
 	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)
 	srvApp.EcbClient = ecbapi.NewClient(srvApp.Db, srvApp.Logger)
-	srvApp.GeminiClient = gemapi.NewClient(ctx, srvApp.Db, srvApp.Config.General.GeneratedPath, srvApp.Logger)
+	srvApp.GeminiClient = gemapi.NewClient(ctx, conf.Gemini, srvApp.Config.General.GeneratedPath, srvApp.Db, srvApp.Logger)
 	srvApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, srvApp.Db, srvApp.Logger)
 
 	// attach services

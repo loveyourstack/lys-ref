@@ -29,6 +29,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbcurr"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbcurrmd"
 	"github.com/loveyourstack/lys-ref/internal/stores/ecb/ecbxrperfnorm"
+	"github.com/loveyourstack/lys-ref/internal/stores/gemini/gemapicall"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geoocean"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procflow"
@@ -121,7 +122,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/core", RouteAdder: srvApp.coreRoutes(apiEnv)},
 		{Url: "/digmark", RouteAdder: srvApp.digmarkRoutes(apiEnv)},
 		{Url: "/ecb", RouteAdder: srvApp.ecbRoutes(apiEnv)},
-		{Url: "/gemini", RouteAdder: srvApp.geminiRoutes()},
+		{Url: "/gemini", RouteAdder: srvApp.geminiRoutes(apiEnv)},
 		{Url: "/geo", RouteAdder: srvApp.geoRoutes(apiEnv)},
 		{Url: "/maxmind", RouteAdder: srvApp.maxmindRoutes(apiEnv)},
 		{Url: "/pg-monitor", RouteAdder: srvApp.pgMonRoutes(apiEnv)},
@@ -389,18 +390,24 @@ func (srvApp *httpServerApplication) ecbRoutes(apiEnv lys.Env) lys.RouteAdderFun
 	}
 }
 
-func (srvApp *httpServerApplication) geminiRoutes() lys.RouteAdderFunc {
+func (srvApp *httpServerApplication) geminiRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
 
 	return func(r *mux.Router) *mux.Router {
 
 		writeR := r.NewRoute().Subrouter()
 		writeR.Use(authorizeRole(sysrole.Writer[:]))
 
+		endpoint := "/api-calls"
+
+		apiCallStore := gemapicall.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
+
 		// disable for now: img generation no longer available in free tier
-		//endpoint := "/generate-image"
+		//endpoint = "/generate-image"
 		//writeR.HandleFunc(endpoint, srvApp.gemGenerateImage).Methods("POST")
 
-		endpoint := "/generate-marketing-campaign"
+		endpoint = "/generate-marketing-campaign"
 		writeR.HandleFunc(endpoint, srvApp.gemGenerateMarketingCampaign).Methods("POST")
 
 		endpoint = "/generate-text"

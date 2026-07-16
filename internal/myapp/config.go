@@ -7,6 +7,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/loveyourstack/connectors/aws/awsapi"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
+	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys/lysmail"
 	"github.com/loveyourstack/lys/lyspgdb"
@@ -102,6 +103,7 @@ type Config struct {
 	Reflis       reflis
 
 	Aws     awsapi.Conf
+	Gemini  gemapi.Conf
 	MaxMind mmapi.Conf
 	Process Process
 	Smtp    lysmail.SmtpConfig
