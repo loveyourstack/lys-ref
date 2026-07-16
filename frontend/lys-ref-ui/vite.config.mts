@@ -6,7 +6,7 @@ import { defineConfig } from 'vite'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // dev CSP: in prod, CSP is set by nginx config
-const csp = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws://localhost:3016 ws://localhost:8016 http://localhost:8016 http://localhost:8017; form-action 'self'"
+const csp = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://lysref-847632507082-eu-central-1-an.s3.eu-central-1.amazonaws.com; font-src 'self' data:; connect-src 'self' ws://localhost:3016 ws://localhost:8016 http://localhost:8016 http://localhost:8017; form-action 'self'"
 
 // https://vitejs.dev/config/
 export default defineConfig({

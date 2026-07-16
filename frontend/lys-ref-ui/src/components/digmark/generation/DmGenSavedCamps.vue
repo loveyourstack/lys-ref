@@ -2,6 +2,11 @@
   <v-row class="ml-4 pb-6">
     <v-col v-for="camp in items" :key="camp.id" cols="auto">
       <v-card elevation="2" max-width="650">
+
+        <v-img height="250" cover
+          :src="'https://lysref-847632507082-eu-central-1-an.s3.eu-central-1.amazonaws.com/' + camp.image_filename"
+        ></v-img>
+
         <v-card-title>{{ camp.headline }}</v-card-title>
 
         <v-card-text>
