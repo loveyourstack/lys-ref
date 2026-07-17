@@ -13,6 +13,7 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys-ref/internal/connectors/awsbedrockapi"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
@@ -54,6 +55,9 @@ type httpServerApplication struct {
 	SessionHistStore   syssessionhist.Store
 	SrvLogStore        syssrvreq.Store
 	UserStore          sysuser.Store
+
+	// clients
+	AwsBedrockClient *awsbedrockapi.Client
 }
 
 // limitAuthed is middleware that applies rate limiting to authenticated users based on user ID

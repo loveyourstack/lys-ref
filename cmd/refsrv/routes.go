@@ -149,6 +149,13 @@ func (srvApp *httpServerApplication) awsRoutes(apiEnv lys.Env) lys.RouteAdderFun
 		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
 
+		// disabled due to INVALID_PAYMENT_INSTRUMENT error: needs credit card payment method on AWS account
+		//endpoint = "/bedrock-generate-marketing-image"
+		//r.HandleFunc(endpoint, srvApp.awsBedrockGenerateMarketingImage).Methods("POST")
+
+		endpoint = "/bedrock-list-image-models"
+		r.HandleFunc(endpoint, srvApp.awsBedrockListImageModels).Methods("POST")
+
 		endpoint = "/update-user-security-group-rules"
 		writeR.HandleFunc(endpoint, srvApp.awsUpdateUserSecurityGroupRules).Methods("PATCH")
 

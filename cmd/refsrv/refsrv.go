@@ -23,6 +23,7 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys-ref/internal/connectors/awsbedrockapi"
 	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
@@ -116,6 +117,15 @@ func main() {
 
 	// attach clients
 	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)
+
+	// bedrock: use separate client since it needs region override
+	bedrockConf := awsapi.Conf{
+		AccessKeyId:     conf.Aws.AccessKeyId,
+		Region:          "us-west-2", // AWS Bedrock is only available in us-west-2 and us-east-1
+		SecretAccessKey: conf.Aws.SecretAccessKey,
+	}
+	srvApp.AwsBedrockClient = awsbedrockapi.NewClient(bedrockConf, srvApp.Config.General.GeneratedPath, srvApp.Db, srvApp.Logger)
+
 	srvApp.EcbClient = ecbapi.NewClient(srvApp.Db, srvApp.Logger)
 	srvApp.GeminiClient = gemapi.NewClient(ctx, conf.Gemini, srvApp.Config.General.GeneratedPath, srvApp.Db, srvApp.Logger)
 	srvApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, srvApp.Db, srvApp.Logger)

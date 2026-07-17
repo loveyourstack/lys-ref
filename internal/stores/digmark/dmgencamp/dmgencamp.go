@@ -64,6 +64,7 @@ func (s Store) GetPlan() lysmeta.Plan {
 }
 
 func (s Store) Insert(ctx context.Context, input Input) (newId int64, err error) {
+	input.ImageFilename = "placeholder.png"
 	return lyspg.Insert[Input, int64](ctx, s.Db, schemaName, tableName, pkColName, input)
 }
 

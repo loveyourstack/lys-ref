@@ -9,7 +9,7 @@
       <v-text-field label="Text model" v-model="textModel" max-width="250" disabled
         :rules="[(v: string) => !!v || 'Text model is required']"
       ></v-text-field>
-      <v-btn type="submit" class="mb-2" color="primary" :loading="generating">{{ $t('actions.generate') }}</v-btn>
+      <v-btn type="submit" class="mb-2" color="primary" :disabled="!auth.isWriter()" :loading="generating">{{ $t('actions.generate') }}</v-btn>
     </div>
   </v-form>
 
@@ -28,7 +28,7 @@
         ></v-text-field>
       </v-form>
       <div class="ml-4 mt-2 d-flex ga-4 align-center">
-        <v-btn class="mb-2" color="primary" :loading="saving" @click="save">Save</v-btn>
+        <v-btn class="mb-2" color="primary" :disabled="!auth.isWriter()" :loading="saving" @click="save">Save</v-btn>
         <v-btn class="mb-2" @click="clear">Clear</v-btn>
       </div>
     </v-card-text>
@@ -43,6 +43,7 @@
 import { ref, computed } from 'vue'
 import { type VForm } from 'vuetify/components'
 import ax from '@/api'
+import auth from '@/auth'
 import { type GeneratedCampaignInput } from '@/types/digmark'
 
 const emit = defineEmits<{
@@ -92,7 +93,7 @@ async function save() {
     body: body.value,
     call_to_action: callToAction.value,
     headline: headline.value,
-    image_filename: '',
+    image_filename: 'placeholder.png',
     model: textModel.value,
     product: product.value,
   }
