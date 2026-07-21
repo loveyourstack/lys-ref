@@ -1,4 +1,5 @@
 import type { SelectionItem } from 'lys-vue'
+import { type Country } from '@/types/geo'
 
 export interface LoginResponse {
   default_locale: string
@@ -41,7 +42,7 @@ export interface StoreData {
 
   ecb_active_currencies_ex_eur: SelectionItem[]
 
-  geo_countries: SelectionItem[]
+  geo_countries: Country[]
   geo_oceans: SelectionItem[]
 
   process_flows: SelectionItem[]

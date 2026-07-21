@@ -6,7 +6,7 @@
           <v-card variant="flat">
             <v-card-text>
 
-              <tedb-vat-rate-summary-table />
+              <tedb-vr-summary-table />
 
             </v-card-text>
           </v-card>

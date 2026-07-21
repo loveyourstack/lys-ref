@@ -26,6 +26,7 @@ const (
 type Input struct {
 	DefaultLocale string `db:"default_locale" json:"default_locale,omitempty" validate:"required,max=5"`
 	IsActive      bool   `db:"is_active" json:"is_active,omitempty"`
+	IsEu          bool   `db:"is_eu" json:"is_eu,omitempty"`
 	Iso2          string `db:"iso2" json:"iso2,omitempty" validate:"required,len=2"`
 	Name          string `db:"name" json:"name,omitempty" validate:"required,max=256"`
 }

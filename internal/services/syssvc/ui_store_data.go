@@ -92,9 +92,7 @@ func (svc Service) SelectUiStoreData(ctx context.Context, db *pgxpool.Pool) (uiS
 	// ----------------------------------------------------------------
 
 	geoCountryStore := geocountry.Store{Db: db}
-	uiStoreData.GeoCountries, _, err = geoCountryStore.Select(ctx, lyspg.SelectParams{
-		Fields: []string{"id", "name"},
-	})
+	uiStoreData.GeoCountries, _, err = geoCountryStore.Select(ctx, lyspg.SelectParams{})
 	if err != nil {
 		return UiStoreData{}, fmt.Errorf("geoCountryStore.Select failed: %w", err)
 	}

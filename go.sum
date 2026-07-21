@@ -139,6 +139,8 @@ github.com/loveyourstack/connectors v0.3.16 h1:WeRpSY1438Osk1X6dO47WuAIQagn1p8sq
 github.com/loveyourstack/connectors v0.3.16/go.mod h1:t+fy84YRfJSDzdcLLyuJ0FV9E3D7jLE1ueDOwU/S45w=
 github.com/loveyourstack/connectors v0.3.17 h1:WOaTXF8lMkgXARGnWMpZ03BP6vLmzZNtG3YqdaE4nxU=
 github.com/loveyourstack/connectors v0.3.17/go.mod h1:/qrxFi4dQYkuEbpW78dZJwRfmodnpgQ0awDLS8rR3Gg=
+github.com/loveyourstack/connectors v0.3.18 h1:34f4UxYjwd0KvHrsreAoDawoj1DoOGBvmix45uiZnLI=
+github.com/loveyourstack/connectors v0.3.18/go.mod h1:/qrxFi4dQYkuEbpW78dZJwRfmodnpgQ0awDLS8rR3Gg=
 github.com/loveyourstack/lys v0.3.50 h1:sPfcxMsaJX+zHr3OgmMgCMe6SPz26yzw8FPUwCSgSCI=
 github.com/loveyourstack/lys v0.3.50/go.mod h1:dE381esUaWZCaOQU/BGzD7yS+CwInW4X6vv/+douKR4=
 github.com/mark3labs/mcp-go v0.55.0 h1:lJfz2aoctiwK+sI991+uIYwmKNIBciI+O7zsyDsa4U8=

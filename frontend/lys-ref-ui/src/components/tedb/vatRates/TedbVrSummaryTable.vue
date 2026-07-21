@@ -27,6 +27,13 @@
         </v-col>
       </v-row>
 
+      <v-row density="compact">
+        <v-col>
+          <tedb-vr-summary-table-filters @update="refreshItems()"
+            v-model:filterCountryFk="filterCountryFk"
+          />
+        </v-col>
+      </v-row>
     </template>
 
     <template v-slot:[`item.situation_on`]="{ item }">
@@ -34,7 +41,7 @@
     </template>
 
      <template v-slot:[`item.rate`]="{ item }">
-      {{ formatterDec1.format(item.rate) }}
+      {{ formatterPctDec1.format(item.rate / 100) }}
     </template>
 
     <template #bottom>
@@ -49,7 +56,6 @@
 import { ref } from 'vue'
 import { useDateFormat } from '@vueuse/core'
 import { type SortItem } from 'vuetify/lib/components/VDataTable/composables/sort.mjs'
-import { type DateFilter, getDateFilterUrlParams } from 'lys-vue'
 import { useJsonLs, useLastSyncAt, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
 import { type VatRateSummary } from '@/types/tedb'
@@ -74,18 +80,29 @@ const { excelDlUrl } = useTableExcelDlUrl(baseUrl)
 const { lastSyncAtMsg, getLastSyncAt } = useLastSyncAt()
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
-  loadItems, refreshItems, refreshItemsDebounced
-} = useTableState<VatRateSummary>({ ax, baseUrl, onFetchSuccess: getLastSyncAt })
+  loadItems, refreshItems
+} = useTableState<VatRateSummary>({ ax, baseUrl, getFilterStr, onFetchSuccess: getLastSyncAt })
 
-const formatterDec1 = new Intl.NumberFormat(undefined , { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+const filterCountryFk = ref<number>()
+
+const formatterPctDec1 = new Intl.NumberFormat(undefined , { style: 'percent', maximumFractionDigits: 1, minimumFractionDigits: 1 })
 
 const { resetTable } = useJsonLs({
   lsKey: 'exchange_rates_dt',
   refs: {
     excludedHeaders,
+    filterCountryFk,
     itemsPerPage,
     sortBy,
   },
 })
+
+function getFilterStr(): string {
+  let ret = ''
+
+  if (filterCountryFk.value) { ret += '&country_fk=' + filterCountryFk.value }
+
+  return ret
+}
 
 </script>

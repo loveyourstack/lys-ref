@@ -9,6 +9,7 @@ CREATE OR REPLACE VIEW tedb.v_vat_rate AS
     tedb_vr.cpa_codes,
     tedb_vr.created_at,
     tedb_vr.member_state,
+      geo_c.id AS country_fk,
       geo_c.name AS country,
     tedb_vr.rate_type,
     tedb_vr.rate,
@@ -28,14 +29,14 @@ CREATE OR REPLACE VIEW tedb.v_vat_rate_summary AS
     GROUP BY 1,2,3
   )
   
-  SELECT tedb_vr.country, initcap(tedb_vr.type::text) AS type, '' AS categories, situation_on, CASE WHEN comment LIKE '%Canary%' THEN comment ELSE '' END AS comment, rate
+  SELECT tedb_vr.country, tedb_vr.country_fk, initcap(tedb_vr.type::text) AS type, '' AS categories, situation_on, CASE WHEN comment LIKE '%Canary%' THEN comment ELSE '' END AS comment, rate
   FROM tedb.v_vat_rate tedb_vr
   JOIN latest ON tedb_vr.member_state = latest.member_state AND tedb_vr.type = latest.type AND tedb_vr.category_fk = latest.category_fk
   WHERE tedb_vr.type = 'STANDARD' AND situation_on = latest.max_situation_on
   
   UNION
   
-  SELECT tedb_vr.country, initcap(tedb_vr.type::text) AS type, 
+  SELECT tedb_vr.country, tedb_vr.country_fk, initcap(tedb_vr.type::text) AS type, 
     CASE WHEN LENGTH(array_to_string(ARRAY_AGG(DISTINCT(initcap(category_identifier))), ', ')) > 57 
       THEN LEFT(array_to_string(ARRAY_AGG(DISTINCT(initcap(category_identifier))), ', ') ,57) || '...' 
       ELSE array_to_string(ARRAY_AGG(DISTINCT(initcap(category_identifier))), ', ')
@@ -44,4 +45,4 @@ CREATE OR REPLACE VIEW tedb.v_vat_rate_summary AS
   FROM tedb.v_vat_rate tedb_vr
   JOIN latest ON tedb_vr.member_state = latest.member_state AND tedb_vr.type = latest.type AND tedb_vr.category_fk = latest.category_fk
   WHERE tedb_vr.type = 'REDUCED' AND situation_on = latest.max_situation_on
-  GROUP BY 1,2;
+  GROUP BY 1,2,3;

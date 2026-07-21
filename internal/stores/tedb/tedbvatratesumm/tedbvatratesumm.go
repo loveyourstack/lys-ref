@@ -22,6 +22,7 @@ type Model struct {
 	Categories  string       `db:"categories" json:"categories,omitempty"`
 	Comment     string       `db:"comment" json:"comment,omitempty"`
 	Country     string       `db:"country" json:"country,omitempty"`
+	CountryFk   int64        `db:"country_fk" json:"country_fk,omitempty"`
 	Rate        float64      `db:"rate" json:"rate"`
 	SituationOn lystype.Date `db:"situation_on" json:"situation_on,omitzero"`
 	Type        string       `db:"type" json:"type,omitempty"`

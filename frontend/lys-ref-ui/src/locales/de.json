@@ -167,7 +167,7 @@
         "external_data": {
             "title": "Externe Daten",
             "subtitle": "Importieren und Verwalten externer Datenquellen.",
-            "p1": "Dieser Abschnitt zeigt Daten aus verschiedenen APIs.",
+            "p1": "Dieser Abschnitt zeigt Daten aus verschiedenen externen APIs.",
             "p2": "Im Backend wird gezeigt, wie Daten effizient mit Hash-Tabellen zusammengeführt werden und wie direkt aus einer Datei in die Datenbank gestreamt werden kann."
         },
         "parallel_processing": {

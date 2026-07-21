@@ -16,6 +16,7 @@ CREATE TABLE geo.country
   created_at tracking_at,
   default_locale varchar(5) NOT NULL DEFAULT 'en' CHECK (default_locale != ''),
   is_active boolean NOT NULL DEFAULT false,
+  is_eu boolean NOT NULL DEFAULT false,
   iso2 char(2) NOT NULL UNIQUE CHECK (iso2 ~ '^[A-Z]+$'), -- ~ for case sensitive match, ^ and $ to to match whole string
   name text_short_mandatory UNIQUE,
   updated_at tracking_at
