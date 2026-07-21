@@ -152,7 +152,7 @@
         "ai": {
             "title": "KI / LLMs",
             "subtitle": "Hinzufügen von LLM-Tools.",
-            "p1": "Dieser Abschnitt zeigt, wie benutzerdefinierte Datenquellen zu LLMs hinzugefügt werden können."
+            "p1": "Dieser Abschnitt zeigt, wie Daten generiert werden und benutzerdefinierte Datenquellen zu LLMs hinzugefügt werden können."
         },
         "charts": {
             "title": "Diagramme",
@@ -167,7 +167,7 @@
         "external_data": {
             "title": "Externe Daten",
             "subtitle": "Importieren und Verwalten externer Datenquellen.",
-            "p1": "Dieser Abschnitt zeigt Daten von der API der Europäischen Zentralbank und der MaxMind-API.",
+            "p1": "Dieser Abschnitt zeigt Daten aus verschiedenen APIs.",
             "p2": "Im Backend wird gezeigt, wie Daten effizient mit Hash-Tabellen zusammengeführt werden und wie direkt aus einer Datei in die Datenbank gestreamt werden kann."
         },
         "parallel_processing": {
@@ -346,6 +346,13 @@
         "title": "Varianten",
         "new_item": "Neuer Variantentyp",
         "p1": "Häufige Varianten grundlegender Datentypen."
+    },
+    "vat_rates": {
+        "nav": "MwSt-Sätze",
+        "title": "MwSt-Sätze",
+        "p1": "Diese Daten werden aus der Taxes in Europe (TEDB) API synchronisiert.",
+        "p2": "ür Standardsätze ist der angezeigte Tag der zuletzt verfügbare Tag. Jedes Land hat einen Standardsatz, außer Spanien, das für die Kanarischen Inseln einen anderen Standardsatz verwendet.",
+        "p3": "Die ermäßigten Sätze können je nach Kategorie variieren, sodass für diese Datensätze sowohl der angezeigte Tag als auch der angezeigte Satz die am häufigsten vorkommenden Werte sind."
     },
     "verticals": {
         "nav": "Vertikalen",

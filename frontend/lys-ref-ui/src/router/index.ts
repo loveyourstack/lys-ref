@@ -228,6 +228,16 @@ const routes = [
           },
         ]
       },
+      {
+        path: 'tedb',
+        children: [
+          {
+            path: 'vat-rate-summary',
+            name: 'VAT rate summary',
+            component: () => import('@/pages/TedbVatRateSummary.vue'),
+          },
+        ]
+      },
     ]
   }
 ]

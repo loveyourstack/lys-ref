@@ -15,6 +15,8 @@ import (
 	"github.com/loveyourstack/connectors/ecb/ecbsvc"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/connectors/maxmind/mmsvc"
+	"github.com/loveyourstack/connectors/tedb/tedbapi"
+	"github.com/loveyourstack/connectors/tedb/tedbsvc"
 	appCmd "github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/admincli"
@@ -26,6 +28,7 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/maxmindcli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/proccli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/pubcli"
+	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/tedbcli"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysextdatasync"
@@ -62,6 +65,7 @@ func addSubCommands() {
 	rootCmd.AddCommand(maxmindcli.NewCmd(cliApp))
 	rootCmd.AddCommand(proccli.NewCmd(cliApp))
 	rootCmd.AddCommand(pubcli.NewCmd(cliApp))
+	rootCmd.AddCommand(tedbcli.NewCmd(cliApp))
 }
 
 func Execute() {
@@ -100,6 +104,7 @@ func Execute() {
 	cliApp.AwsClient = awsapi.NewClient(conf.Aws, cliApp.Db, cliApp.Logger)
 	cliApp.EcbClient = ecbapi.NewClient(cliApp.Db, cliApp.Logger)
 	cliApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.Logger)
+	cliApp.TedbClient = tedbapi.NewClient(cliApp.Db, cliApp.Logger)
 
 	// attach services
 	syncStore := sysextdatasync.Store{Db: cliApp.Db}
@@ -107,6 +112,7 @@ func Execute() {
 	cliApp.EcbSvc = ecbsvc.NewServiceWithSyncStore(cliApp.EcbClient, cliApp.Logger, syncStore)
 	cliApp.MaxMindSvc = mmsvc.NewServiceWithSyncStore(cliApp.MaxMindClient, cliApp.Config.General.DownloadsPath, cliApp.Logger, syncStore)
 	cliApp.ProcSvc = procsvc.NewService(conf.Process, cliApp.Logger)
+	cliApp.TedbSvc = tedbsvc.NewServiceWithSyncStore(cliApp.TedbClient, cliApp.Db, cliApp.Logger, syncStore)
 
 	// note that defer db Close is also needed in subcommands or else context cancelation doesn't propagate to db
 

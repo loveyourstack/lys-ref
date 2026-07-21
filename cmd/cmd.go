@@ -12,6 +12,8 @@ import (
 	"github.com/loveyourstack/connectors/ecb/ecbsvc"
 	"github.com/loveyourstack/connectors/maxmind/mmapi"
 	"github.com/loveyourstack/connectors/maxmind/mmsvc"
+	"github.com/loveyourstack/connectors/tedb/tedbapi"
+	"github.com/loveyourstack/connectors/tedb/tedbsvc"
 	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/launchsvc"
@@ -33,6 +35,7 @@ type Application struct {
 	EcbClient     ecbapi.Client
 	GeminiClient  gemapi.Client
 	MaxMindClient mmapi.Client
+	TedbClient    tedbapi.Client
 
 	// services
 	AwsSvc     awssvc.Service
@@ -41,6 +44,7 @@ type Application struct {
 	MaxMindSvc mmsvc.Service
 	ProcSvc    procsvc.Service
 	SysSvc     syssvc.Service
+	TedbSvc    tedbsvc.Service
 }
 
 // NewApplication returns an Application with default settings. Not all fields get initialized.

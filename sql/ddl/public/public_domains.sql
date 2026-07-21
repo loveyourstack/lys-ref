@@ -8,7 +8,7 @@ CREATE DOMAIN int_gte0 AS integer NOT NULL CHECK (value >= 0);
 CREATE DOMAIN int_positive AS integer NOT NULL CHECK (value > 0);
 
 -- stati, codes, shortnames
-CREATE DOMAIN text_short AS varchar(64) NOT NULL; 
+CREATE DOMAIN text_short AS varchar(64) NOT NULL;
 CREATE DOMAIN text_short_mandatory AS varchar(64) NOT NULL CHECK (value != '');
 
 -- full names, address lines

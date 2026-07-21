@@ -21,6 +21,8 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/mmsvc"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
+	"github.com/loveyourstack/connectors/tedb/tedbapi"
+	"github.com/loveyourstack/connectors/tedb/tedbsvc"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/connectors/awsbedrockapi"
@@ -129,6 +131,7 @@ func main() {
 	srvApp.EcbClient = ecbapi.NewClient(srvApp.Db, srvApp.Logger)
 	srvApp.GeminiClient = gemapi.NewClient(ctx, conf.Gemini, srvApp.Config.General.GeneratedPath, srvApp.Db, srvApp.Logger)
 	srvApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, srvApp.Db, srvApp.Logger)
+	srvApp.TedbClient = tedbapi.NewClient(srvApp.Db, srvApp.Logger)
 
 	// attach services
 	syncStore := sysextdatasync.Store{Db: srvApp.Db}
@@ -137,6 +140,7 @@ func main() {
 	srvApp.MaxMindSvc = mmsvc.NewServiceWithSyncStore(srvApp.MaxMindClient, srvApp.Config.General.DownloadsPath, srvApp.Logger, syncStore)
 	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.Logger)
 	srvApp.SysSvc = syssvc.NewService(srvApp.Logger)
+	srvApp.TedbSvc = tedbsvc.NewServiceWithSyncStore(srvApp.TedbClient, srvApp.Db, srvApp.Logger, syncStore)
 
 	// connect to db using db owner and assign to srvApp
 	srvApp.OwnerDb, err = lyspgdb.GetPool(ctx, conf.Db, conf.DbOwnerUser, conf.General.AppName+" Srv")

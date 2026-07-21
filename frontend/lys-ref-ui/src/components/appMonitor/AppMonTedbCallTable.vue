@@ -14,7 +14,7 @@
     @update:options="loadItems"
   >
     <template #top>
-      <l-dt-top :ax="ax" :title="props.title ?? 'ECB API calls'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
+      <l-dt-top :ax="ax" :title="props.title ?? 'TEDB API calls'" :headers="headers" :excelDlUrl="excelDlUrl" v-model:excludedHeaders="excludedHeaders" @resetTable="resetTable()"
         :resetTableLabel="$t('actions.reset_table')" :adjustColumnsLabel="$t('actions.adjust_columns')" :downloadToExcelLabel="$t('actions.download_to_excel')">
         <v-btn icon flat v-tooltip="$t('actions.refresh')" @click="refreshItems()">
           <v-icon icon="mdi-refresh"></v-icon>
@@ -53,7 +53,7 @@ import { useDateFormat } from '@vueuse/core'
 import { type DateFilter, type NumericFilter, getDateFilterUrlParams, getNumericFilterUrlParams, getTextFilterUrlParam } from 'lys-vue'
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
-import { type ApiCall } from '@/types/ecb'
+import { type ApiCall } from '@/types/tedb'
 
 const props = defineProps<{
   title?: string
@@ -71,7 +71,7 @@ const headers = [
 ] as const
 const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
 
-const baseUrl = '/a/ecb/api-calls'
+const baseUrl = '/a/tedb/api-calls'
 const { excelDlUrl } = useTableExcelDlUrl(baseUrl)
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
@@ -86,7 +86,7 @@ const filterResultOk = ref<boolean>()
 const formatter = new Intl.NumberFormat()
 
 const { resetTable } = useJsonLs({
-  lsKey: 'app_mon_ecb_call_dt',
+  lsKey: 'app_mon_tedb_call_dt',
   refs: {
     excludedHeaders,
     filterCreatedAtDate,

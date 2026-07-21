@@ -22,6 +22,8 @@ declare module 'vue' {
     AppMonReqLogTable: typeof import('./src/components/appMonitor/AppMonReqLogTable.vue')['default']
     AppMonReqLogTableFilters: typeof import('./src/components/appMonitor/AppMonReqLogTableFilters.vue')['default']
     AppMonSessionTable: typeof import('./src/components/appMonitor/AppMonSessionTable.vue')['default']
+    AppMonTedbCallTable: typeof import('./src/components/appMonitor/AppMonTedbCallTable.vue')['default']
+    copy: typeof import('./src/components/appMonitor/AppMonEcbCallTable copy.vue')['default']
     CoreArrayTypeForm: typeof import('./src/components/core/arrayType/CoreArrayTypeForm.vue')['default']
     CoreArrayTypeTable: typeof import('./src/components/core/arrayType/CoreArrayTypeTable.vue')['default']
     CoreDefaultValueForm: typeof import('./src/components/core/defaultValue/CoreDefaultValueForm.vue')['default']
@@ -95,5 +97,7 @@ declare module 'vue' {
     SuppEmployeeTable: typeof import('./src/components/supplier/employee/SuppEmployeeTable.vue')['default']
     SuppProductForm: typeof import('./src/components/supplier/product/SuppProductForm.vue')['default']
     SuppProductTable: typeof import('./src/components/supplier/product/SuppProductTable.vue')['default']
+    TedbVatRateSummaryTable: typeof import('./src/components/tedb/vatRates/TedbVatRateSummaryTable.vue')['default']
+    TedbVatRateTable: typeof import('./src/components/tedb/vatRates/TedbVatRateTable.vue')['default']
   }
 }

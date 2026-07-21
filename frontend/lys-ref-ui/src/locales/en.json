@@ -152,7 +152,7 @@
         "ai": {
             "title": "AI / LLMs",
             "subtitle": "Adding LLM tools.",
-            "p1": "This section shows how to add custom data sources to LLMs."
+            "p1": "This section shows how to generate data and add custom data sources to LLMs."
         },
         "charts": {
             "title": "Charts",
@@ -167,7 +167,7 @@
         "external_data": {
             "title": "External data",
             "subtitle": "Importing and managing external data sources.",
-            "p1": "This section shows data from the European Central Bank's API and the MaxMind API.",
+            "p1": "This section shows data from various APIs.",
             "p2": "In the backend, it shows how to merge data efficiently using hash tables and how to stream from file directly into the database."
         },
         "parallel_processing": {
@@ -346,6 +346,13 @@
         "title": "Variants",
         "new_item": "New variant type",
         "p1": "Common variants of basic data types."
+    },
+    "vat_rates": {
+        "nav": "VAT rates",
+        "title": "VAT rates",
+        "p1": "This data is synced from the Taxes in Europe (TEDB) API.",
+        "p2": "For standard rates, the day shown is the latest available day. Each country has one standard rate except Spain, which uses a different standard rate for the Canary islands.",
+        "p3": "The reduced rates can vary by category, so for those records both the day and the rate shown below are the most frequently-occurring values."
     },
     "verticals": {
         "nav": "Verticals",

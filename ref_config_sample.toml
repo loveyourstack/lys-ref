@@ -9,7 +9,7 @@ generatedPath = "/home/<user>/generated"
 host   = "localhost"
 port   = "5432"
 database = "lysref"
-schemaCreationOrder = ["public", "system", "geo", "core", "aws", "digmark", "ecb", "gemini", "maxmind", "process", "publisher", "supplier"] # must be updated when schemas are added / removed. Also need to add to schemas.sql
+schemaCreationOrder = ["public", "system", "geo", "core", "aws", "digmark", "ecb", "gemini", "maxmind", "process", "publisher", "supplier", "tedb"] # must be updated when schemas are added / removed. Also need to add to schemas.sql
 
 [dbSuperUser]
 userName = "postgres" # only fill in dev environment: is used for local db creation

@@ -11,6 +11,8 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmapicall"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
+	"github.com/loveyourstack/connectors/tedb/stores/tedbapicall"
+	"github.com/loveyourstack/connectors/tedb/stores/tedbvatrate"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/stores/core/corearraytype"
@@ -47,6 +49,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/supplier/suppproduct"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
+	"github.com/loveyourstack/lys-ref/internal/stores/tedb/tedbvatratesumm"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgauditupdate"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgbloat"
@@ -131,6 +134,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/supplier", RouteAdder: srvApp.supplierRoutes(apiEnv)},
 		{Url: "/system", RouteAdder: srvApp.systemRoutes(apiEnv)},
 		{Url: "/tech", RouteAdder: srvApp.techRoutes(apiEnv)},
+		{Url: "/tedb", RouteAdder: srvApp.tedbRoutes(apiEnv)},
 		{Url: "/ws", RouteAdder: srvApp.wsRoutes()},
 	}
 }
@@ -754,6 +758,33 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 
 		r.HandleFunc(endpoint, srvApp.authGetSessions).Methods("GET")
 		r.HandleFunc(endpoint+"/block-ip/{ip}", srvApp.authBlockSessionIp).Methods("POST")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) tedbRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+
+		endpoint := "/api-calls"
+
+		apiCallStore := tedbapicall.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
+
+		endpoint = "/vat-rates"
+
+		vatRateStore := tedbvatrate.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, vatRateStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, vatRateStore)).Methods("GET")
+
+		endpoint = "/vat-rate-summary"
+
+		vatRateSummStore := tedbvatratesumm.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, vatRateSummStore, &lys.GetOpts[tedbvatratesumm.Model]{
+			GetLastSyncAt: srvApp.TedbSvc.SelectVatRatesLastSyncAt,
+		})).Methods("GET")
 
 		return r
 	}

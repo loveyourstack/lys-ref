@@ -25,6 +25,7 @@
                 <v-tab value="ecbCalls">ECB API</v-tab>
                 <v-tab value="gemCalls">Gemini API</v-tab>
                 <v-tab value="mmCalls">Maxmind API</v-tab>
+                <v-tab value="tedbCalls">TEDB API</v-tab>
               </v-tabs>
 
               <v-window v-model="selectedTab">
@@ -59,6 +60,10 @@
 
                 <v-window-item value="mmCalls">
                   <app-mon-mm-call-table />
+                </v-window-item>
+
+                <v-window-item value="tedbCalls">
+                  <app-mon-tedb-call-table />
                 </v-window-item>
 
               </v-window>

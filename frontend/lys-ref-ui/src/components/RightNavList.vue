@@ -5,6 +5,7 @@
     <div v-if="showExtDataItems">
       <v-list-item link :title="$t('currencies.nav')" to="/ecb/currencies" prepend-icon="mdi-currency-eur"></v-list-item>
       <v-list-item link :title="$t('exchange_rates.nav')" to="/ecb/exchange-rates" prepend-icon="mdi-currency-eur"></v-list-item>
+      <v-list-item link :title="$t('vat_rates.nav')" to="/tedb/vat-rate-summary" prepend-icon="mdi-cash"></v-list-item>
       <v-list-item link :title="$t('geo_ip.nav')" to="/maxmind/geo-ip" prepend-icon="mdi-earth"></v-list-item>
     </div>
 

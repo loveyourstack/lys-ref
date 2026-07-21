@@ -27,7 +27,7 @@
             v-model:filterCreatedAtDate="filterCreatedAtDate"
             v-model:filterDurationMs="filterDurationMs"
             v-model:filterEndpoint="filterEndpoint"
-            v-model:filterStatusCodeOk="filterStatusCodeOk"
+            v-model:filterResultOk="filterResultOk"
           />
         </v-col>
       </v-row>
@@ -81,7 +81,7 @@ const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstim
 const filterCreatedAtDate = ref<DateFilter>()
 const filterDurationMs = ref<NumericFilter>()
 const filterEndpoint = ref<string>()
-const filterStatusCodeOk = ref<boolean>()
+const filterResultOk = ref<boolean>()
 
 const formatter = new Intl.NumberFormat()
 
@@ -92,7 +92,7 @@ const { resetTable } = useJsonLs({
     filterCreatedAtDate,
     filterDurationMs,
     filterEndpoint,
-    filterStatusCodeOk,
+    filterResultOk,
     itemsPerPage,
     sortBy,
   },
@@ -101,11 +101,11 @@ const { resetTable } = useJsonLs({
 function getFilterStr(): string {
   let ret = ''
 
-  if (filterStatusCodeOk.value != undefined) {
-    if (filterStatusCodeOk.value) {
-      ret += '&status_code=200'
+  if (filterResultOk.value != undefined) {
+    if (filterResultOk.value) {
+      ret += '&result=OK'
     } else {
-      ret += '&status_code=!200'
+      ret += '&result=!OK'
     }
   }
 
