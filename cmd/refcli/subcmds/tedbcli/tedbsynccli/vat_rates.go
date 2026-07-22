@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/loveyourstack/connectors/tedb/tedbapi"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,10 @@ func VatRatesCmd(cliApp *cliapp.App) *cobra.Command {
 
 			err = cliApp.TedbSvc.SyncVatRates(ctx, cliApp.Db, startDate, endDate)
 			if err != nil {
+				if err == tedbapi.ErrNoRatesFound {
+					cliApp.Logger.Debug("no rates returned from TEDB API for the given date range")
+					return nil
+				}
 				return fmt.Errorf("cliApp.TedbSvc.SyncVatRates failed: %w", err)
 			}
 
