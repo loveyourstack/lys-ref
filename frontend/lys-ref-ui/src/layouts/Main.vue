@@ -4,7 +4,7 @@
 
       <v-app-bar-nav-icon variant="text" v-tooltip:bottom="'Toggle left menu'" @click.stop="showLeftNav = !showLeftNav"></v-app-bar-nav-icon>
 
-      <v-img max-height="30px" max-width="30px" src="./../assets/logo.png" class="ml-1"></v-img>
+      <v-img max-height="30px" max-width="30px" src="@/assets/logo.png" class="ml-1"></v-img>
       <v-toolbar-title>
         <span class="font-weight-bold">{{ appStore.company }} - {{ appStore.projectTitle }}</span>
       </v-toolbar-title>
@@ -16,8 +16,10 @@
       <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
           <div v-if="auth.user" class="d-flex align-center" v-bind="props">
-            <v-icon icon="mdi-account" color="primary" class="mr-1"></v-icon>
-            <div class="text-body-1 mr-3">{{ auth.user.name }}</div>
+            <v-avatar size="small" class="mr-2">
+              <v-img :src="s3Bucket + 'generic_profile_400x400.png'"></v-img>
+            </v-avatar>
+            <div class="text-body-1 mr-3 mt-1">{{ auth.user.name }}</div>
           </div>
         </template>
 
@@ -90,6 +92,8 @@ import { useProcessStore } from '@/stores/process'
 import { usePublisherStore } from '@/stores/publisher'
 import { useSupplierStore } from '@/stores/supplier'
 import { type StoreData } from '@/types/system'
+
+const s3Bucket = import.meta.env.VITE_S3_BUCKET
 
 const theme = useTheme()
 const router = useRouter()
