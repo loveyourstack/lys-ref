@@ -4,7 +4,7 @@
       <v-card elevation="2" max-width="650">
 
         <v-img height="250" cover
-          :src="'https://lysref-847632507082-eu-central-1-an.s3.eu-central-1.amazonaws.com/' + camp.image_filename"
+          :src="s3Bucket + camp.image_filename"
         ></v-img>
 
         <v-card-title>{{ camp.headline }}</v-card-title>
@@ -42,6 +42,7 @@ const props = defineProps<{
 }>()
 
 const baseUrl = '/a/digmark/generated-campaigns'
+const s3Bucket = import.meta.env.VITE_S3_BUCKET
 
 // add fake rating and votes to each campaign for display purposes
 type FakeCardStats = {
