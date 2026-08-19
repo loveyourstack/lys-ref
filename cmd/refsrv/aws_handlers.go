@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
-	"strings"
 
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/templates"
 	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmail"
-	"github.com/loveyourstack/lys/lysmeta"
 )
+
+/* unused for now
 
 func (srvApp *httpServerApplication) awsBedrockGenerateMarketingImage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -55,7 +55,7 @@ func (srvApp *httpServerApplication) awsBedrockGenerateMarketingImage(w http.Res
 		Data:   fName,
 	}
 	lys.JsonResponse(resp, http.StatusOK, w)
-}
+}*/
 
 func (srvApp *httpServerApplication) awsBedrockListImageModels(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

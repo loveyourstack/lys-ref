@@ -143,8 +143,16 @@ github.com/loveyourstack/connectors v0.3.18 h1:34f4UxYjwd0KvHrsreAoDawoj1DoOGBvm
 github.com/loveyourstack/connectors v0.3.18/go.mod h1:/qrxFi4dQYkuEbpW78dZJwRfmodnpgQ0awDLS8rR3Gg=
 github.com/loveyourstack/connectors v0.3.19 h1:GJ5KV6e/l6y3gTNQH0T/KX+T/gnJ2W1vdAT4QcTtZwY=
 github.com/loveyourstack/connectors v0.3.19/go.mod h1:/qrxFi4dQYkuEbpW78dZJwRfmodnpgQ0awDLS8rR3Gg=
+github.com/loveyourstack/connectors v0.3.20 h1:gTl0Yx4msDtYhPNCvUElj1AdvELTWk4eYClopsZG77o=
+github.com/loveyourstack/connectors v0.3.20/go.mod h1:/qrxFi4dQYkuEbpW78dZJwRfmodnpgQ0awDLS8rR3Gg=
 github.com/loveyourstack/lys v0.3.50 h1:sPfcxMsaJX+zHr3OgmMgCMe6SPz26yzw8FPUwCSgSCI=
 github.com/loveyourstack/lys v0.3.50/go.mod h1:dE381esUaWZCaOQU/BGzD7yS+CwInW4X6vv/+douKR4=
+github.com/loveyourstack/lys v0.3.51 h1:UbCTmXzIY5646YLIRfBtzvGrW26Y7iiYa1wMoBQpeuo=
+github.com/loveyourstack/lys v0.3.51/go.mod h1:SPG9x6Mz07YLMX6FPBb9gRMI00JWCMOtqfNjsEn0QaQ=
+github.com/loveyourstack/lys v0.3.52 h1:dMnrkHqvyZpGY6KGgL7q0qc2DUeUkwjL/J0n9/2HnFA=
+github.com/loveyourstack/lys v0.3.52/go.mod h1:SPG9x6Mz07YLMX6FPBb9gRMI00JWCMOtqfNjsEn0QaQ=
+github.com/loveyourstack/lys v0.3.53 h1:WJJoX3p3oLwo3f5N8CvBYzHCuKe+akf1oNBioDkoIo4=
+github.com/loveyourstack/lys v0.3.53/go.mod h1:SPG9x6Mz07YLMX6FPBb9gRMI00JWCMOtqfNjsEn0QaQ=
 github.com/mark3labs/mcp-go v0.55.0 h1:lJfz2aoctiwK+sI991+uIYwmKNIBciI+O7zsyDsa4U8=
 github.com/mark3labs/mcp-go v0.55.0/go.mod h1:+8WclSK1ZUweCP3hvktSji8n8ABG/95QaEkeVE/Uwas=
 github.com/peterbourgon/diskv/v3 v3.0.1 h1:x06SQA46+PKIUftmEujdwSEpIx8kR+M9eLYsUxeYveU=

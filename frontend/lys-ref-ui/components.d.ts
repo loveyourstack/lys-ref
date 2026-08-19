@@ -67,6 +67,7 @@ declare module 'vue' {
     HomeCharts: typeof import('./src/components/home/HomeCharts.vue')['default']
     HomeEntityRelationships: typeof import('./src/components/home/HomeEntityRelationships.vue')['default']
     HomeExternalData: typeof import('./src/components/home/HomeExternalData.vue')['default']
+    HomeFileOperations: typeof import('./src/components/home/HomeFileOperations.vue')['default']
     HomeParallelProcessing: typeof import('./src/components/home/HomeParallelProcessing.vue')['default']
     HomeProjectStack: typeof import('./src/components/home/HomeProjectStack.vue')['default']
     HomeSaaS: typeof import('./src/components/home/HomeSaaS.vue')['default']

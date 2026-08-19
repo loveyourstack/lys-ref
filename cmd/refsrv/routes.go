@@ -50,6 +50,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys-ref/internal/stores/tedb/tedbvatratesumm"
+	"github.com/loveyourstack/lys/lysformfile"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgauditupdate"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgbloat"
@@ -135,6 +136,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/system", RouteAdder: srvApp.systemRoutes(apiEnv)},
 		{Url: "/tech", RouteAdder: srvApp.techRoutes(apiEnv)},
 		{Url: "/tedb", RouteAdder: srvApp.tedbRoutes(apiEnv)},
+		{Url: "/uploads", RouteAdder: srvApp.uploadsRoutes(apiEnv)},
 		{Url: "/ws", RouteAdder: srvApp.wsRoutes()},
 	}
 }
@@ -697,6 +699,9 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 	return func(r *mux.Router) *mux.Router {
 		//schemaName := "system"
 
+		writeR := r.NewRoute().Subrouter()
+		writeR.Use(authorizeRole(sysrole.Writer[:]))
+
 		endpoint := "/audit-updates"
 
 		auditUpdateStore := lyspgauditupdate.Store{Db: srvApp.Db}
@@ -714,6 +719,15 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 		r.HandleFunc(endpoint+"/add-fake", srvApp.sysAddFakeNotification).Methods("POST")
 		r.HandleFunc(endpoint+"/set-all-read", srvApp.sysSetAllNotificationsToRead).Methods("PATCH")
 		r.HandleFunc(endpoint+"/set-read", srvApp.sysSetNotificationsToRead(apiEnv)).Methods("PATCH")
+
+		endpoint = "/profile-image"
+
+		writeR.HandleFunc(endpoint, lys.Upload(lysformfile.ExtractParams{
+			AllowedMimeTypes: lysformfile.ImageMimeTypes,
+			ImgMinHeightPx:   new(400),
+			ImgMinWidthPx:    new(400),
+			MaxSizePerFile:   1 * 1024 * 1024, // 1 MB
+		}, srvApp.Config.General.UploadsPath, apiEnv.Logger)).Methods("POST")
 
 		endpoint = "/ui-store-data"
 
@@ -785,6 +799,41 @@ func (srvApp *httpServerApplication) tedbRoutes(apiEnv lys.Env) lys.RouteAdderFu
 		r.HandleFunc(endpoint, lys.Get(apiEnv, vatRateSummStore, &lys.GetOpts[tedbvatratesumm.Model]{
 			GetLastSyncAt: srvApp.TedbSvc.SelectVatRatesLastSyncAt,
 		})).Methods("GET")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) uploadsRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+
+		writeR := r.NewRoute().Subrouter()
+		writeR.Use(authorizeRole(sysrole.Writer[:]))
+
+		endpoint := "/image-file"
+
+		writeR.HandleFunc(endpoint, lys.Upload(lysformfile.ExtractParams{
+			AllowedMimeTypes: []string{"image/png"},
+			ImgMaxHeightPx:   new(300),
+			ImgMaxWidthPx:    new(300),
+			MaxSizePerFile:   10 * 1024, // 10 KB
+		}, srvApp.Config.General.UploadsPath, apiEnv.Logger)).Methods("POST")
+
+		endpoint = "/multiple-text-files"
+
+		writeR.HandleFunc(endpoint, lys.Upload(lysformfile.ExtractParams{
+			AllowedMimeTypes: []string{"text/plain"},
+			MaxFiles:         new(3),
+			MaxSizePerFile:   2 * 1024, // 2 KB
+		}, srvApp.Config.General.UploadsPath, apiEnv.Logger)).Methods("POST")
+
+		endpoint = "/single-text-file"
+
+		writeR.HandleFunc(endpoint, lys.Upload(lysformfile.ExtractParams{
+			AllowedMimeTypes: []string{"text/plain"},
+			MaxSizePerFile:   10 * 1024, // 10 KB
+		}, srvApp.Config.General.UploadsPath, apiEnv.Logger)).Methods("POST")
 
 		return r
 	}

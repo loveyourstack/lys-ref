@@ -10,6 +10,8 @@ import (
 	"github.com/loveyourstack/lys/lysmeta"
 )
 
+/* unused for now
+
 func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -59,7 +61,7 @@ func (srvApp *httpServerApplication) gemGenerateImage(w http.ResponseWriter, r *
 		Data:   fName,
 	}
 	lys.JsonResponse(resp, http.StatusOK, w)
-}
+}*/
 
 func (srvApp *httpServerApplication) gemGenerateMarketingCampaign(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

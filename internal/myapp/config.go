@@ -21,6 +21,7 @@ type general struct {
 	Debug         bool
 	DownloadsPath string
 	GeneratedPath string
+	UploadsPath   string
 }
 
 // api contains the API config

@@ -24,7 +24,8 @@
         "run_with_dependencies": "Run with dependencies",
         "save": "Save",
         "show_archive": "Show archive",
-        "show_update_history": "Show update history"
+        "show_update_history": "Show update history",
+        "upload": "Upload"
     },
     "application": {
         "nav": "Application"
@@ -170,6 +171,11 @@
             "p1": "This section shows data from various external APIs.",
             "p2": "In the backend, it shows how to merge data efficiently using hash tables and how to stream from file directly into the database."
         },
+        "file_operations": {
+            "title": "File operations",
+            "subtitle": "Working with images and other files.",
+            "p1": "This section shows how to handle file uploads with various file types."
+        },
         "parallel_processing": {
             "title": "Parallel processing",
             "subtitle": "Improved data throughput.",
@@ -272,6 +278,7 @@
         "ai": "AI / LLMs",
         "charts": "Charts",
         "entity_relationships": "Entity relationships",
+        "file_operations": "File operations",
         "external_data": "External data",
         "monitoring": "Monitoring",
         "parallel_processing": "Parallel processing",
@@ -340,6 +347,22 @@
         "supplier_products": {
             "p1": "Tenant view: only products of the tenant are visible, and are editable by the tenant."
         }
+    },
+    "uploads": {
+        "nav": "Uploads",
+        "title": "Uploads",
+        "p1": "Select a file constraint from the list below, then drag the appropriate file(s) from your File Explorer into the upload area and click \"Upload\".",
+        "p2": "You can also click the upload area to open a file browse window. The items will be filtered based on the selected constraint.",
+        "p3": "File count, MIME type and size are checked before upload. Image dimensions are checked if applicable.",
+        "p4": "A zip file containing test files can be downloaded below.",
+        "constraint1": "Single text file, max size 10 Kb",
+        "constraint2": "Up to 3 text files, max size 2 Kb each",
+        "constraint3": "Single PNG image, max 300 x 300px, max size 10 Kb",
+        "control_title": "Drag and drop files here",
+        "results": "Results",
+        "results_placeholder": "The upload results will be shown here.",
+        "test_files": "Test files",
+        "test_files_download": "Download test files"
     },
     "variants": {
         "nav": "Variants",

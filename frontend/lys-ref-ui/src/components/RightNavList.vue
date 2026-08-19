@@ -37,6 +37,12 @@
       <v-list-item link :title="$t('notifications.nav')" to="/server-push/notifications" prepend-icon="mdi-bell-outline"></v-list-item>
     </div>
 
+    <v-list-subheader :title="$t('nav_header.file_operations')" class="mt-2 clickable" @click="showFileOperationsItems = !showFileOperationsItems"></v-list-subheader>
+
+    <div v-if="showFileOperationsItems">
+      <v-list-item link :title="$t('uploads.nav')" to="/file-operations/uploads" prepend-icon="mdi-upload"></v-list-item>
+    </div>
+
     <v-list-subheader v-if="auth.hasRole(Role.Tech)" :title="$t('nav_header.monitoring')" class="mt-2 clickable" @click="showMonitoringItems = !showMonitoringItems"></v-list-subheader>
 
     <div v-if="auth.hasRole(Role.Tech) && showMonitoringItems">
@@ -55,6 +61,7 @@ import { Role } from '@/types/system'
 
 const showExtDataItems = ref(true)
 const showChartsItems = ref(true)
+const showFileOperationsItems = ref(true)
 const showParProcItems = ref(true)
 const showMultiTenItems = ref(true)
 const showServerPushItems = ref(true)
@@ -65,6 +72,7 @@ useJsonLs({
   refs: {
     showExtDataItems,
     showChartsItems,
+    showFileOperationsItems,
     showParProcItems,
     showMultiTenItems,
     showServerPushItems,

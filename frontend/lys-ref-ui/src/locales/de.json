@@ -24,7 +24,8 @@
         "run_with_dependencies": "Mit Abhängigkeiten ausführen",
         "save": "Speichern",
         "show_archive": "Archiv anzeigen",
-        "show_update_history": "Update-Verlauf anzeigen"
+        "show_update_history": "Update-Verlauf anzeigen",
+        "upload": "Hochladen"
     },
     "application": {
         "nav": "Anwendung"
@@ -170,6 +171,11 @@
             "p1": "Dieser Abschnitt zeigt Daten aus verschiedenen externen APIs.",
             "p2": "Im Backend wird gezeigt, wie Daten effizient mit Hash-Tabellen zusammengeführt werden und wie direkt aus einer Datei in die Datenbank gestreamt werden kann."
         },
+        "file_operations": {
+            "title": "Dateioperationen",
+            "subtitle": "Arbeiten mit Bildern und anderen Dateien.",
+            "p1": "Dieser Abschnitt zeigt, wie man Datei-Uploads mit verschiedenen Dateitypen handhabt."
+        },
         "parallel_processing": {
             "title": "Parallelverarbeitung",
             "subtitle": "Verbesserter Datendurchsatz.",
@@ -273,6 +279,7 @@
         "charts": "Diagramme",
         "entity_relationships": "Entity-Beziehungen",
         "external_data": "Externe Daten",
+        "file_operations": "Dateioperationen",
         "monitoring": "Überwachung",
         "parallel_processing": "Parallele Verarbeitung",
         "saas": "SaaS / Multi-Tenancy",
@@ -341,6 +348,22 @@
             "p1": "Mandantenansicht: nur Produkte des Mandanten sind sichtbar und vom Mandanten bearbeitbar."
         }
     },
+    "uploads": {
+        "nav": "Uploads",
+        "title": "Uploads",
+        "p1": "Wählen Sie eine Datei-Beschränkung aus der Liste unten aus, ziehen Sie dann die entsprechenden Datei(en) aus Ihrem Datei-Explorer in den Upload-Bereich und klicken Sie auf \"Hochladen\".",
+        "p2": "Sie können auch auf den Upload-Bereich klicken, um ein Datei-Browser-Fenster zu öffnen. Die Elemente werden basierend auf der ausgewählten Beschränkung gefiltert.",
+        "p3": "Dateianzahl, MIME-Typ und Größe werden vor dem Upload überprüft. Bildabmessungen werden überprüft, falls zutreffend.",
+        "p4": "Eine Zip-Datei mit Testdateien kann unten heruntergeladen werden.",
+        "constraint1": "Eine Textdatei, maximale Größe 10 Kb",
+        "constraint2": "Bis zu 3 Textdateien, jeweils maximal 2 Kb",
+        "constraint3": "Ein PNG-Bild, maximal 300 x 300 px, maximale Größe 10 Kb",
+        "control_title": "Dateien hierher ziehen und ablegen",
+        "results": "Ergebnisse",
+        "results_placeholder": "Die Upload-Ergebnisse werden hier angezeigt.",
+        "test_files": "Testdateien",
+        "test_files_download": "Testdateien herunterladen"
+    },
     "variants": {
         "nav": "Varianten",
         "title": "Varianten",
@@ -351,7 +374,7 @@
         "nav": "MwSt-Sätze",
         "title": "MwSt-Sätze",
         "p1": "Diese Daten werden aus der Taxes in Europe (TEDB) API synchronisiert.",
-        "p2": "ür Standardsätze ist der angezeigte Tag der zuletzt verfügbare Tag. Jedes Land hat einen Standardsatz, außer Spanien, das für die Kanarischen Inseln einen anderen Standardsatz verwendet.",
+        "p2": "Für Standardsätze ist der angezeigte Tag der zuletzt verfügbare Tag. Jedes Land hat einen Standardsatz, außer Spanien, das für die Kanarischen Inseln einen anderen Standardsatz verwendet.",
         "p3": "Die ermäßigten Sätze können je nach Kategorie variieren, sodass für diese Datensätze sowohl der angezeigte Tag als auch der angezeigte Satz die am häufigsten vorkommenden Werte sind."
     },
     "verticals": {

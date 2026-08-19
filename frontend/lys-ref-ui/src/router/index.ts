@@ -124,6 +124,16 @@ const routes = [
         ]
       },
       {
+        path: 'file-operations',
+        children: [
+          {
+            path: 'uploads',
+            name: 'Uploads',
+            component: () => import('@/pages/FileOpsUploads.vue'),
+          },
+        ]
+      },
+      {
         path: 'maxmind',
         children: [
           {

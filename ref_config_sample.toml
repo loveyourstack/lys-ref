@@ -4,6 +4,7 @@ env     = "dev"
 debug   = true
 downloadsPath = "/home/<user>/downloads"
 generatedPath = "/home/<user>/generated"
+uploadsPath = "/home/<user>/uploads"
 
 [database]
 host   = "localhost"
