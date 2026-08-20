@@ -10,6 +10,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys/lysmail"
+	"github.com/loveyourstack/lys/lysos"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -133,6 +134,18 @@ func (c *Config) LoadFromFile(configFilePath string) (err error) {
 		}
 	}
 
+	// validate paths
+	if err = lysos.ValidateDir(c.General.DownloadsPath, "Downloads"); err != nil {
+		return err
+	}
+	if err = lysos.ValidateDir(c.General.GeneratedPath, "Generated"); err != nil {
+		return err
+	}
+	if err = lysos.ValidateDir(c.General.UploadsPath, "Uploads"); err != nil {
+		return err
+	}
+
+	// validate SMTP config
 	err = c.Smtp.Validate()
 	if err != nil {
 		return fmt.Errorf("c.Smtp.Validate failed: %w", err)
