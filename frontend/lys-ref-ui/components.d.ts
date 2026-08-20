@@ -86,6 +86,7 @@ declare module 'vue' {
     ProcStepDiag: typeof import('./src/components/process/step/ProcStepDiag.vue')['default']
     ProcStepForm: typeof import('./src/components/process/step/ProcStepForm.vue')['default']
     ProcStepLinkAddForm: typeof import('./src/components/process/step/ProcStepLinkAddForm.vue')['default']
+    ProfileForm: typeof import('./src/components/profile/ProfileForm.vue')['default']
     PubAuthorForm: typeof import('./src/components/publisher/author/PubAuthorForm.vue')['default']
     PubAuthorTable: typeof import('./src/components/publisher/author/PubAuthorTable.vue')['default']
     PubBookForm: typeof import('./src/components/publisher/book/PubBookForm.vue')['default']

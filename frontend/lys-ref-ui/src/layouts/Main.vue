@@ -1,4 +1,8 @@
 <template>
+  <l-dialog-card v-model="editProfile" card-title="Edit profile">
+    <profile-form @cancelled="editProfile = false"></profile-form>
+  </l-dialog-card>
+
   <v-app class="rounded rounded-md">
     <v-app-bar density="compact" elevation="8" class="app-shell-bar">
 
@@ -24,6 +28,9 @@
         </template>
 
         <v-list density="compact" class="mt-1">
+          <v-list-item prepend-icon="mdi-account-edit" class="clickable" @click="editProfile = true">
+            <v-list-item-title>Edit profile</v-list-item-title>
+          </v-list-item>
           <v-list-item prepend-icon="mdi-logout" class="clickable" @click="logout()">
             <v-list-item-title>{{ $t('actions.logout') }}</v-list-item-title>
           </v-list-item>
@@ -114,6 +121,8 @@ const storeData = ref<StoreData>()
 
 const showLeftNav = ref(true)
 const showRightNav = ref(true)
+
+const editProfile = ref(false)
 
 const updatingAwsFirewall = ref(false)
 

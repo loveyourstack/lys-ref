@@ -12,7 +12,13 @@ const csp = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object
 export default defineConfig({
   plugins: [
     Vue({
-      template: { transformAssetUrls },
+      template: { 
+        transformAssetUrls,
+        compilerOptions: {
+          // allow cropperjs custom elements to be used in templates without warnings
+          isCustomElement: (tag) => tag.startsWith('cropper-'),
+        },
+      },
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
