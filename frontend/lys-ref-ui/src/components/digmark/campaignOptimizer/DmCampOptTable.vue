@@ -88,7 +88,7 @@
     </template>
 
     <template v-slot:[`item.daily_budget_eur`]="{ item }">
-      <span v-if="item.editing_daily_budget" class="d-flex justify-content align-center ga-1">
+      <span v-if="isEditing(item)" class="d-flex justify-content align-center ga-1">
         <v-form ref="dailyBudgetForm">
           <v-text-field v-model.number="item.daily_budget_eur" hide-details density="compact" style="min-width: 110px;"
             :append-inner-icon="item.patch_daily_budget_icon"
@@ -106,7 +106,7 @@
       </span>
       <span v-else class="d-flex justify-sm-end align-center text-no-wrap">
         {{ formatterDec2.format(item.daily_budget_eur!) + ' €' }}
-        <v-btn icon flat size="small" :disabled="!auth.isWriter()" @click="item.editing_daily_budget = true">
+        <v-btn icon flat size="small" :disabled="!auth.isWriter()" @click="setEditing(item)">
           <v-icon class="ml-3" color="primary" icon="mdi-square-edit-outline"></v-icon>
         </v-btn>
       </span>
@@ -231,6 +231,8 @@ const filterVerticalFks = ref<number[]>()
 const selectedManager = ref<string>('All')
 const selectedPeriod = ref<string>('Today')
 
+const editingIds = ref(new Set<number>()) // set of campaign IDs where daily budget is currently being edited
+
 const formatter = new Intl.NumberFormat()
 const formatterDec2 = new Intl.NumberFormat(undefined , { maximumFractionDigits: 2, minimumFractionDigits: 2})
 const formatterPctDec2 = new Intl.NumberFormat(undefined , { style: 'percent', maximumFractionDigits: 2, minimumFractionDigits: 2})
@@ -306,6 +308,10 @@ function getVolatilityInfo(vol: number): {icon: string, color: string, tooltip: 
   return { icon: 'mdi-none', color: '', tooltip: '' }
 }
 
+function isEditing(item: CampaignOptimizer) {
+  return editingIds.value.has(item.id!)
+}
+
 function loadItems(options: { page: number, itemsPerPage: number, sortBy: SortItem[] }) {
 
   // if explicitly preserving selection (e.g. after bulk edit), save selection for restoring after data refresh
@@ -315,15 +321,15 @@ function loadItems(options: { page: number, itemsPerPage: number, sortBy: SortIt
     selectedIdsForRestore.value = []
   }
 
-  // reset selected and expanded, since filtering / paging / sorting will potentially no longer show the affected rows
+  // reset selected, expanded and editingIds, since filtering / paging / sorting will potentially no longer show the affected rows
   selected.value = []
   expanded.value = []
+  editingIds.value = new Set()
 
   let myUrl = processURIOptions(baseUrl, options)
   myUrl += getFilterStr()
   fetchDtItems({ ax, myUrl, page: options.page, itemsPerPage: options.itemsPerPage, items, totalItems, totalItemsIsEstimate, totalItemsEstimated, onSuccess: () => {
     items.value.forEach(item => {
-      item.editing_daily_budget = false
       item.patch_daily_budget_icon = 'mdi-none'
       item.patch_is_active_icon = 'mdi-none'
     })
@@ -370,7 +376,6 @@ async function patchDailyBudget(item: CampaignOptimizer) {
     })
     .catch() // handled by interceptor
     .finally(() => {
-      item.patch_daily_budget_icon = 'mdi-none'
       refreshItems() // always refresh items, so that previous value is shown if patch fails
     })
 }
@@ -390,6 +395,12 @@ async function patchIsActive(item: CampaignOptimizer) {
       item.patch_is_active_icon = 'mdi-none'
       refreshItems()
     })
+}
+
+function setEditing(item: CampaignOptimizer) {
+  const next = new Set(editingIds.value)
+  next.add(item.id)
+  editingIds.value = next // reassigning forces a clean reactive update
 }
 
 function showProfitTooltips() {

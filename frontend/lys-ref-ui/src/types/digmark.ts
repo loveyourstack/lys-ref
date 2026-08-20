@@ -68,7 +68,6 @@ export interface CampaignOptimizer {
   country_iso2: string
   created_at: Date
   daily_budget_eur: number
-  editing_daily_budget: boolean
   end_day: Date
   impressions: number
   is_active: boolean
