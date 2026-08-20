@@ -9,6 +9,7 @@ import (
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys/lyserr"
+	"github.com/loveyourstack/lys/lysformfile"
 )
 
 func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWriter, r *http.Request) {
@@ -139,6 +140,46 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 		err = notsStore.SetUsersToRead(ctx, inp.Ids)
 		if err != nil {
 			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), srvApp.Logger, w)
+			return
+		}
+
+		// return success
+		resp := lys.StdResponse{
+			Status: lys.ReqSucceeded,
+			Data:   "updated",
+		}
+		lys.JsonResponse(resp, http.StatusOK, w)
+	}
+}
+
+func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// extract the image from the request
+		uploadFiles, err := lysformfile.ExtractFromRequest(r, lysformfile.ExtractParams{
+			AllowedMimeTypes: lysformfile.ImageMimeTypes,
+			ImgMaxHeightPx:   new(400),
+			ImgMaxWidthPx:    new(400),
+			ImgMinHeightPx:   new(400),
+			ImgMinWidthPx:    new(400),
+			MaxSizePerFile:   500 * 1024, // 500 KB
+		})
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("sysSetUserProfilePic: lysformfile.ExtractFromRequest failed: %w", err), env.Logger, w)
+			return
+		}
+
+		if len(uploadFiles) != 1 {
+			lys.HandleUserError(lyserr.User{Message: "exactly one image must be uploaded"}, w)
+			return
+		}
+
+		// store image and update user record
+		err = srvApp.SysSvc.SetUserProfilePic(ctx, uploadFiles[0], srvApp.Config.General.UploadsPath)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SetUserProfilePic failed: %w", err), env.Logger, w)
 			return
 		}
 

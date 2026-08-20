@@ -71,6 +71,7 @@ CREATE TABLE system.user
   is_deactivated boolean NOT NULL DEFAULT false,
   last_user_update_by tracking_last_user_update_by,
   name text_short_mandatory UNIQUE, -- natural key
+  profile_pic text_medium NOT NULL DEFAULT '',
   roles system.role[] NOT NULL DEFAULT '{}',
   updated_at tracking_at
 );

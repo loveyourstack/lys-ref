@@ -30,6 +30,7 @@ type Input struct {
 	GivenName             string         `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
 	HashedPw              string         `db:"hashed_pw" json:"-"`
 	Name                  string         `db:"name" json:"name,omitempty" validate:"required,max=64"`
+	ProfilePic            string         `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256"`
 	Roles                 []sysrole.Enum `db:"roles" json:"roles,omitempty" validate:"required"`
 }
 

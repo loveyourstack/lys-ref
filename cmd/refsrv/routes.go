@@ -720,14 +720,9 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 		r.HandleFunc(endpoint+"/set-all-read", srvApp.sysSetAllNotificationsToRead).Methods("PATCH")
 		r.HandleFunc(endpoint+"/set-read", srvApp.sysSetNotificationsToRead(apiEnv)).Methods("PATCH")
 
-		endpoint = "/profile-image"
+		endpoint = "/set-user-profile-pic"
 
-		writeR.HandleFunc(endpoint, lys.Upload(lysformfile.ExtractParams{
-			AllowedMimeTypes: lysformfile.ImageMimeTypes,
-			ImgMinHeightPx:   new(400),
-			ImgMinWidthPx:    new(400),
-			MaxSizePerFile:   1 * 1024 * 1024, // 1 MB
-		}, srvApp.Config.General.UploadsPath, apiEnv.Logger)).Methods("POST")
+		r.HandleFunc(endpoint, srvApp.sysSetUserProfilePic(apiEnv)).Methods("PATCH")
 
 		endpoint = "/ui-store-data"
 
