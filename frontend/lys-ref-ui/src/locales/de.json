@@ -6,6 +6,7 @@
         "cancel": "Abbrechen",
         "close": "Schließen",
         "create": "Erstellen",
+        "crop": "Zuschneiden",
         "delete": "Löschen",
         "download_to_excel": "In Excel herunterladen",
         "edit": "Bearbeiten",
@@ -102,6 +103,9 @@
     },
     "external_data": {
         "last_synced": "Zuletzt synchronisiert"
+    },
+    "feedback": {
+        "saved": "Gespeichert"
     },
     "flows": {
         "nav": "Abläufe",
@@ -218,6 +222,15 @@
             "p1": "Dieser Abschnitt zeigt, wie Daten ordnungsgemäß archiviert (soft gelöscht) werden, einschließlich der Auswirkungen auf verknüpfte Daten, und wie Benutzeränderungen mithilfe eines Datenbank-Audit-Logs verfolgt werden können."
         },
         "welcome": "Willkommen bei"
+    },
+    "image_cropping": {
+        "nav": "Bild zuschneiden",
+        "title": "Bild zuschneiden: Profilbild festlegen",
+        "p1": "Diese Seite zeigt die Verwendung von {CropperJs}, um dem Benutzer das Zuschneiden eines hochgeladenen Bildes zu ermöglichen und es als sein Profilbild festzulegen.",
+        "p2": "Das ursprünglich hochgeladene Bild muss mindestens 400px x 400px groß sein und darf höchstens 2 MB groß sein.",
+        "p3": "Wenn das hochgeladene Bild genau 400 x 400 ist, ist kein Zuschneiden erforderlich und das Bild kann sofort gespeichert werden. Ist es größer, wird das Zuschneidewerkzeug verwendet, um ein 400 x 400 zugeschnittenes Bild zu erhalten.",
+        "p4": "Beim Speichern wird das Bild im Backend überprüft und dann in AWS S3 hochgeladen und als Profilbild festgelegt.",
+        "control_title": "Klicken oder Bild hierher ziehen"
     },
     "internal_view": {
         "nav": "Interne Ansicht",

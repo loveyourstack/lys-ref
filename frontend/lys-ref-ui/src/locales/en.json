@@ -6,6 +6,7 @@
         "cancel": "Cancel",
         "close": "Close",
         "create": "Create",
+        "crop": "Crop",
         "delete": "Delete",
         "download_to_excel": "Download to Excel",
         "edit": "Edit",
@@ -102,6 +103,9 @@
     },
     "external_data": {
         "last_synced": "Last synced"
+    },
+    "feedback": {
+        "saved": "Saved"
     },
     "flows": {
         "nav": "Flows",
@@ -218,6 +222,15 @@
             "p1": "This section demonstrates how to properly archive (soft delete) data including cascading effects, and how to track user changes using a database audit log."
         },
         "welcome": "Welcome to"
+    },
+    "image_cropping": {
+        "nav": "Image cropping",
+        "title": "Image cropping: set profile picture",
+        "p1": "This page demonstrates the use of {CropperJs} to allow the user to crop an uploaded image and set it as his profile picture.",
+        "p2": "The initial uploaded image must be at least 400px x 400px and may be at most 2 MB in size.",
+        "p3": "If the uploaded image is exactly 400 x 400, no cropping is required and the image can be saved immediately. If it is larger, the cropping tool is used to get a 400 x 400 cropped image.",
+        "p4": "On Save, the image is double-checked in the backend and then uploaded to AWS S3 and set as the profile picture.",
+        "control_title": "Click or drag image here"
     },
     "internal_view": {
         "nav": "Internal view",

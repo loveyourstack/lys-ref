@@ -127,6 +127,11 @@ const routes = [
         path: 'file-operations',
         children: [
           {
+            path: 'image-cropping',
+            name: 'Image cropping',
+            component: () => import('@/pages/FileOpsImageCropping.vue'),
+          },
+          {
             path: 'uploads',
             name: 'Uploads',
             component: () => import('@/pages/FileOpsUploads.vue'),

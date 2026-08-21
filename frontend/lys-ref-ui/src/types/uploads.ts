@@ -6,6 +6,13 @@ export interface Constraint {
   value: number
 }
 
+export type SelectionChange = CustomEvent<{
+  x: number
+  y: number
+  width: number
+  height: number
+}>
+
 export interface UploadResult {
   mime_type: string
   original_name: string

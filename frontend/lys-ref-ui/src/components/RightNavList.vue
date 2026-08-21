@@ -41,6 +41,7 @@
 
     <div v-if="showFileOperationsItems">
       <v-list-item link :title="$t('uploads.nav')" to="/file-operations/uploads" prepend-icon="mdi-upload"></v-list-item>
+      <v-list-item link :title="$t('image_cropping.nav')" to="/file-operations/image-cropping" prepend-icon="mdi-crop"></v-list-item>
     </div>
 
     <v-list-subheader v-if="auth.hasRole(Role.Tech)" :title="$t('nav_header.monitoring')" class="mt-2 clickable" @click="showMonitoringItems = !showMonitoringItems"></v-list-subheader>

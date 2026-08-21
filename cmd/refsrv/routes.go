@@ -722,7 +722,7 @@ func (srvApp *httpServerApplication) systemRoutes(apiEnv lys.Env) lys.RouteAdder
 
 		endpoint = "/set-user-profile-pic"
 
-		r.HandleFunc(endpoint, srvApp.sysSetUserProfilePic(apiEnv)).Methods("PATCH")
+		writeR.HandleFunc(endpoint, srvApp.sysSetUserProfilePic(apiEnv)).Methods("PATCH")
 
 		endpoint = "/ui-store-data"
 
