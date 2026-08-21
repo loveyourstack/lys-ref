@@ -23,6 +23,7 @@ type general struct {
 	DownloadsPath string
 	GeneratedPath string
 	UploadsPath   string
+	S3Bucket      string
 }
 
 // api contains the API config

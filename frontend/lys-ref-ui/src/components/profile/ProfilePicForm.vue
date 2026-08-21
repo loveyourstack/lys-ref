@@ -172,7 +172,10 @@ function save() {
   ax.patch(baseUrl, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
-    .then(async () => {
+    .then(async (resp) => {
+      // update the user with the stored S3 filename
+      auth.user.profile_pic = resp.data.data
+
       showSaved.value = true
       setTimeout(() => { showSaved.value = false }, import.meta.env.VITE_FADE_MS)
 

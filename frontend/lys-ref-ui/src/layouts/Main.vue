@@ -17,7 +17,7 @@
         <template v-slot:activator="{ props }">
           <div v-if="auth.user" class="d-flex align-center" v-bind="props">
             <v-avatar size="small" class="mr-2">
-              <v-img :src="s3Bucket + 'generic_profile_400x400.png'"></v-img>
+              <v-img :src="s3Bucket + 'profiles/' + auth.user.profile_pic"></v-img>
             </v-avatar>
             <div class="text-body-1 mr-3 mt-1">{{ auth.user.name }}</div>
           </div>

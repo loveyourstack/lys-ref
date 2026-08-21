@@ -176,17 +176,27 @@ func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.Hand
 			return
 		}
 
+		// get user id from context
+		userId := lys.GetUserIdFromCtx(ctx)
+		if userId == 0 {
+			lys.HandleUserError(lyserr.User{Message: "user not authenticated", StatusCode: http.StatusForbidden}, w)
+			return
+		}
+
 		// store image and update user record
-		err = srvApp.SysSvc.SetUserProfilePic(ctx, uploadFiles[0], srvApp.Config.General.UploadsPath)
+		storedFileName, err := srvApp.SysSvc.SetUserProfilePic(ctx, userId, uploadFiles[0], srvApp.Config.General.UploadsPath)
 		if err != nil {
 			lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SetUserProfilePic failed: %w", err), env.Logger, w)
 			return
 		}
 
+		// update user session(s) with new profile pic
+		srvApp.Sessions.UpdateProfilePicByUserId(userId, storedFileName)
+
 		// return success
 		resp := lys.StdResponse{
 			Status: lys.ReqSucceeded,
-			Data:   "updated",
+			Data:   storedFileName,
 		}
 		lys.JsonResponse(resp, http.StatusOK, w)
 	}

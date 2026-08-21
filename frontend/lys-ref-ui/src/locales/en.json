@@ -178,7 +178,7 @@
         "file_operations": {
             "title": "File operations",
             "subtitle": "Working with images and other files.",
-            "p1": "This section shows how to handle file uploads with various file types."
+            "p1": "This section shows how to handle file uploads of various types, and how to crop images in the UI."
         },
         "parallel_processing": {
             "title": "Parallel processing",

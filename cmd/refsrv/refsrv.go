@@ -139,7 +139,7 @@ func main() {
 	srvApp.EcbSvc = ecbsvc.NewServiceWithSyncStore(srvApp.EcbClient, srvApp.Logger, syncStore)
 	srvApp.MaxMindSvc = mmsvc.NewServiceWithSyncStore(srvApp.MaxMindClient, srvApp.Config.General.DownloadsPath, srvApp.Logger, syncStore)
 	srvApp.ProcSvc = procsvc.NewService(conf.Process, srvApp.Logger)
-	srvApp.SysSvc = syssvc.NewService(srvApp.Db, srvApp.Logger)
+	srvApp.SysSvc = syssvc.NewService(srvApp.AwsClient, srvApp.Config.General.S3Bucket, srvApp.Db, srvApp.Logger)
 	srvApp.TedbSvc = tedbsvc.NewServiceWithSyncStore(srvApp.TedbClient, srvApp.Db, srvApp.Logger, syncStore)
 
 	// connect to db using db owner and assign to srvApp

@@ -35,6 +35,7 @@ type Input struct {
 	GeoIpLocation         string           `db:"geo_ip_location" json:"geo_ip_location,omitempty" validate:"required,max=256"`
 	Ip                    netip.Addr       `db:"ip" json:"ip,omitzero" validate:"required"`
 	LastAccessAt          lystype.Datetime `db:"last_access_at" json:"last_access_at,omitzero" validate:"required"`
+	ProfilePic            string           `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256"`
 	Roles                 []string         `db:"roles" json:"roles,omitempty" validate:"required"`
 	Token                 string           `db:"token" json:"-" validate:"required,max=64"`
 	UserAgent             string           `db:"user_agent" json:"user_agent,omitempty" validate:"required,max=256"`

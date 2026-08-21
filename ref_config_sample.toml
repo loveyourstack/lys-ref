@@ -5,6 +5,7 @@ debug   = true
 downloadsPath = "/home/<user>/downloads"
 generatedPath = "/home/<user>/generated"
 uploadsPath = "/home/<user>/uploads"
+s3Bucket = ""
 
 [database]
 host   = "localhost"

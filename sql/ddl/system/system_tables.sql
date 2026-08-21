@@ -118,6 +118,7 @@ CREATE TABLE system.session
   geo_ip_location text_medium_mandatory,
   ip inet NOT NULL,
   last_access_at timestamptz NOT NULL,
+  profile_pic text NOT NULL,
   roles system.role[] NOT NULL,
   token text_short_mandatory,
   user_agent text_medium_mandatory,

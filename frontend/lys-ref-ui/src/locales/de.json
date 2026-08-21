@@ -178,7 +178,7 @@
         "file_operations": {
             "title": "Dateioperationen",
             "subtitle": "Arbeiten mit Bildern und anderen Dateien.",
-            "p1": "Dieser Abschnitt zeigt, wie man Datei-Uploads mit verschiedenen Dateitypen handhabt."
+            "p1": "Dieser Abschnitt zeigt, wie man Datei-Uploads mit verschiedenen Dateitypen handhabt und wie man Bilder im UI zuschneidet."
         },
         "parallel_processing": {
             "title": "Parallelverarbeitung",

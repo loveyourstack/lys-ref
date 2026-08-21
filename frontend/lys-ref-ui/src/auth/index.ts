@@ -1,3 +1,4 @@
+import { reactive } from 'vue'
 import ax, { setAuthToken, deleteAuthToken } from '@/api'
 import { i18n } from '@/plugins'
 import { useAppStore } from '@/stores/app'
@@ -10,7 +11,8 @@ export default {
   ready: false,
 
   // move to pinia auth store? but need to ensure that the pinia store is ready before router tries to use it in nav guard
-  user: {
+  // reactive: profile_pic gets updated
+  user: reactive({
     authenticated: false,
     force_password_change: false,
     has_aws_sg_rules: false,
@@ -19,8 +21,9 @@ export default {
     id: 0,
     ip: '',
     name: '',
+    profile_pic: '',
     roles: [] as Role[],
-  },
+  }),
 
   assignUser (data: AuthUserData) {
     this.user.authenticated = true
@@ -31,6 +34,7 @@ export default {
     this.user.id = data.user_id
     this.user.ip = data.ip
     this.user.name = data.user_name
+    this.user.profile_pic = data.profile_pic ? data.profile_pic : 'generic_profile_400x400.png'
     this.user.roles = data.roles
 
     this.setLocale(data.default_locale)
@@ -49,6 +53,7 @@ export default {
     this.user.id = 0
     this.user.ip = ''
     this.user.name = ''
+    this.user.profile_pic = ''
     this.user.roles = []
 
     useNotsStore().wsStop()

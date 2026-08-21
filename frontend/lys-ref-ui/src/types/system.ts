@@ -8,6 +8,7 @@ export interface LoginResponse {
   geo_ip_country_iso_code: string
   geo_ip_location: string
   ip: string
+  profile_pic: string
   roles: Role[]
   token: string
   user_id: number

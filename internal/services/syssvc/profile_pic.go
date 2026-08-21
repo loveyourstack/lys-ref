@@ -2,42 +2,41 @@ package syssvc
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"net/http"
+	"time"
 
-	"github.com/loveyourstack/lys"
-	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysformfile"
 )
 
-func (svc Service) SetUserProfilePic(ctx context.Context, uploadFile lysformfile.UploadFile, uploadsPath string) (err error) {
+func (svc Service) SetUserProfilePic(ctx context.Context, userId int64, uploadFile lysformfile.UploadFile, uploadsPath string) (storedFileName string, err error) {
 
 	defer uploadFile.File.Close()
 
-	// get user id from context
-	userId := lys.GetUserIdFromCtx(ctx)
-	if userId == 0 {
-		return lyserr.User{Message: "user not authenticated", StatusCode: http.StatusForbidden}
+	// generate random 4-byte hex string for unique file naming
+	rnd := make([]byte, 4)
+	if _, err := rand.Read(rnd); err != nil {
+		return "", fmt.Errorf("rand.Read failed: %w", err)
 	}
 
-	// stream to uploads
-	uploadResp, err := lysformfile.StreamToDisk([]lysformfile.UploadFile{uploadFile}, uploadsPath, userId, svc.Logger)
+	// determine stored file extension based on MIME type and original file name
+	ext := lysformfile.ChooseStoredExtension(uploadFile.FileHeader, uploadFile.MimeType)
+
+	// generate stored file name
+	storedFileName = fmt.Sprintf("%s-u%d-%s%s", time.Now().Format("20060102"), userId, hex.EncodeToString(rnd), ext)
+
+	// upload to s3
+	err = svc.AwsApiClient.PutS3Object(ctx, svc.S3Bucket, "profiles/"+storedFileName, uploadFile.File, uploadFile.MimeType)
 	if err != nil {
-		return fmt.Errorf("lysformfile.StreamToDisk failed: %w", err)
+		return "", fmt.Errorf("svc.AwsApiClient.PutS3Object failed: %w", err)
 	}
-
-	if len(uploadResp.FileResults) != 1 {
-		return fmt.Errorf("expected 1 file result, got %d", len(uploadResp.FileResults))
-	}
-	fileResult := uploadResp.FileResults[0]
-
-	// TODO: upload to s3
 
 	// write stored file name to user db record
-	err = svc.SysUserStore.UpdatePartial(ctx, map[string]any{"profile_pic": fileResult.StoredName}, userId)
+	err = svc.SysUserStore.UpdatePartial(ctx, map[string]any{"profile_pic": storedFileName}, userId)
 	if err != nil {
-		return fmt.Errorf("svc.SysUserStore.UpdatePartial failed: %w", err)
+		return "", fmt.Errorf("svc.SysUserStore.UpdatePartial failed: %w", err)
 	}
 
-	return nil
+	return storedFileName, nil
 }

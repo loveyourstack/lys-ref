@@ -24,6 +24,7 @@ type loginResponse struct {
 	GeoIpCountryIsoCode string     `json:"geo_ip_country_iso_code"`
 	GeoIpLocation       string     `json:"geo_ip_location"`
 	Ip                  netip.Addr `json:"ip"`
+	ProfilePic          string     `json:"profile_pic"`
 	Roles               []string   `json:"roles"`
 	SessionToken        string     `json:"token"`
 	UserId              int64      `json:"user_id"`
@@ -100,16 +101,27 @@ func (srvApp *httpServerApplication) authGetSessions(w http.ResponseWriter, r *h
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-func authGetSignInResponse(defaultLocale string, forcePasswordChange, hasAwsSgRules bool, roles []string, userId int64, geoIpCountryIsoCode, geoIpLocation string,
-	ip netip.Addr, sessToken, userName string) loginResponse {
+func authGetSignInResponse(
+	defaultLocale string,
+	forcePasswordChange bool,
+	geoIpCountryIsoCode, geoIpLocation string,
+	hasAwsSgRules bool,
+	ip netip.Addr,
+	profilePic string,
+	roles []string,
+	sessToken string,
+	userId int64,
+	userName string,
+) loginResponse {
 
 	loginResp := loginResponse{
 		DefaultLocale:       defaultLocale,
 		ForcePasswordChange: forcePasswordChange,
-		HasAwsSgRules:       hasAwsSgRules,
 		GeoIpCountryIsoCode: geoIpCountryIsoCode,
 		GeoIpLocation:       geoIpLocation,
+		HasAwsSgRules:       hasAwsSgRules,
 		Ip:                  ip,
+		ProfilePic:          profilePic,
 		Roles:               roles,
 		SessionToken:        sessToken,
 		UserId:              userId,
@@ -219,6 +231,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 		GeoIpCountryIsoCode:   geoIpCountryIsoCode,
 		GeoIpLocation:         geoIpLocation,
 		Ip:                    remoteHostIP,
+		ProfilePic:            sysUser.ProfilePic,
 		Roles:                 sysrole.ToStringSlice(sysUser.Roles),
 		UserAgent:             r.UserAgent(),
 		UserId:                sysUser.Id,
@@ -231,8 +244,18 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	}
 
 	// build the reponse to be returned to the user
-	loginResp := authGetSignInResponse(defaultLocale, sysUser.ForcePasswordChange, hasAwsSgRules, sysrole.ToStringSlice(sysUser.Roles), sysUser.Id,
-		geoIpCountryIsoCode, geoIpLocation, remoteHostIP, sessToken, sysUser.Name)
+	loginResp := authGetSignInResponse(
+		defaultLocale,
+		sysUser.ForcePasswordChange,
+		geoIpCountryIsoCode, geoIpLocation,
+		hasAwsSgRules,
+		remoteHostIP,
+		sysUser.ProfilePic,
+		sysrole.ToStringSlice(sysUser.Roles),
+		sessToken,
+		sysUser.Id,
+		sysUser.Name,
+	)
 
 	// success
 	resp := lys.StdResponse{
@@ -324,8 +347,18 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 	}
 
 	// build the reponse to be returned to the UI
-	signInResp := authGetSignInResponse(defaultLocale, sess.ForcePasswordChange, hasAwsSgRules, sess.Roles, sess.UserId,
-		sess.GeoIpCountryIsoCode, sess.GeoIpLocation, sess.Ip, sess.Token, sess.UserName)
+	signInResp := authGetSignInResponse(
+		defaultLocale,
+		sess.ForcePasswordChange,
+		sess.GeoIpCountryIsoCode, sess.GeoIpLocation,
+		hasAwsSgRules,
+		remoteHostIP,
+		sess.ProfilePic,
+		sess.Roles,
+		sess.Token,
+		sess.UserId,
+		sess.UserName,
+	)
 
 	// success
 	resp := lys.StdResponse{
