@@ -81,9 +81,18 @@ const croppedPreviewUrl = ref<string>()
 // MAX_SIZE is the height and width of the image that will be uploaded to the server
 const MAX_SIZE = 400
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024
+const MAX_FILE_SIZE_MB = 2
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
 
 const uploadError = ref<string>()
+
+const imageDimensionsErrMsg = computed(() => 
+  `Profile picture must be at least ${MAX_SIZE} x ${MAX_SIZE} pixels`
+)
+
+const imageSizeErrMsg = computed(() => 
+  `Profile picture must be ${MAX_FILE_SIZE_MB} MB or smaller`
+)
 
 const requiresCropping = computed(() =>
   cropperSize.value.width !== MAX_SIZE || cropperSize.value.height !== MAX_SIZE,
@@ -149,16 +158,12 @@ async function getImageDimensions(file: File) {
 
 async function imageDimensionsRule(selectedFiles: File[]) {
   const file = selectedFiles[0]
-  if (!file) return true
-
-  const dimensions = await getImageDimensions(file)
-  return !dimensions || (dimensions.width >= MAX_SIZE && dimensions.height >= MAX_SIZE)
-    || 'Profile picture must be at least 400 x 400 pixels'
+  return await validateImageDimensions(file) || imageDimensionsErrMsg.value
 }
 
 function imageFileSizeRule(selectedFiles: File[]) {
   const file = selectedFiles[0]
-  return !file || file.size <= MAX_FILE_SIZE || 'Profile picture must be 2 MB or smaller'
+  return !file || file.size <= MAX_FILE_SIZE || imageSizeErrMsg.value
 }
 
 function save() {
@@ -201,16 +206,22 @@ async function validateImage(selectedFiles: File[]) {
   if (!file) return
 
   if (file.size > MAX_FILE_SIZE) {
-    uploadError.value = 'Profile picture must be 2 MB or smaller'
+    uploadError.value = imageSizeErrMsg.value
     files.value = []
     return
   }
 
-  const dimensions = await getImageDimensions(file)
-  if (!dimensions || dimensions.width < MAX_SIZE || dimensions.height < MAX_SIZE) {
-    uploadError.value = 'Profile picture must be at least 400 x 400 pixels'
+  if (!(await validateImageDimensions(file))) {
+    uploadError.value = imageDimensionsErrMsg.value
     files.value = []
   }
+}
+
+async function validateImageDimensions(file: File | undefined) {
+  if (!file) return true
+
+  const dimensions = await getImageDimensions(file)
+  return !dimensions || (dimensions.width >= MAX_SIZE && dimensions.height >= MAX_SIZE)
 }
 
 watch(files, async (newFiles, _old, onCleanup) => {
