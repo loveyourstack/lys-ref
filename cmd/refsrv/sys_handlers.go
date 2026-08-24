@@ -171,7 +171,7 @@ func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.Hand
 			ImgMaxWidthPx:    new(400),
 			ImgMinHeightPx:   new(400),
 			ImgMinWidthPx:    new(400),
-			MaxSizePerFile:   500 * 1024, // 500 KB
+			MaxSizePerFile:   1 * 1024 * 1024, // 1 MB
 		})
 		if err != nil {
 			lys.HandleError(ctx, fmt.Errorf("sysSetUserProfilePic: lysformfile.ExtractFromRequest failed: %w", err), env.Logger, w)
