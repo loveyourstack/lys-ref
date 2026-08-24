@@ -156,7 +156,7 @@ function loadStoreData() {
 
 function logout() {
   // make post call to remove session from server
-  var myURL = '/a/logout'
+  const myURL = '/a/logout'
   ax.post(myURL)
     .then(() => {
       appStore.apiErr = undefined

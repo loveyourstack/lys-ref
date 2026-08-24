@@ -10,7 +10,7 @@ import (
 	"github.com/loveyourstack/lys/lysformfile"
 )
 
-func (svc Service) SetUserProfilePic(ctx context.Context, userId int64, uploadFile lysformfile.UploadFile, uploadsPath string) (storedFileName string, err error) {
+func (svc Service) SetUserProfilePic(ctx context.Context, userId int64, uploadFile lysformfile.UploadFile) (storedFileName string, err error) {
 
 	defer uploadFile.File.Close()
 

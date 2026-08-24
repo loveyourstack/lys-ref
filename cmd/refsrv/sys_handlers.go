@@ -157,6 +157,13 @@ func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.Hand
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// get user id from context
+		userId := lys.GetUserIdFromCtx(ctx)
+		if userId == 0 {
+			lys.HandleUserError(lyserr.User{Message: "user not authenticated", StatusCode: http.StatusForbidden}, w)
+			return
+		}
+
 		// extract the image from the request
 		uploadFiles, err := lysformfile.ExtractFromRequest(r, lysformfile.ExtractParams{
 			AllowedMimeTypes: lysformfile.ImageMimeTypes,
@@ -176,15 +183,8 @@ func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.Hand
 			return
 		}
 
-		// get user id from context
-		userId := lys.GetUserIdFromCtx(ctx)
-		if userId == 0 {
-			lys.HandleUserError(lyserr.User{Message: "user not authenticated", StatusCode: http.StatusForbidden}, w)
-			return
-		}
-
 		// store image and update user record
-		storedFileName, err := srvApp.SysSvc.SetUserProfilePic(ctx, userId, uploadFiles[0], srvApp.Config.General.UploadsPath)
+		storedFileName, err := srvApp.SysSvc.SetUserProfilePic(ctx, userId, uploadFiles[0])
 		if err != nil {
 			lys.HandleError(ctx, fmt.Errorf("srvApp.SysSvc.SetUserProfilePic failed: %w", err), env.Logger, w)
 			return
