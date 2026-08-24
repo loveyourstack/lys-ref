@@ -34,6 +34,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/gemini/gemapicall"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geoocean"
+	"github.com/loveyourstack/lys-ref/internal/stores/lysinc/lysincemployee"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procflow"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procpoint"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procrun"
@@ -128,6 +129,7 @@ func (srvApp *httpServerApplication) getSubRoutes(apiEnv lys.Env) []lys.SubRoute
 		{Url: "/ecb", RouteAdder: srvApp.ecbRoutes(apiEnv)},
 		{Url: "/gemini", RouteAdder: srvApp.geminiRoutes(apiEnv)},
 		{Url: "/geo", RouteAdder: srvApp.geoRoutes(apiEnv)},
+		{Url: "/lysinc", RouteAdder: srvApp.lysincRoutes(apiEnv)},
 		{Url: "/maxmind", RouteAdder: srvApp.maxmindRoutes(apiEnv)},
 		{Url: "/pg-monitor", RouteAdder: srvApp.pgMonRoutes(apiEnv)},
 		{Url: "/process", RouteAdder: srvApp.procRoutes(apiEnv)},
@@ -485,6 +487,28 @@ func (srvApp *httpServerApplication) maxmindRoutes(apiEnv lys.Env) lys.RouteAdde
 		apiCallStore := mmapicall.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) lysincRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+
+		writeR := r.NewRoute().Subrouter()
+		writeR.Use(authorizeRole(sysrole.Writer[:]))
+
+		endpoint := "/employees"
+
+		employeeStore := lysincemployee.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, employeeStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/tree", srvApp.GetEmployeeTree(apiEnv, employeeStore.SelectTree)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, employeeStore)).Methods("GET")
+		writeR.HandleFunc(endpoint, lys.Post(apiEnv, employeeStore)).Methods("POST")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, employeeStore)).Methods("PUT")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, employeeStore)).Methods("PATCH")
+		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, employeeStore)).Methods("DELETE")
 
 		return r
 	}
