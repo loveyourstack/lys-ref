@@ -139,6 +139,16 @@ const routes = [
         ]
       },
       {
+        path: 'lysinc',
+        children: [
+          {
+            path: 'hierarchy',
+            name: 'Hierarchy',
+            component: () => import('@/pages/LysincHierarchy.vue'),
+          },
+        ]
+      },
+      {
         path: 'maxmind',
         children: [
           {

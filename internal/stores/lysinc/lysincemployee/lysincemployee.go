@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/loveyourstack/lys-ref/pkg/lysp"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
 	"github.com/loveyourstack/lys/lystype"
@@ -83,21 +82,26 @@ func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error)
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
+type TreeNode struct {
+	Model
+	Children []*TreeNode `json:"children,omitempty"`
+}
+
 // SelectTree returns all employees nested under the root (the employee who reports to themselves)
-func (s Store) SelectTree(ctx context.Context) (root *lysp.TreeNode[Model], err error) {
+func (s Store) SelectTree(ctx context.Context) (root *TreeNode, err error) {
 
 	items, _, err := s.Select(ctx, lyspg.SelectParams{})
 	if err != nil {
 		return nil, fmt.Errorf("s.Select failed: %w", err)
 	}
 
-	nodesById := make(map[int64]*lysp.TreeNode[Model], len(items))
+	empNodeMap := make(map[int64]*TreeNode, len(items))
 
 	// for each employee, create a TreeNode and store it in the map by id
 	for _, item := range items {
-		nodesById[item.Id] = &lysp.TreeNode[Model]{
-			Item:     item,
-			Children: []*lysp.TreeNode[Model]{},
+		empNodeMap[item.Id] = &TreeNode{
+			Model:    item,
+			Children: []*TreeNode{},
 		}
 	}
 
@@ -106,12 +110,12 @@ func (s Store) SelectTree(ctx context.Context) (root *lysp.TreeNode[Model], err 
 
 		// root employee reports to themselves
 		if item.ReportsTo == item.Id {
-			root = nodesById[item.Id]
+			root = empNodeMap[item.Id]
 			continue
 		}
 
-		if parent, ok := nodesById[item.ReportsTo]; ok {
-			parent.Children = append(parent.Children, nodesById[item.Id])
+		if parent, ok := empNodeMap[item.ReportsTo]; ok {
+			parent.Children = append(parent.Children, empNodeMap[item.Id])
 		}
 	}
 
