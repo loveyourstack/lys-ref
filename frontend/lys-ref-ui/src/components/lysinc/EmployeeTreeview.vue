@@ -1,6 +1,6 @@
 <template>
   <v-treeview v-model:selected="selected" return-object :items="items"
-    @update:model-value="emit('selected', selected[0] ?? undefined)"
+    @update:selected="emit('selected', selected[0] ?? undefined)"
     item-value="id" item-title="full_name"
     open-all indent-lines="default"
     selectable select-strategy="single-independent" selected-color="success">
@@ -9,7 +9,7 @@
         size="32" class="mr-3"></v-avatar>
     </template>
     <template v-slot:append="{ item }">
-      <span v-if="item.children && (item.job_title.includes('Chief') || item.job_title.includes('VP'))" 
+      <span v-if="item.children && item.children.length > 0 && (item.job_title.includes('Chief') || item.job_title.includes('VP'))" 
         class="text-body-small ml-4">{{ item.department }}</span>
 
       <!-- hack to ensure that department is right-aligned to all items, not just the ones shown by the v-if -->
@@ -43,7 +43,7 @@ const selected = ref<Employee[]>([])
 
 function loadItems() {
   ax.get(baseUrl).then((res) => {
-    items.value.push(res.data.data)
+    items.value = res.data.data
   })
 }
 

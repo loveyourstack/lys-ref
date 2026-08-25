@@ -23,7 +23,6 @@ declare module 'vue' {
     AppMonReqLogTableFilters: typeof import('./src/components/appMonitor/AppMonReqLogTableFilters.vue')['default']
     AppMonSessionTable: typeof import('./src/components/appMonitor/AppMonSessionTable.vue')['default']
     AppMonTedbCallTable: typeof import('./src/components/appMonitor/AppMonTedbCallTable.vue')['default']
-    copy: typeof import('./src/components/lysinc/EmployeeTreeview copy.vue')['default']
     CoreArrayTypeForm: typeof import('./src/components/core/arrayType/CoreArrayTypeForm.vue')['default']
     CoreArrayTypeTable: typeof import('./src/components/core/arrayType/CoreArrayTypeTable.vue')['default']
     CoreDefaultValueForm: typeof import('./src/components/core/defaultValue/CoreDefaultValueForm.vue')['default']

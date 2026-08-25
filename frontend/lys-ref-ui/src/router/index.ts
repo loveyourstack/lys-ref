@@ -142,9 +142,9 @@ const routes = [
         path: 'lysinc',
         children: [
           {
-            path: 'hierarchy',
-            name: 'Hierarchy',
-            component: () => import('@/pages/LysincHierarchy.vue'),
+            path: 'organization',
+            name: 'Organization',
+            component: () => import('@/pages/LysincOrganization.vue'),
           },
         ]
       },

@@ -287,7 +287,7 @@
         "response_no_data": "Keine Daten verfügbar."
     },
     "nav_header": {
-        "advanced_tables": "Erweiterte Tabellen",
+        "advanced_ui": "Erweiterte UI",
         "ai": "KI / LLMs",
         "charts": "Diagramme",
         "entity_relationships": "Entity-Beziehungen",
@@ -311,7 +311,7 @@
     },
     "optimizer": {
         "nav": "Optimierer",
-        "title": "Kampagnenoptimierer",
+        "title": "Erweiterte Datentabelle: Kampagnenoptimierer",
         "p1": "Zeigt Kampagnen, die mit voraggregierten Kampagnenleistungsdaten aus dem Abschnitt 'Entity-Beziehungen' verknüpft sind.",
         "p2": "Demonstriert die folgenden erweiterten Tabellenfunktionen:",
         "p2_list": {
@@ -329,6 +329,13 @@
         "new_item": "Neuer optionaler Wert",
         "import_enter": "Optionale Werte eingeben",
         "p1": "Alle Spalten sind optional. Wo kein Wert angegeben ist, werden typabhängige Nullwerte eingefügt."
+    },
+    "organization": {
+        "nav": "Organisation",
+        "title": "Hierarchische Daten: Organisationsbaum",
+        "p1": "Die Mitarbeiter einer fiktiven Organisation werden unten angezeigt. Namen und Bilder wurden generiert.",
+        "p2": "Die Daten sind hierarchisch: Abgesehen vom CEO an der Spitze hat jeder Mitarbeiter einen Manager. Die Mitarbeiter jedes Managers werden als untergeordnete Knoten im Baum angezeigt.",
+        "p3": "Die Baumknoten können durch Klicken auf sie erweitert und reduziert werden. Die Auswahl eines Mitarbeiters über das Kontrollkästchen zeigt dessen Profil auf der rechten Seite."
     },
     "runs": {
         "nav": "Durchläufe",

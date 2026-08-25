@@ -3,7 +3,7 @@ export interface Employee {
   children: Employee[]
   department: string
   full_name: string
-  email: boolean
+  email: string
   honorific: string
   job_title: string
   id: number

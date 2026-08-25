@@ -287,7 +287,7 @@
         "response_no_data": "No data available."
     },
     "nav_header": {
-        "advanced_tables": "Advanced tables",
+        "advanced_ui": "Advanced UI",
         "ai": "AI / LLMs",
         "charts": "Charts",
         "entity_relationships": "Entity relationships",
@@ -311,7 +311,7 @@
     },
     "optimizer": {
         "nav": "Optimizer",
-        "title": "Campaign optimizer",
+        "title": "Advanced data table: Campaign optimizer",
         "p1": "Shows campaigns joined to pre-aggregated campaign performance data from the 'Entity relationships' section.",
         "p2": "Demonstrates the following advanced table features:",
         "p2_list": {
@@ -329,6 +329,13 @@
         "new_item": "New optional value",
         "import_enter": "Enter optional values",
         "p1": "All columns are optional. Zero-values by type are inserted where no value is given."
+    },
+    "organization": {
+        "nav": "Organization",
+        "title": "Hierarchical data: Organization tree",
+        "p1": "The employees of a fictional organization are shown below. Names and pictures were generated.",
+        "p2": "The data is hierarchical: other than the CEO at the top, each employee has a manager. Each manager's employees are shown as child nodes in the tree view.",
+        "p3": "The tree nodes can be expanded and collapsed by clicking on them. Selecting an employee using the checkbox shows their profile on the right."
     },
     "runs": {
         "nav": "Runs",

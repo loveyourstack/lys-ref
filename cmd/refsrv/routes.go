@@ -51,7 +51,6 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
 	"github.com/loveyourstack/lys-ref/internal/stores/tedb/tedbvatratesumm"
-	"github.com/loveyourstack/lys-ref/pkg/lysp"
 	"github.com/loveyourstack/lys/lysformfile"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgauditupdate"
@@ -504,7 +503,7 @@ func (srvApp *httpServerApplication) lysincRoutes(apiEnv lys.Env) lys.RouteAdder
 
 		employeeStore := lysincemployee.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, employeeStore, nil)).Methods("GET")
-		r.HandleFunc(endpoint+"/tree", lysp.GetItem(apiEnv, employeeStore.SelectTree)).Methods("GET")
+		r.HandleFunc(endpoint+"/tree", lys.GetSimple(apiEnv, employeeStore.SelectTree)).Methods("GET")
 		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, employeeStore)).Methods("GET")
 		writeR.HandleFunc(endpoint, lys.Post(apiEnv, employeeStore)).Methods("POST")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, employeeStore)).Methods("PUT")

@@ -26,9 +26,9 @@ type Input struct {
 	Email      string `db:"email" json:"email,omitempty" validate:"required,email,max=256"`
 	FamilyName string `db:"family_name" json:"family_name,omitempty" validate:"required,max=256"`
 	GivenName  string `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
-	Honorific  string `db:"honorific" json:"honorific,omitempty" validate:"max=32"`
+	Honorific  string `db:"honorific" json:"honorific,omitempty" validate:"max=64,required"`
 	JobTitle   string `db:"job_title" json:"job_title,omitempty" validate:"required,max=256"`
-	ProfilePic string `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256"`
+	ProfilePic string `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256,required"`
 	ReportsTo  int64  `db:"reports_to" json:"reports_to,omitempty" validate:"required"`
 }
 
@@ -87,8 +87,8 @@ type TreeNode struct {
 	Children []*TreeNode `json:"children,omitempty"`
 }
 
-// SelectTree returns all employees nested under the root (the employee who reports to themselves)
-func (s Store) SelectTree(ctx context.Context) (root *TreeNode, err error) {
+// SelectTree returns all employees in a hierarchical tree structure based on ReportsTo.
+func (s Store) SelectTree(ctx context.Context) (roots []*TreeNode, err error) {
 
 	items, _, err := s.Select(ctx, lyspg.SelectParams{})
 	if err != nil {
@@ -108,9 +108,9 @@ func (s Store) SelectTree(ctx context.Context) (root *TreeNode, err error) {
 	// for each employee, find their parent (reports_to) and add them as a child
 	for _, item := range items {
 
-		// root employee reports to themselves
+		// root employees report to themselves
 		if item.ReportsTo == item.Id {
-			root = empNodeMap[item.Id]
+			roots = append(roots, empNodeMap[item.Id])
 			continue
 		}
 
@@ -119,11 +119,11 @@ func (s Store) SelectTree(ctx context.Context) (root *TreeNode, err error) {
 		}
 	}
 
-	if root == nil {
+	if len(roots) == 0 {
 		return nil, fmt.Errorf("no root employee found (an employee with reports_to = id)")
 	}
 
-	return root, nil
+	return roots, nil
 }
 
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {

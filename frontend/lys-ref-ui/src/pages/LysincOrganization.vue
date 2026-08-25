@@ -5,15 +5,15 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text>
-              <span class="dt-title">Hierarchical data: Organization</span>
+              <span class="dt-title">{{ $t('organization.title') }}</span>
 
-              <div class="dt-subtitle mt-6">The employees of a fictional organization are shown below. Names and pictures were generated.</div>
-              <div class="dt-subtitle">The data is hierarchical: other than the CEO at the top, each employee has a manager. Each manager's employees are shown as child nodes in the tree view.</div>
-              <div class="dt-subtitle">The tree nodes can be expanded and collapsed by clicking on them. Selecting an employee using the checkbox shows their profile on the right.</div>
+              <div class="dt-subtitle mt-6">{{ $t('organization.p1') }}</div>
+              <div class="dt-subtitle">{{ $t('organization.p2') }}</div>
+              <div class="dt-subtitle">{{ $t('organization.p3') }}</div>
 
               <v-row class="ga-8 mt-4">
                 <v-col cols="auto">
-                  <employee-treeview @selected="selectedEmployee = $event" />
+                  <employee-treeview @selected="(e: Employee | undefined) => selectedEmployee = e" />
                 </v-col>
                 <v-col>
                   <employee-profile :employee="selectedEmployee" />
