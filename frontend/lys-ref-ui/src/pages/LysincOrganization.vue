@@ -13,10 +13,10 @@
 
               <v-row class="ga-8 mt-4">
                 <v-col cols="auto">
-                  <employee-treeview @selected="(e: Employee | undefined) => selectedEmployee = e" />
+                  <lysinc-emp-treeview @selected="(e: Employee | undefined) => selectedEmployee = e" />
                 </v-col>
                 <v-col>
-                  <employee-profile :employee="selectedEmployee" />
+                  <lysinc-emp-profile :employee="selectedEmployee" />
                 </v-col>
               </v-row>
 

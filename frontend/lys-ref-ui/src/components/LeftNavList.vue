@@ -25,6 +25,7 @@
     <div v-if="showAdvUiItems">
       <v-list-item link :title="$t('optimizer.nav')" to="/digital-marketing/campaign-optimizer" prepend-icon="mdi-counter"></v-list-item>
       <v-list-item link :title="$t('organization.nav')" to="/lysinc/organization" prepend-icon="mdi-file-tree"></v-list-item>
+      <v-list-item link title="Calendar" to="/lysinc/calendar" prepend-icon="mdi-calendar"></v-list-item>
     </div>
 
     <v-list-subheader :title="$t('nav_header.ai')" class="mt-2 clickable" @click="showAiItems = !showAiItems"></v-list-subheader>

@@ -142,6 +142,11 @@ const routes = [
         path: 'lysinc',
         children: [
           {
+            path: 'calendar',
+            name: 'Calendar',
+            component: () => import('@/pages/LysincCalendar.vue'),
+          },
+          {
             path: 'organization',
             name: 'Organization',
             component: () => import('@/pages/LysincOrganization.vue'),

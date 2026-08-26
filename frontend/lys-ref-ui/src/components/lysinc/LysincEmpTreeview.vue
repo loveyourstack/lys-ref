@@ -45,6 +45,7 @@ function loadItems() {
   ax.get(baseUrl).then((res) => {
     items.value = res.data.data
   })
+  .catch() // handled by interceptor
 }
 
 onMounted(() => {
