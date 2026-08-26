@@ -35,6 +35,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geoocean"
 	"github.com/loveyourstack/lys-ref/internal/stores/lysinc/lysincemployee"
+	"github.com/loveyourstack/lys-ref/internal/stores/lysinc/lysinceventsinmonth"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procflow"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procpoint"
 	"github.com/loveyourstack/lys-ref/internal/stores/process/procrun"
@@ -509,6 +510,13 @@ func (srvApp *httpServerApplication) lysincRoutes(apiEnv lys.Env) lys.RouteAdder
 		writeR.HandleFunc(endpoint+"/{id}", lys.Put(apiEnv, employeeStore)).Methods("PUT")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Patch(apiEnv, employeeStore)).Methods("PATCH")
 		writeR.HandleFunc(endpoint+"/{id}", lys.Delete(apiEnv, employeeStore)).Methods("DELETE")
+
+		endpoint = "/events-in-month"
+
+		eventsInMonthStore := lysinceventsinmonth.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, eventsInMonthStore, &lys.GetOpts[lysinceventsinmonth.Model]{
+			SetFuncUrlParamNames: eventsInMonthStore.GetSetFuncUrlParamNames(),
+		})).Methods("GET")
 
 		return r
 	}
