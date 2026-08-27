@@ -5,9 +5,10 @@
         <v-col cols="auto">
           <v-card variant="flat">
             <v-card-text>
-              <span class="dt-title">HR Calendar</span>
+              <span class="dt-title">{{ $t('calendar.title') }}</span>
 
-              <div class="dt-subtitle mt-6">TODO</div>
+              <div class="dt-subtitle mt-6">{{ $t('calendar.p1') }}</div>
+              <div class="dt-subtitle">{{ $t('calendar.p2') }}</div>
 
               <lysinc-hr-calendar class="mt-4" style="min-width: 900px;" />
 
@@ -20,9 +21,4 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { type Employee } from '@/types/lysinc'
-
-const selectedEmployee = ref<Employee | undefined>(undefined)
-
 </script>

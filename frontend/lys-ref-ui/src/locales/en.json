@@ -55,6 +55,15 @@
         "p1": "If the author is archived, his active books will also be automatically archived.",
         "p2": "However, books by active authors can also be archived separately. Restoration is only possible if the book was archived separately."
     },
+    "calendar": {
+        "nav": "Calendar",
+        "title": "HR Calendar",
+        "p1": "Using Join dates and DOBs from the employees shown in the 'Organization' section, this calendar shows their work anniversaries and birthdays.",
+        "p2": "Each event has a tooltip showing additional details. The calendar locale is integrated with the application language setting.",
+        "today": "Today",
+        "anniversaries": "Anniversaries",
+        "birthdays": "Birthdays"
+    },
     "campaign_charts": {
         "nav": "Campaign charts",
         "p1": "Using the campaign data from the 'Entity relationships' section, demonstrates further chart types.",
@@ -149,10 +158,10 @@
     },
     "home": {
         "nav": "Home",
-        "advanced_tables": {
-            "title": "Advanced tables",
+        "advanced_ui": {
+            "title": "Advanced UI",
             "subtitle": "Complex data presentation.",
-            "p1": "This section demonstrates some of the more advanced features of Vuetify's data tables."
+            "p1": "This section demonstrates some of the more advanced Vuetify library features."
         },
         "ai": {
             "title": "AI / LLMs",

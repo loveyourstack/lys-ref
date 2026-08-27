@@ -4,7 +4,7 @@
       <v-sheet height="64">
         <v-toolbar flat>
           <v-btn class="me-4" color="grey-darken-2" variant="outlined" @click="setToday">
-            Today
+            {{ $t('calendar.today') }}
           </v-btn>
 
           <v-btn color="grey-darken-2" size="small" variant="text" icon @click="prev">
@@ -26,8 +26,8 @@
           <v-spacer></v-spacer>
 
           <v-form class="d-flex align-center">
-            <v-checkbox v-model="showAnniversaries" :color="anniversaryColor" class="me-4" label="Anniversaries" hide-details dense />
-            <v-checkbox v-model="showBirthdays" :color="birthdayColor" class="me-4" label="Birthdays" hide-details dense />
+            <v-checkbox v-model="showAnniversaries" :color="anniversaryColor" class="me-4" :label="$t('calendar.anniversaries')" hide-details dense />
+            <v-checkbox v-model="showBirthdays" :color="birthdayColor" class="me-4" :label="$t('calendar.birthdays')" hide-details dense />
           </v-form>
 
         </v-toolbar>

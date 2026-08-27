@@ -55,6 +55,15 @@
         "p1": "Wenn der Autor archiviert ist, werden auch seine aktiven Bücher automatisch archiviert.",
         "p2": "Bücher von aktiven Autoren können jedoch auch separat archiviert werden. Eine Wiederherstellung ist nur möglich, wenn das Buch separat archiviert wurde."
     },
+    "calendar": {
+        "nav": "Kalender",
+        "title": "HR Kalender",
+        "p1": "Unter Verwendung der Eintrittsdaten und Geburtsdaten der im Abschnitt 'Organisation' angezeigten Mitarbeiter zeigt dieser Kalender deren Arbeitsjubiläen und Geburtstage an.",
+        "p2": "Jedes Ereignis hat ein Tooltip, das zusätzliche Details anzeigt. Die Kalendersprache ist in die Anwendungssprache integriert.",
+        "today": "Heute",
+        "anniversaries": "Jubiläen",
+        "birthdays": "Geburtstage"
+    },
     "campaign_charts": {
         "nav": "Kampagnencharts",
         "p1": "Verwendet die Kampagnendaten aus dem Abschnitt 'Entity-Beziehungen', um weitere Diagrammtypen zu demonstrieren.",
@@ -149,10 +158,10 @@
     },
     "home": {
         "nav": "Startseite",
-        "advanced_tables": {
-            "title": "Erweiterte Tabellen",
+        "advanced_ui": {
+            "title": "Erweiterte UI",
             "subtitle": "Komplexe Datenpräsentation.",
-            "p1": "Dieser Abschnitt zeigt einige der fortgeschritteneren Funktionen der Vuetify-Datentabellen."
+            "p1": "Dieser Abschnitt zeigt einige der fortgeschritteneren Funktionen der Vuetify-Bibliothek."
         },
         "ai": {
             "title": "KI / LLMs",

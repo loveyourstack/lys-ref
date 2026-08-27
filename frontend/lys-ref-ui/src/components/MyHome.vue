@@ -30,7 +30,7 @@
       </v-col>
 
       <v-col cols="12" md="6">
-        <HomeAdvancedTables />
+        <HomeAdvancedUi />
       </v-col>
 
       <v-col cols="12" md="6">
