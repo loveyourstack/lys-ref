@@ -17,19 +17,25 @@ INSERT INTO process.step (flow_fk, name, cmd, display_order) VALUES
   (currval('process.flow_id_seq'), 'Create report', 'createreports :fromDate :untilDate', 510)
 ;
 
-INSERT INTO process.step_link (step_fk, depends_on_fk) VALUES 
-  ((SELECT id FROM process.step WHERE name = 'Aggregate costs'), (SELECT id FROM process.step WHERE name = 'Fetch XRates source')),
-  ((SELECT id FROM process.step WHERE name = 'Aggregate costs'), (SELECT id FROM process.step WHERE name = 'Fetch cost source 1')),
-  ((SELECT id FROM process.step WHERE name = 'Aggregate costs'), (SELECT id FROM process.step WHERE name = 'Fetch cost source 2')),
-  ((SELECT id FROM process.step WHERE name = 'Aggregate costs'), (SELECT id FROM process.step WHERE name = 'Fetch cost source 3')),
+WITH links AS (VALUES 
+  ('Aggregate costs', 'Fetch XRates source'),
+  ('Aggregate costs', 'Fetch cost source 1'),
+  ('Aggregate costs', 'Fetch cost source 2'),
+  ('Aggregate costs', 'Fetch cost source 3'),
 
-  ((SELECT id FROM process.step WHERE name = 'Aggregate revenue'), (SELECT id FROM process.step WHERE name = 'Fetch XRates source')),
-  ((SELECT id FROM process.step WHERE name = 'Aggregate revenue'), (SELECT id FROM process.step WHERE name = 'Fetch revenue source 1')),
-  ((SELECT id FROM process.step WHERE name = 'Aggregate revenue'), (SELECT id FROM process.step WHERE name = 'Fetch revenue source 2')),
+  ('Aggregate revenue', 'Fetch XRates source'),
+  ('Aggregate revenue', 'Fetch revenue source 1'),
+  ('Aggregate revenue', 'Fetch revenue source 2'),
 
-  ((SELECT id FROM process.step WHERE name = 'Create report'), (SELECT id FROM process.step WHERE name = 'Aggregate costs')),
-  ((SELECT id FROM process.step WHERE name = 'Create report'), (SELECT id FROM process.step WHERE name = 'Aggregate revenue'))
-;
+  ('Create report', 'Aggregate costs'),
+  ('Create report', 'Aggregate revenue')
+)
+INSERT INTO process.step_link (step_fk, depends_on_fk)
+  SELECT s.id, d.id
+  FROM links l
+  JOIN process.step s ON s.name = l.column1
+  JOIN process.step d ON d.name = l.column2;
+
 
 -- fake runs
 INSERT INTO process.run (flow_fk, step_id, step_name) VALUES 
@@ -60,8 +66,13 @@ INSERT INTO process.step (flow_fk, name, cmd, display_order) VALUES
   (currval('process.flow_id_seq'), 'Send invoices', 'invoices send :month', 410)
 ;
 
-INSERT INTO process.step_link (step_fk, depends_on_fk) VALUES 
-  ((SELECT id FROM process.step WHERE name = 'Generate invoice PDFs'), (SELECT id FROM process.step WHERE name = 'Create invoice data')),
-  ((SELECT id FROM process.step WHERE name = 'Send invoices'), (SELECT id FROM process.step WHERE name = 'Validate invoice recipients')),
-  ((SELECT id FROM process.step WHERE name = 'Send invoices'), (SELECT id FROM process.step WHERE name = 'Generate invoice PDFs'))
-;
+WITH links AS (VALUES 
+  ('Generate invoice PDFs', 'Create invoice data'),
+  ('Send invoices', 'Validate invoice recipients'),
+  ('Send invoices', 'Generate invoice PDFs')
+)
+INSERT INTO process.step_link (step_fk, depends_on_fk)
+  SELECT s.id, d.id
+  FROM links l
+  JOIN process.step s ON s.name = l.column1
+  JOIN process.step d ON d.name = l.column2;
