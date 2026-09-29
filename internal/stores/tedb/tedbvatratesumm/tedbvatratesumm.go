@@ -19,13 +19,13 @@ const (
 )
 
 type Model struct {
-	Categories  string       `db:"categories" json:"categories,omitempty"`
-	Comment     string       `db:"comment" json:"comment,omitempty"`
-	Country     string       `db:"country" json:"country,omitempty"`
-	CountryFk   int64        `db:"country_fk" json:"country_fk,omitempty"`
+	Categories  string       `db:"categories" json:"categories,omitzero"`
+	Comment     string       `db:"comment" json:"comment,omitzero"`
+	Country     string       `db:"country" json:"country,omitzero"`
+	CountryFk   int64        `db:"country_fk" json:"country_fk,omitzero"`
 	Rate        float64      `db:"rate" json:"rate"`
 	SituationOn lystype.Date `db:"situation_on" json:"situation_on,omitzero"`
-	Type        string       `db:"type" json:"type,omitempty"`
+	Type        string       `db:"type" json:"type,omitzero"`
 }
 
 var (

@@ -3,7 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"net/http"
 	"os/exec"
@@ -200,12 +201,12 @@ func dmExtractToolResult(stdout []byte, toolCallID int) (any, error) {
 		}
 
 		var msg struct {
-			ID     *json.RawMessage `json:"id,omitempty"`
-			Result json.RawMessage  `json:"result,omitempty"`
+			ID     *int           `json:"id,omitzero"`
+			Result jsontext.Value `json:"result,omitzero"`
 			Error  *struct {
 				Code    int    `json:"code"`
 				Message string `json:"message"`
-			} `json:"error,omitempty"`
+			} `json:"error,omitzero"`
 		}
 
 		if err := json.Unmarshal([]byte(line), &msg); err != nil {
@@ -216,12 +217,7 @@ func dmExtractToolResult(stdout []byte, toolCallID int) (any, error) {
 			continue
 		}
 
-		var id int
-		if err := json.Unmarshal(*msg.ID, &id); err != nil {
-			continue
-		}
-
-		if id != toolCallID {
+		if *msg.ID != toolCallID {
 			continue
 		}
 

@@ -24,19 +24,19 @@ const (
 )
 
 type Input struct {
-	Cmd          string `db:"cmd" json:"cmd,omitempty" validate:"required,max=255"`
-	DisplayOrder int    `db:"display_order" json:"display_order,omitempty" validate:"required,min=1"`
-	FlowFk       int64  `db:"flow_fk" json:"flow_fk,omitempty" validate:"required"`
-	Name         string `db:"name" json:"name,omitempty" validate:"required,max=255"`
+	Cmd          string `db:"cmd" json:"cmd,omitzero" validate:"required,max=255"`
+	DisplayOrder int    `db:"display_order" json:"display_order,omitzero" validate:"required,min=1"`
+	FlowFk       int64  `db:"flow_fk" json:"flow_fk,omitzero" validate:"required"`
+	Name         string `db:"name" json:"name,omitzero" validate:"required,max=255"`
 }
 
 type Model struct {
 	Id             int64            `db:"id" json:"id"`
 	CreatedAt      lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	DependsOn      []int64          `db:"depends_on" json:"depends_on,omitempty"`
-	DependsOnNames []string         `db:"depends_on_names" json:"depends_on_names,omitempty"`
-	Flow           string           `db:"flow" json:"flow,omitempty"`
-	PointCount     int              `db:"point_count" json:"point_count,omitempty"`
+	DependsOn      []int64          `db:"depends_on" json:"depends_on,omitzero"`
+	DependsOnNames []string         `db:"depends_on_names" json:"depends_on_names,omitzero"`
+	Flow           string           `db:"flow" json:"flow,omitzero"`
+	PointCount     int              `db:"point_count" json:"point_count,omitzero"`
 	UpdatedAt      lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

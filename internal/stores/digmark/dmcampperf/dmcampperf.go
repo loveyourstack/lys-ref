@@ -21,7 +21,7 @@ const (
 )
 
 type Input struct {
-	CampaignFk  int64        `db:"campaign_fk" json:"campaign_fk,omitempty" validate:"required"`
+	CampaignFk  int64        `db:"campaign_fk" json:"campaign_fk,omitzero" validate:"required"`
 	Clicks      int          `db:"clicks" json:"clicks" validate:"gte=0"`
 	Conversions int          `db:"conversions" json:"conversions" validate:"gte=0"`
 	DayCet      lystype.Date `db:"day_cet" json:"day_cet,omitzero" validate:"required"`
@@ -31,14 +31,14 @@ type Input struct {
 }
 
 type Model struct {
-	Id                 int64            `db:"id" json:"id,omitempty"`
-	Campaign           string           `db:"campaign" json:"campaign,omitempty"`
-	Country            string           `db:"country" json:"country,omitempty"`
-	CountryIso2        string           `db:"country_iso2" json:"country_iso2,omitempty"`
+	Id                 int64            `db:"id" json:"id,omitzero"`
+	Campaign           string           `db:"campaign" json:"campaign,omitzero"`
+	Country            string           `db:"country" json:"country,omitzero"`
+	CountryIso2        string           `db:"country_iso2" json:"country_iso2,omitzero"`
 	CreatedAt          lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	ProfitEur          float64          `db:"profit_eur" json:"profit_eur"`
 	ReturnOnInvestment float64          `db:"return_on_investment" json:"return_on_investment"`
-	Vertical           string           `db:"vertical" json:"vertical,omitempty"`
+	Vertical           string           `db:"vertical" json:"vertical,omitzero"`
 	UpdatedAt          lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

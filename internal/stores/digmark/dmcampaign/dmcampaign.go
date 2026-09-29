@@ -23,21 +23,21 @@ const (
 )
 
 type Input struct {
-	CountryFk      int64   `db:"country_fk" json:"country_fk,omitempty" validate:"required,gte=1"` // disallow -1 (None)
+	CountryFk      int64   `db:"country_fk" json:"country_fk,omitzero" validate:"required,gte=1"` // disallow -1 (None)
 	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur" validate:"gte=0,lte=10000"`
-	IsActive       bool    `db:"is_active" json:"is_active,omitempty"`
-	Manager        string  `db:"manager" json:"manager,omitempty"`
-	Name           string  `db:"name" json:"name,omitempty" validate:"max=256"`
-	VerticalFk     int64   `db:"vertical_fk" json:"vertical_fk,omitempty" validate:"required"`
+	IsActive       bool    `db:"is_active" json:"is_active,omitzero"`
+	Manager        string  `db:"manager" json:"manager,omitzero"`
+	Name           string  `db:"name" json:"name,omitzero" validate:"max=256"`
+	VerticalFk     int64   `db:"vertical_fk" json:"vertical_fk,omitzero" validate:"required"`
 }
 
 type Model struct {
-	Id               int64            `db:"id" json:"id,omitempty"`
-	Country          string           `db:"country" json:"country,omitempty"`
-	CountryIso2      string           `db:"country_iso2" json:"country_iso2,omitempty"`
+	Id               int64            `db:"id" json:"id,omitzero"`
+	Country          string           `db:"country" json:"country,omitzero"`
+	CountryIso2      string           `db:"country_iso2" json:"country_iso2,omitzero"`
 	CreatedAt        lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	PerformanceRange string           `db:"performance_range" json:"performance_range,omitempty"`
-	Vertical         string           `db:"vertical" json:"vertical,omitempty"`
+	PerformanceRange string           `db:"performance_range" json:"performance_range,omitzero"`
+	Vertical         string           `db:"vertical" json:"vertical,omitzero"`
 	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

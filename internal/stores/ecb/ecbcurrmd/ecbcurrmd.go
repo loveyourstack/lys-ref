@@ -22,13 +22,13 @@ const (
 )
 
 type Input struct {
-	Code     string `db:"code" json:"code,omitempty" validate:"required,min=2,max=3"`
-	IsActive bool   `db:"is_active" json:"is_active,omitempty"`
-	Symbol   string `db:"symbol" json:"symbol,omitempty" validate:"max=5"`
+	Code     string `db:"code" json:"code,omitzero" validate:"required,min=2,max=3"`
+	IsActive bool   `db:"is_active" json:"is_active,omitzero"`
+	Symbol   string `db:"symbol" json:"symbol,omitzero" validate:"max=5"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

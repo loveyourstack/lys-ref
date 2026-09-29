@@ -27,10 +27,10 @@ type Input struct {
 }
 
 type Computed struct {
-	GAdsAccountId  int64 `db:"gads_account_id" json:"gads_account_id,omitempty"`   // set during preparation
-	GAdsAdId       int64 `db:"gads_ad_id" json:"gads_ad_id,omitempty"`             // set during processing
-	GAdsAdGroupId  int64 `db:"gads_ad_group_id" json:"gads_ad_group_id,omitempty"` // set during processing
-	GAdsCampaignId int64 `db:"gads_campaign_id" json:"gads_campaign_id,omitempty"` // set during processing
+	GAdsAccountId  int64 `db:"gads_account_id" json:"gads_account_id,omitzero"`   // set during preparation
+	GAdsAdId       int64 `db:"gads_ad_id" json:"gads_ad_id,omitzero"`             // set during processing
+	GAdsAdGroupId  int64 `db:"gads_ad_group_id" json:"gads_ad_group_id,omitzero"` // set during processing
+	GAdsCampaignId int64 `db:"gads_campaign_id" json:"gads_campaign_id,omitzero"` // set during processing
 	dmlaunch.Computed
 }
 

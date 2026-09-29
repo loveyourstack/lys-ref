@@ -21,16 +21,16 @@ const (
 )
 
 type Input struct {
-	Name   string   `db:"name" json:"name,omitempty" validate:"required,max=255"`
+	Name   string   `db:"name" json:"name,omitzero" validate:"required,max=255"`
 	Params []string `db:"params" json:"params,omitempty"`
 }
 
 type Model struct {
 	Id             int64            `db:"id" json:"id"`
 	CreatedAt      lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	ParamsReplaced string           `db:"params_replaced" json:"params_replaced,omitempty"`
-	RunCount       int              `db:"run_count" json:"run_count,omitempty"`
-	StepCount      int              `db:"step_count" json:"step_count"`          // don't omitempty: show 0 in UI
+	ParamsReplaced string           `db:"params_replaced" json:"params_replaced,omitzero"`
+	RunCount       int              `db:"run_count" json:"run_count,omitzero"`
+	StepCount      int              `db:"step_count" json:"step_count"`          // don't omitzero: show 0 in UI
 	UpdatedAt      lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

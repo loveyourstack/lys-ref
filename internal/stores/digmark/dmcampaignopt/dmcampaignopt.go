@@ -30,22 +30,22 @@ type Model struct {
 	Id                 int64        `db:"id" json:"id"`
 	Clicks             int          `db:"clicks" json:"clicks"`
 	Conversions        int          `db:"conversions" json:"conversions"`
-	Country            string       `db:"country" json:"country,omitempty"`
+	Country            string       `db:"country" json:"country,omitzero"`
 	CountryFk          int64        `db:"country_fk" json:"country_fk"`
-	CountryIso2        string       `db:"country_iso2" json:"country_iso2,omitempty"`
+	CountryIso2        string       `db:"country_iso2" json:"country_iso2,omitzero"`
 	DailyBudgetEur     float64      `db:"daily_budget_eur" json:"daily_budget_eur"`
 	EndDay             lystype.Date `db:"end_day" json:"end_day,omitzero"`
 	Impressions        int          `db:"impressions" json:"impressions"`
 	IsActive           bool         `db:"is_active" json:"is_active"`
-	Manager            string       `db:"manager" json:"manager,omitempty"`
-	Name               string       `db:"name" json:"name,omitempty"`
+	Manager            string       `db:"manager" json:"manager,omitzero"`
+	Name               string       `db:"name" json:"name,omitzero"`
 	ProfitEur          float64      `db:"profit_eur" json:"profit_eur"`
 	ReturnOnInvestment float64      `db:"return_on_investment" json:"return_on_investment"`
 	RevenueEur         float64      `db:"revenue_eur" json:"revenue_eur"`
 	SpendEur           float64      `db:"spend_eur" json:"spend_eur"`
 	StartDay           lystype.Date `db:"start_day" json:"start_day,omitzero"`
 	Trend              float64      `db:"trend" json:"trend"`
-	Vertical           string       `db:"vertical" json:"vertical,omitempty"`
+	Vertical           string       `db:"vertical" json:"vertical,omitzero"`
 	VerticalFk         int64        `db:"vertical_fk" json:"vertical_fk"`
 	Volatility         float64      `db:"volatility" json:"volatility"`
 }

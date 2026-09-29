@@ -23,15 +23,15 @@ const (
 
 type Input struct {
 	DurationMs int64      `db:"duration_ms" json:"duration_ms" validate:"required,min=0"`
-	Endpoint   string     `db:"endpoint" json:"endpoint,omitempty" validate:"required"`
+	Endpoint   string     `db:"endpoint" json:"endpoint,omitzero" validate:"required"`
 	Ip         netip.Addr `db:"ip" json:"ip,omitzero" validate:"required"`
-	Method     string     `db:"method" json:"method,omitempty" validate:"required,max=64"`
-	StatusCode int        `db:"status_code" json:"status_code,omitempty" validate:"required,min=1"`
-	UserName   string     `db:"user_name" json:"user_name,omitempty" validate:"required,max=256"`
+	Method     string     `db:"method" json:"method,omitzero" validate:"required,max=64"`
+	StatusCode int        `db:"status_code" json:"status_code,omitzero" validate:"required,min=1"`
+	UserName   string     `db:"user_name" json:"user_name,omitzero" validate:"required,max=256"`
 }
 
 type Model struct {
-	Id            int64            `db:"id" json:"id,omitempty"`
+	Id            int64            `db:"id" json:"id,omitzero"`
 	CreatedAt     lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	CreatedAtDate lystype.Date     `db:"created_at_date" json:"created_at_date,omitzero"`
 	Input

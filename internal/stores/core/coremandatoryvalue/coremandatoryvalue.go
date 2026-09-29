@@ -23,28 +23,47 @@ const (
 
 type Input struct {
 
+	/*
+	  json/v2 - changes for bool and numeric types
+
+	  omitzero: When marshaling, the "omitzero" option specifies that the struct field should be omitted if the field value is zero as determined by the "IsZero() bool" method if present,
+	  otherwise based on whether the field is the zero Go value
+
+	  omitempty: When marshaling, the "omitempty" option specifies that the struct field should be omitted if the field value would have been encoded as a JSON null, empty string,
+	  empty object, or empty array
+
+	  use omitzero rather than omitempty for bool and numeric types (https://pkg.go.dev/encoding/json/v2#hdr-JSON_Representation_of_Go_structs),
+	  but only when it's ok for false/0 to be omitted in json response
+	  this makes xfields param work correctly (bool/numeric fields will be omitted if zero), but needs isNaN checks in UI for numeric types
+
+	  omitempty now has no effect for bool and numeric types
+	  since omitzero also works for strings ("") and pointers (nil), and was already used for custom types with an IsZero method,
+	  use omitzero for all non-slice type fields where the zero value can be safely omitted.
+	  Slice types should still use omitempty.
+	*/
+
 	// don't use validate:"required": it will reject false
-	CBool bool `db:"c_bool" json:"c_bool,omitempty"`
+	CBool bool `db:"c_bool" json:"c_bool,omitzero"`
 
 	// note use of omitzero rather than omitempty for lystype types
 	CDateCet lystype.Date `db:"c_date_cet" json:"c_date_cet,omitzero" validate:"required"`
 
-	CEnum string `db:"c_enum" json:"c_enum,omitempty" validate:"required"`
+	CEnum string `db:"c_enum" json:"c_enum,omitzero" validate:"required"`
 
 	// numbers: if zero is allowed, don't use validate:"required": it will reject 0
 	// use gte/lte rather than min/max to ensure correct validation message
-	CInt     int64   `db:"c_int" json:"c_int,omitempty" validate:"lte=1000000"`
-	CNumeric float64 `db:"c_numeric" json:"c_numeric,omitempty" validate:"lte=1000000"`
+	CInt     int64   `db:"c_int" json:"c_int,omitzero" validate:"lte=1000000"`
+	CNumeric float64 `db:"c_numeric" json:"c_numeric,omitzero" validate:"lte=1000000"`
 
-	CTableFk int64        `db:"c_table_fk" json:"c_table_fk,omitempty" validate:"required"`
-	CText    string       `db:"c_text" json:"c_text,omitempty" validate:"required,max=256"`
+	CTableFk int64        `db:"c_table_fk" json:"c_table_fk,omitzero" validate:"required"`
+	CText    string       `db:"c_text" json:"c_text,omitzero" validate:"required,max=256"`
 	CTime    lystype.Time `db:"c_time" json:"c_time,omitzero"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	CTable    string           `db:"c_table" json:"c_table,omitempty"`
+	CTable    string           `db:"c_table" json:"c_table,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

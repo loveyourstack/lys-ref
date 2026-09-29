@@ -22,18 +22,18 @@ const (
 )
 
 type Input struct {
-	FlowFk   int64  `db:"flow_fk" json:"flow_fk,omitempty" validate:"required"`
-	StepId   int64  `db:"step_id" json:"step_id,omitempty" validate:"required"`
-	StepName string `db:"step_name" json:"step_name,omitempty" validate:"required"`
+	FlowFk   int64  `db:"flow_fk" json:"flow_fk,omitzero" validate:"required"`
+	StepId   int64  `db:"step_id" json:"step_id,omitzero" validate:"required"`
+	StepName string `db:"step_name" json:"step_name,omitzero" validate:"required"`
 }
 
 type Model struct {
 	Id         int64            `db:"id" json:"id"`
 	CreatedAt  lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	FinishedAt lystype.Datetime `db:"finished_at" json:"finished_at,omitzero"`
-	Flow       string           `db:"flow" json:"flow,omitempty"`
-	PointCount int              `db:"point_count" json:"point_count,omitempty"`
-	PointStati string           `db:"point_stati" json:"point_stati,omitempty"`
+	Flow       string           `db:"flow" json:"flow,omitzero"`
+	PointCount int              `db:"point_count" json:"point_count,omitzero"`
+	PointStati string           `db:"point_stati" json:"point_stati,omitzero"`
 	StartedAt  lystype.Datetime `db:"started_at" json:"started_at,omitzero"`
 	Input
 }

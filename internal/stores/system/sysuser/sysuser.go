@@ -24,27 +24,27 @@ const (
 )
 
 type Input struct {
-	AllowMultipleSessions bool           `db:"allow_multiple_sessions" json:"allow_multiple_sessions,omitempty"`
-	Email                 string         `db:"email" json:"email,omitempty" validate:"required,email,max=256"`
-	FamilyName            string         `db:"family_name" json:"family_name,omitempty" validate:"required,max=256"`
-	GivenName             string         `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
+	AllowMultipleSessions bool           `db:"allow_multiple_sessions" json:"allow_multiple_sessions,omitzero"`
+	Email                 string         `db:"email" json:"email,omitzero" validate:"required,email,max=256"`
+	FamilyName            string         `db:"family_name" json:"family_name,omitzero" validate:"required,max=256"`
+	GivenName             string         `db:"given_name" json:"given_name,omitzero" validate:"required,max=256"`
 	HashedPw              string         `db:"hashed_pw" json:"-"`
-	Name                  string         `db:"name" json:"name,omitempty" validate:"required,max=64"`
-	ProfilePic            string         `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256"`
+	Name                  string         `db:"name" json:"name,omitzero" validate:"required,max=64"`
+	ProfilePic            string         `db:"profile_pic" json:"profile_pic,omitzero" validate:"max=256"`
 	Roles                 []sysrole.Enum `db:"roles" json:"roles,omitempty" validate:"required"`
 }
 
 type Model struct {
-	Id                  int64            `db:"id" json:"id,omitempty"`
+	Id                  int64            `db:"id" json:"id,omitzero"`
 	CreatedAt           lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	CreatedBy           string           `db:"created_by" json:"created_by,omitempty"`         // assigned in Insert func
-	DeactivatedAt       lystype.Datetime `db:"deactivated_at" json:"deactivated_at,omitzero"`  // set in Deactivate func
-	EmailVerified       bool             `db:"email_verified" json:"email_verified,omitempty"` // set in VerifyEmail func
-	ForcePasswordChange bool             `db:"force_password_change" json:"force_password_change,omitempty"`
-	FullName            string           `db:"full_name" json:"full_name,omitempty"`
-	IsDeactivated       bool             `db:"is_deactivated" json:"is_deactivated,omitempty"`           // set in Deactivate func
-	LastUserUpdateBy    string           `db:"last_user_update_by" json:"last_user_update_by,omitempty"` // assigned in Update funcs
-	UpdatedAt           lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                    // assigned by trigger
+	CreatedBy           string           `db:"created_by" json:"created_by,omitzero"`         // assigned in Insert func
+	DeactivatedAt       lystype.Datetime `db:"deactivated_at" json:"deactivated_at,omitzero"` // set in Deactivate func
+	EmailVerified       bool             `db:"email_verified" json:"email_verified,omitzero"` // set in VerifyEmail func
+	ForcePasswordChange bool             `db:"force_password_change" json:"force_password_change,omitzero"`
+	FullName            string           `db:"full_name" json:"full_name,omitzero"`
+	IsDeactivated       bool             `db:"is_deactivated" json:"is_deactivated,omitzero"`           // set in Deactivate func
+	LastUserUpdateBy    string           `db:"last_user_update_by" json:"last_user_update_by,omitzero"` // assigned in Update funcs
+	UpdatedAt           lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                   // assigned by trigger
 	Input
 }
 

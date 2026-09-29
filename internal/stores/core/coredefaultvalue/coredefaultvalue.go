@@ -25,13 +25,13 @@ type Input struct {
 
 	// don't use validate:"required" here, since '' should be passed, and the default is applied on Insert below
 	// on Update, need to rely on the db check constraint
-	CDefaultText string `db:"c_default_text" json:"c_default_text,omitempty" validate:"max=256"`
+	CDefaultText string `db:"c_default_text" json:"c_default_text,omitzero" validate:"max=256"`
 
-	CSuggestedText string `db:"c_suggested_text" json:"c_suggested_text,omitempty" validate:"required,max=256"`
+	CSuggestedText string `db:"c_suggested_text" json:"c_suggested_text,omitzero" validate:"required,max=256"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

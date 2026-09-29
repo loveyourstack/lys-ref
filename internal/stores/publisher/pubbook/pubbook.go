@@ -23,17 +23,17 @@ const (
 )
 
 type Input struct {
-	AuthorFk int64  `db:"author_fk" json:"author_fk,omitempty" validate:"required"`
-	Name     string `db:"name" json:"name,omitempty" validate:"required,max=256"`
+	AuthorFk int64  `db:"author_fk" json:"author_fk,omitzero" validate:"required"`
+	Name     string `db:"name" json:"name,omitzero" validate:"required,max=256"`
 }
 
 type Model struct {
-	Id               int64            `db:"id" json:"id,omitempty"`
-	Author           string           `db:"author" json:"author,omitempty"`
+	Id               int64            `db:"id" json:"id,omitzero"`
+	Author           string           `db:"author" json:"author,omitzero"`
 	CreatedAt        lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	CreatedBy        string           `db:"created_by" json:"created_by,omitempty"`                   // assigned in Insert func
-	LastUserUpdateBy string           `db:"last_user_update_by" json:"last_user_update_by,omitempty"` // assigned in Update funcs
-	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                    // assigned by trigger
+	CreatedBy        string           `db:"created_by" json:"created_by,omitzero"`                   // assigned in Insert func
+	LastUserUpdateBy string           `db:"last_user_update_by" json:"last_user_update_by,omitzero"` // assigned in Update funcs
+	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                   // assigned by trigger
 	Input
 }
 

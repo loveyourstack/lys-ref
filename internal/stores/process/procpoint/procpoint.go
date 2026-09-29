@@ -25,16 +25,16 @@ const (
 )
 
 type Input struct {
-	Cmd          string           `db:"cmd" json:"cmd,omitempty" validate:"required,max=255"`
+	Cmd          string           `db:"cmd" json:"cmd,omitzero" validate:"required,max=255"`
 	DependsOn    []int64          `db:"depends_on" json:"depends_on,omitempty"`
-	DisplayOrder int              `db:"display_order" json:"display_order,omitempty" validate:"required,min=1"`
-	ErrMsg       string           `db:"err_msg" json:"err_msg,omitempty"`
+	DisplayOrder int              `db:"display_order" json:"display_order,omitzero" validate:"required,min=1"`
+	ErrMsg       string           `db:"err_msg" json:"err_msg,omitzero"`
 	FinishedAt   lystype.Datetime `db:"finished_at" json:"finished_at,omitzero"`
-	RunFk        int64            `db:"run_fk" json:"run_fk,omitempty" validate:"required"`
+	RunFk        int64            `db:"run_fk" json:"run_fk,omitzero" validate:"required"`
 	StartedAt    lystype.Datetime `db:"started_at" json:"started_at,omitzero"`
-	Status       runstatus.Enum   `db:"status" json:"status,omitempty" validate:"required,max=255"`
-	StepId       int64            `db:"step_id" json:"step_id,omitempty" validate:"required"`
-	StepName     string           `db:"step_name" json:"step_name,omitempty" validate:"required"`
+	Status       runstatus.Enum   `db:"status" json:"status,omitzero" validate:"required,max=255"`
+	StepId       int64            `db:"step_id" json:"step_id,omitzero" validate:"required"`
+	StepName     string           `db:"step_name" json:"step_name,omitzero" validate:"required"`
 }
 
 type Model struct {

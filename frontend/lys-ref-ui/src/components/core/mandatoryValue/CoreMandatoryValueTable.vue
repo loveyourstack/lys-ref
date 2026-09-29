@@ -83,13 +83,13 @@
     </template>
 
      <template v-slot:[`item.c_int`]="{ item }">
-      <!-- need NaN check since 0 is allowed and omitempty is used in backend, so value might be missing in JSON response -->
+      <!-- need NaN check since 0 is allowed and omitzero is used in backend, so value might be missing in JSON response -->
       <span v-if="!isNaN(item.c_int!)" :class="item.c_int! < 0 ? 'text-error' : ''">{{ formatter.format(item.c_int!) }}</span>
       <span v-else>0</span>
     </template>
 
      <template v-slot:[`item.c_numeric`]="{ item }">
-      <!-- need NaN check since 0 is allowed and omitempty is used in backend, so value might be missing in JSON response -->
+      <!-- need NaN check since 0 is allowed and omitzero is used in backend, so value might be missing in JSON response -->
       <span v-if="!isNaN(item.c_numeric!)" :class="item.c_numeric! < 0 ? 'text-error' : ''">{{ formatterDec2.format(item.c_numeric!) }}</span>
       <span v-else>0</span>
     </template>

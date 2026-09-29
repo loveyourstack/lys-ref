@@ -21,17 +21,17 @@ const (
 )
 
 type Input struct {
-	CompanyFk  int64  `db:"company_fk" json:"company_fk,omitempty" validate:"required"`
-	Email      string `db:"email" json:"email,omitempty" validate:"required,email,max=256"`
-	GivenName  string `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
-	FamilyName string `db:"family_name" json:"family_name,omitempty" validate:"required,max=256"`
+	CompanyFk  int64  `db:"company_fk" json:"company_fk,omitzero" validate:"required"`
+	Email      string `db:"email" json:"email,omitzero" validate:"required,email,max=256"`
+	GivenName  string `db:"given_name" json:"given_name,omitzero" validate:"required,max=256"`
+	FamilyName string `db:"family_name" json:"family_name,omitzero" validate:"required,max=256"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
-	Company   string           `db:"company" json:"company,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
+	Company   string           `db:"company" json:"company,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	Name      string           `db:"name" json:"name,omitempty"`
+	Name      string           `db:"name" json:"name,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

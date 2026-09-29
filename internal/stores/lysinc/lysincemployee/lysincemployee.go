@@ -23,25 +23,25 @@ const (
 
 type Input struct {
 	DateOfBirth  lystype.Date `db:"date_of_birth" json:"date_of_birth,omitzero" validate:"required"`
-	DepartmentFk int64        `db:"department_fk" json:"department_fk,omitempty" validate:"required"`
-	Email        string       `db:"email" json:"email,omitempty" validate:"required,email,max=256"`
-	FamilyName   string       `db:"family_name" json:"family_name,omitempty" validate:"required,max=256"`
-	GivenName    string       `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
-	Honorific    string       `db:"honorific" json:"honorific,omitempty" validate:"max=64,required"`
-	JobTitle     string       `db:"job_title" json:"job_title,omitempty" validate:"required,max=256"`
+	DepartmentFk int64        `db:"department_fk" json:"department_fk,omitzero" validate:"required"`
+	Email        string       `db:"email" json:"email,omitzero" validate:"required,email,max=256"`
+	FamilyName   string       `db:"family_name" json:"family_name,omitzero" validate:"required,max=256"`
+	GivenName    string       `db:"given_name" json:"given_name,omitzero" validate:"required,max=256"`
+	Honorific    string       `db:"honorific" json:"honorific,omitzero" validate:"max=64,required"`
+	JobTitle     string       `db:"job_title" json:"job_title,omitzero" validate:"required,max=256"`
 	JoinDate     lystype.Date `db:"join_date" json:"join_date,omitzero" validate:"required"`
-	ProfilePic   string       `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256,required"`
-	ReportsTo    int64        `db:"reports_to" json:"reports_to,omitempty" validate:"required"`
-	Sex          string       `db:"sex" json:"sex,omitempty" validate:"required"`
+	ProfilePic   string       `db:"profile_pic" json:"profile_pic,omitzero" validate:"max=256,required"`
+	ReportsTo    int64        `db:"reports_to" json:"reports_to,omitzero" validate:"required"`
+	Sex          string       `db:"sex" json:"sex,omitzero" validate:"required"`
 }
 
 type Model struct {
-	Id                int64            `db:"id" json:"id,omitempty"`
+	Id                int64            `db:"id" json:"id,omitzero"`
 	CreatedAt         lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	Department        string           `db:"department" json:"department,omitempty"`
-	FullName          string           `db:"full_name" json:"full_name,omitempty"`
-	ReportsToFullName string           `db:"reports_to_full_name" json:"reports_to_full_name,omitempty"`
-	ReportsToJobTitle string           `db:"reports_to_job_title" json:"reports_to_job_title,omitempty"`
+	Department        string           `db:"department" json:"department,omitzero"`
+	FullName          string           `db:"full_name" json:"full_name,omitzero"`
+	ReportsToFullName string           `db:"reports_to_full_name" json:"reports_to_full_name,omitzero"`
+	ReportsToJobTitle string           `db:"reports_to_job_title" json:"reports_to_job_title,omitzero"`
 	UpdatedAt         lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }

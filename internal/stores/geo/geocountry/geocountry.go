@@ -24,15 +24,15 @@ const (
 )
 
 type Input struct {
-	DefaultLocale string `db:"default_locale" json:"default_locale,omitempty" validate:"required,max=5"`
-	IsActive      bool   `db:"is_active" json:"is_active,omitempty"`
-	IsEu          bool   `db:"is_eu" json:"is_eu,omitempty"`
-	Iso2          string `db:"iso2" json:"iso2,omitempty" validate:"required,len=2"`
-	Name          string `db:"name" json:"name,omitempty" validate:"required,max=256"`
+	DefaultLocale string `db:"default_locale" json:"default_locale,omitzero" validate:"required,max=5"`
+	IsActive      bool   `db:"is_active" json:"is_active,omitzero"`
+	IsEu          bool   `db:"is_eu" json:"is_eu,omitzero"`
+	Iso2          string `db:"iso2" json:"iso2,omitzero" validate:"required,len=2"`
+	Name          string `db:"name" json:"name,omitzero" validate:"required,max=256"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

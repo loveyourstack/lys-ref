@@ -20,7 +20,7 @@ const (
 )
 
 type Model struct {
-	Id         int64            `db:"id" json:"id,omitempty"`
+	Id         int64            `db:"id" json:"id,omitzero"`
 	ArchivedAt lystype.Datetime `db:"archived_at" json:"archived_at,omitzero"`
 	syssession.Model
 }

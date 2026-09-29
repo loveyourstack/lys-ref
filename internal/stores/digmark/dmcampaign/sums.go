@@ -9,7 +9,7 @@ import (
 
 type managerBudget struct {
 	Manager     string `db:"manager" json:"manager"`
-	TotalBudget int    `db:"total_budget" json:"total_budget,omitempty"`
+	TotalBudget int    `db:"total_budget" json:"total_budget,omitzero"`
 }
 
 func (s Store) SelectManagerBudgets(ctx context.Context) (items []managerBudget, err error) {
@@ -22,7 +22,7 @@ func (s Store) SelectManagerBudgets(ctx context.Context) (items []managerBudget,
 
 type verticalBudget struct {
 	Vertical    string `db:"vertical" json:"vertical"`
-	TotalBudget int    `db:"total_budget" json:"total_budget,omitempty"`
+	TotalBudget int    `db:"total_budget" json:"total_budget,omitzero"`
 }
 
 func (s Store) SelectVerticalBudgets(ctx context.Context) (items []verticalBudget, err error) {

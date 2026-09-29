@@ -27,17 +27,17 @@ const (
 )
 
 type Input struct {
-	Code string `db:"code" json:"code,omitempty" validate:"required,min=2,max=3"`
-	Name string `db:"name" json:"name,omitempty" validate:"required,max=500"`
+	Code string `db:"code" json:"code,omitzero" validate:"required,min=2,max=3"`
+	Name string `db:"name" json:"name,omitzero" validate:"required,max=500"`
 }
 
 type Model struct {
 	Id         int64            `db:"id" json:"id"`
 	CreatedAt  lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	IsActive   bool             `db:"is_active" json:"is_active,omitempty"`     // metadata
-	MetadataId int64            `db:"metadata_id" json:"metadata_id,omitempty"` // metadata
-	Symbol     string           `db:"symbol" json:"symbol,omitempty"`           // metadata
-	UpdatedAt  lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`    // assigned by trigger (assumes use of lyspgmon.CheckDb)
+	IsActive   bool             `db:"is_active" json:"is_active,omitzero"`     // metadata
+	MetadataId int64            `db:"metadata_id" json:"metadata_id,omitzero"` // metadata
+	Symbol     string           `db:"symbol" json:"symbol,omitzero"`           // metadata
+	UpdatedAt  lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`   // assigned by trigger (assumes use of lyspgmon.CheckDb)
 	Input
 }
 

@@ -1,6 +1,6 @@
 module github.com/loveyourstack/lys-ref
 
-go 1.26.2
+go 1.27.1
 
 require (
 	github.com/BurntSushi/toml v1.6.0
@@ -13,8 +13,8 @@ require (
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.10.0
-	github.com/loveyourstack/connectors v0.3.21
-	github.com/loveyourstack/lys v0.3.56
+	github.com/loveyourstack/connectors v0.3.23
+	github.com/loveyourstack/lys v0.3.58
 	github.com/mark3labs/mcp-go v0.55.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1

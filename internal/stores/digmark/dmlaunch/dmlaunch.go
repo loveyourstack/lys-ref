@@ -28,31 +28,31 @@ const (
 
 // Input contains the shared input fields for all launchers.
 type Input struct {
-	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitempty" validate:"gte=1,lte=10000"`
-	Manager        string  `db:"manager" json:"manager,omitempty" validate:"required,max=64"`
-	Name           string  `db:"name" json:"name,omitempty" validate:"required,max=256"`
+	DailyBudgetEur float64 `db:"daily_budget_eur" json:"daily_budget_eur,omitzero" validate:"gte=1,lte=10000"`
+	Manager        string  `db:"manager" json:"manager,omitzero" validate:"required,max=64"`
+	Name           string  `db:"name" json:"name,omitzero" validate:"required,max=256"`
 }
 
 // Computed contains the shared computed fields for all launchers.
 type Computed struct {
-	CountryFk  int64             `db:"country_fk" json:"country_fk,omitempty"`   // set during preparation
-	Message    string            `db:"message" json:"message,omitempty"`         // set during preparation and processing
-	Status     launchstatus.Enum `db:"status" json:"status,omitempty"`           // set during preparation and processing
-	Step       int               `db:"step" json:"step,omitempty"`               // set during processing
-	VerticalFk int64             `db:"vertical_fk" json:"vertical_fk,omitempty"` // set during preparation
+	CountryFk  int64             `db:"country_fk" json:"country_fk,omitzero"`   // set during preparation
+	Message    string            `db:"message" json:"message,omitzero"`         // set during preparation and processing
+	Status     launchstatus.Enum `db:"status" json:"status,omitzero"`           // set during preparation and processing
+	Step       int               `db:"step" json:"step,omitzero"`               // set during processing
+	VerticalFk int64             `db:"vertical_fk" json:"vertical_fk,omitzero"` // set during preparation
 }
 
 // DbManaged contains the shared database-managed fields for all launchers.
 type DbManaged struct {
-	Id           int64            `db:"id" json:"id,omitempty"`
-	Country      string           `db:"country" json:"country,omitempty"`
-	CountryIso2  string           `db:"country_iso2" json:"country_iso2,omitempty"`
+	Id           int64            `db:"id" json:"id,omitzero"`
+	Country      string           `db:"country" json:"country,omitzero"`
+	CountryIso2  string           `db:"country_iso2" json:"country_iso2,omitzero"`
 	CreatedAt    lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	CreatedAtDay lystype.Date     `db:"created_at_day" json:"created_at_day,omitzero"`
-	MaxSteps     int              `db:"max_steps" json:"max_steps,omitempty"`
-	Partner      string           `db:"partner" json:"partner,omitempty"`
+	MaxSteps     int              `db:"max_steps" json:"max_steps,omitzero"`
+	Partner      string           `db:"partner" json:"partner,omitzero"`
 	UpdatedAt    lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
-	Vertical     string           `db:"vertical" json:"vertical,omitempty"`
+	Vertical     string           `db:"vertical" json:"vertical,omitzero"`
 }
 
 type Model struct {

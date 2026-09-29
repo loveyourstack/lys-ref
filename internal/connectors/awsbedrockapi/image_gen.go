@@ -3,7 +3,7 @@ package awsbedrockapi
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"os"
 	"time"
@@ -55,7 +55,7 @@ func (c *Client) GenerateMarketingImage(ctx context.Context, product string) (fN
 
 	var out stableImageCoreResponse
 	if err := json.Unmarshal(resp.Body, &out); err != nil {
-		return "", fmt.Errorf("unmarshal response: %w", err)
+		return "", fmt.Errorf("json.Unmarshal failed: %w", err)
 	}
 	if len(out.Images) != 1 {
 		return "", fmt.Errorf("expected 1 image, got %d", len(out.Images))

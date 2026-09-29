@@ -21,8 +21,8 @@ const (
 )
 
 type Input struct {
-	DependsOnFk int64 `db:"depends_on_fk" json:"depends_on_fk,omitempty" validate:"required"`
-	StepFk      int64 `db:"step_fk" json:"step_fk,omitempty" validate:"required"`
+	DependsOnFk int64 `db:"depends_on_fk" json:"depends_on_fk,omitzero" validate:"required"`
+	StepFk      int64 `db:"step_fk" json:"step_fk,omitzero" validate:"required"`
 }
 
 type Model struct {

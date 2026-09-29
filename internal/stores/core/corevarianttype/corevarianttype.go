@@ -22,16 +22,16 @@ const (
 )
 
 type Input struct {
-	CConstrainedText string     `db:"c_constrained_text" json:"c_constrained_text,omitempty" validate:"required,len=6,uppercase"`
+	CConstrainedText string     `db:"c_constrained_text" json:"c_constrained_text,omitzero" validate:"required,len=6,uppercase"`
 	CIp              netip.Addr `db:"c_ip" json:"c_ip,omitzero" validate:"required"` // don't use "ip" in validate: it requires subnet mask
-	CLongText        string     `db:"c_long_text" json:"c_long_text,omitempty" validate:"required,max=1000"`
-	CMoneyAmount     float64    `db:"c_money_amount" json:"c_money_amount,omitempty"`
-	CPercent         float64    `db:"c_percent" json:"c_percent,omitempty" validate:"min=0,max=10"`
+	CLongText        string     `db:"c_long_text" json:"c_long_text,omitzero" validate:"required,max=1000"`
+	CMoneyAmount     float64    `db:"c_money_amount" json:"c_money_amount,omitzero"`
+	CPercent         float64    `db:"c_percent" json:"c_percent,omitzero" validate:"min=0,max=10"`
 }
 
 type Model struct {
-	Id             int64            `db:"id" json:"id,omitempty"`
-	CLongTextShort string           `db:"c_long_text_short" json:"c_long_text_short,omitempty"`
+	Id             int64            `db:"id" json:"id,omitzero"`
+	CLongTextShort string           `db:"c_long_text_short" json:"c_long_text_short,omitzero"`
 	CreatedAt      lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt      lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

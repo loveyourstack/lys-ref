@@ -90,7 +90,7 @@ const { item, itemForm, saving, saveBtnLabel, showSaved, deleteItem, saveItem } 
     onCreate: (id: number) => { emit('create', id) },
     onDelete: () => { emit('delete') },
 
-    // onLoad: set default values for int and numeric since they are required but might be missing in JSON response due to omitempty in backend
+    // onLoad: set default values for int and numeric since they are required but might be missing in JSON response due to omitzero in backend
     onLoad: (id: number) => { 
       emit('load', id)
       item.value!.c_int = item.value?.c_int ?? 0

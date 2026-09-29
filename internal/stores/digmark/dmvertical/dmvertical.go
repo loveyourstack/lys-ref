@@ -21,12 +21,12 @@ const (
 )
 
 type Input struct {
-	Name string `db:"name" json:"name,omitempty" validate:"max=256"`
+	Name string `db:"name" json:"name,omitzero" validate:"max=256"`
 }
 
 type Model struct {
-	Id            int64            `db:"id" json:"id,omitempty"`
-	CampaignCount int              `db:"campaign_count" json:"campaign_count,omitempty"`
+	Id            int64            `db:"id" json:"id,omitzero"`
+	CampaignCount int              `db:"campaign_count" json:"campaign_count,omitzero"`
 	CreatedAt     lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt     lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

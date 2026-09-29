@@ -22,20 +22,20 @@ const (
 )
 
 type Input struct {
-	CategoryFk   int64  `db:"category_fk" json:"category_fk,omitempty" validate:"required"`
-	CompanyFk    int64  `db:"company_fk" json:"company_fk,omitempty" validate:"required"`
-	Name         string `db:"name" json:"name,omitempty" validate:"required,max=256"`
-	UnitsOnOrder int    `db:"units_on_order" json:"units_on_order,omitempty" validate:"gte=0"`
+	CategoryFk   int64  `db:"category_fk" json:"category_fk,omitzero" validate:"required"`
+	CompanyFk    int64  `db:"company_fk" json:"company_fk,omitzero" validate:"required"`
+	Name         string `db:"name" json:"name,omitzero" validate:"required,max=256"`
+	UnitsOnOrder int    `db:"units_on_order" json:"units_on_order" validate:"gte=0"`
 }
 
 type Model struct {
-	Id               int64            `db:"id" json:"id,omitempty"`
-	Category         string           `db:"category" json:"category,omitempty"`
-	Company          string           `db:"company" json:"company,omitempty"`
+	Id               int64            `db:"id" json:"id,omitzero"`
+	Category         string           `db:"category" json:"category,omitzero"`
+	Company          string           `db:"company" json:"company,omitzero"`
 	CreatedAt        lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	CreatedBy        string           `db:"created_by" json:"created_by,omitempty"`                   // assigned in Insert func
-	LastUserUpdateBy string           `db:"last_user_update_by" json:"last_user_update_by,omitempty"` // assigned in Update funcs
-	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                    // assigned by trigger
+	CreatedBy        string           `db:"created_by" json:"created_by,omitzero"`                   // assigned in Insert func
+	LastUserUpdateBy string           `db:"last_user_update_by" json:"last_user_update_by,omitzero"` // assigned in Update funcs
+	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"`                   // assigned by trigger
 	Input
 }
 

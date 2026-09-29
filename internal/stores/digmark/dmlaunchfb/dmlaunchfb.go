@@ -23,14 +23,14 @@ const (
 )
 
 type Input struct {
-	FanPage string `db:"fan_page" json:"fan_page,omitempty" validate:"required,max=256"`
+	FanPage string `db:"fan_page" json:"fan_page,omitzero" validate:"required,max=256"`
 	dmlaunch.Input
 }
 
 type Computed struct {
-	FbAccountId  string `db:"fb_account_id" json:"fb_account_id,omitempty"`   // set during preparation
-	FbCampaignId string `db:"fb_campaign_id" json:"fb_campaign_id,omitempty"` // set during processing
-	FbCreativeId string `db:"fb_creative_id" json:"fb_creative_id,omitempty"` // set during processing
+	FbAccountId  string `db:"fb_account_id" json:"fb_account_id,omitzero"`   // set during preparation
+	FbCampaignId string `db:"fb_campaign_id" json:"fb_campaign_id,omitzero"` // set during processing
+	FbCreativeId string `db:"fb_creative_id" json:"fb_creative_id,omitzero"` // set during processing
 	dmlaunch.Computed
 }
 

@@ -25,15 +25,15 @@ const (
 )
 
 type Model struct {
-	Department string       `db:"department" json:"department,omitempty"`
-	EmployeeId int64        `db:"employee_id" json:"employee_id,omitempty"`
+	Department string       `db:"department" json:"department,omitzero"`
+	EmployeeId int64        `db:"employee_id" json:"employee_id,omitzero"`
 	EventDate  lystype.Date `db:"event_date" json:"event_date,omitzero"`
-	EventType  string       `db:"event_type" json:"event_type,omitempty"`
-	FullName   string       `db:"full_name" json:"full_name,omitempty"`
-	JobTitle   string       `db:"job_title" json:"job_title,omitempty"`
-	Message    string       `db:"-" json:"message,omitempty"` // added in Select
-	Sex        string       `db:"sex" json:"sex,omitempty"`
-	Years      int          `db:"years" json:"years,omitempty"`
+	EventType  string       `db:"event_type" json:"event_type,omitzero"`
+	FullName   string       `db:"full_name" json:"full_name,omitzero"`
+	JobTitle   string       `db:"job_title" json:"job_title,omitzero"`
+	Message    string       `db:"-" json:"message,omitzero"` // added in Select
+	Sex        string       `db:"sex" json:"sex,omitzero"`
+	Years      int          `db:"years" json:"years,omitzero"`
 }
 
 var (

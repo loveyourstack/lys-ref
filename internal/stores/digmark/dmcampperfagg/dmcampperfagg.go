@@ -25,14 +25,14 @@ const (
 )
 
 type Model struct {
-	Id                 int64            `db:"id" json:"id,omitempty"`
-	CampaignFk         int64            `db:"campaign_fk" json:"campaign_fk,omitempty"`
+	Id                 int64            `db:"id" json:"id,omitzero"`
+	CampaignFk         int64            `db:"campaign_fk" json:"campaign_fk,omitzero"`
 	Clicks             int              `db:"clicks" json:"clicks"`
 	Conversions        int              `db:"conversions" json:"conversions"`
 	CreatedAt          lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	EndDay             lystype.Date     `db:"end_day" json:"end_day,omitzero"`
 	Impressions        int              `db:"impressions" json:"impressions"`
-	Period             perfperiod.Enum  `db:"period" json:"period,omitempty"`
+	Period             perfperiod.Enum  `db:"period" json:"period,omitzero"`
 	ProfitEur          float64          `db:"profit_eur" json:"profit_eur"`
 	ReturnOnInvestment float64          `db:"return_on_investment" json:"return_on_investment"`
 	RevenueEur         float64          `db:"revenue_eur" json:"revenue_eur"`

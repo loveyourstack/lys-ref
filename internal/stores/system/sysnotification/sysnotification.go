@@ -23,14 +23,14 @@ const (
 )
 
 type Input struct {
-	IsRead  bool   `db:"is_read" json:"is_read,omitempty"`
-	Message string `db:"message" json:"message,omitempty" validate:"required,max=1024"`
-	NotType string `db:"not_type" json:"not_type,omitempty" validate:"required,max=64"`
-	UserFk  int64  `db:"user_fk" json:"user_fk,omitempty" validate:"required"`
+	IsRead  bool   `db:"is_read" json:"is_read,omitzero"`
+	Message string `db:"message" json:"message,omitzero" validate:"required,max=1024"`
+	NotType string `db:"not_type" json:"not_type,omitzero" validate:"required,max=64"`
+	UserFk  int64  `db:"user_fk" json:"user_fk,omitzero" validate:"required"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input

@@ -26,16 +26,16 @@ const (
 )
 
 type Model struct {
-	Id               int64            `db:"id" json:"id,omitempty"`
+	Id               int64            `db:"id" json:"id,omitzero"`
 	CreatedAt        lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	Day              lystype.Date     `db:"day" json:"day,omitzero"`
-	FromCurrencyFk   int64            `db:"from_currency_fk" json:"from_currency_fk,omitempty"`
-	FromCurrencyCode string           `db:"from_currency_code" json:"from_currency_code,omitempty"`
-	NormalizedPerf   float64          `db:"normalized_perf" json:"normalized_perf,omitempty"`
-	Period           perfperiod.Enum  `db:"period" json:"period,omitempty"`
-	Rate             float64          `db:"rate" json:"rate,omitempty"`
-	ToCurrencyFk     int64            `db:"to_currency_fk" json:"to_currency_fk,omitempty"`
-	ToCurrencyCode   string           `db:"to_currency_code" json:"to_currency_code,omitempty"`
+	FromCurrencyFk   int64            `db:"from_currency_fk" json:"from_currency_fk,omitzero"`
+	FromCurrencyCode string           `db:"from_currency_code" json:"from_currency_code,omitzero"`
+	NormalizedPerf   float64          `db:"normalized_perf" json:"normalized_perf,omitzero"`
+	Period           perfperiod.Enum  `db:"period" json:"period,omitzero"`
+	Rate             float64          `db:"rate" json:"rate,omitzero"`
+	ToCurrencyFk     int64            `db:"to_currency_fk" json:"to_currency_fk,omitzero"`
+	ToCurrencyCode   string           `db:"to_currency_code" json:"to_currency_code,omitzero"`
 }
 
 var (

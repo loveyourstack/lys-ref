@@ -24,23 +24,23 @@ const (
 )
 
 type Input struct {
-	AllowMultipleSessions bool             `db:"allow_multiple_sessions" json:"allow_multiple_sessions,omitempty"`
+	AllowMultipleSessions bool             `db:"allow_multiple_sessions" json:"allow_multiple_sessions,omitzero"`
 	CreatedAt             lystype.Datetime `db:"created_at" json:"created_at,omitzero" validate:"required"`
-	Email                 string           `db:"email" json:"email,omitempty" validate:"required,email,max=256"`
+	Email                 string           `db:"email" json:"email,omitzero" validate:"required,email,max=256"`
 	ExpiresAt             lystype.Datetime `db:"expires_at" json:"expires_at,omitzero" validate:"required"`
-	FamilyName            string           `db:"family_name" json:"family_name,omitempty" validate:"required,max=256"`
-	ForcePasswordChange   bool             `db:"force_password_change" json:"force_password_change,omitempty"`
-	GivenName             string           `db:"given_name" json:"given_name,omitempty" validate:"required,max=256"`
-	GeoIpCountryIsoCode   string           `db:"geo_ip_country_iso_code" json:"geo_ip_country_iso_code,omitempty" validate:"required,len=2"`
-	GeoIpLocation         string           `db:"geo_ip_location" json:"geo_ip_location,omitempty" validate:"required,max=256"`
+	FamilyName            string           `db:"family_name" json:"family_name,omitzero" validate:"required,max=256"`
+	ForcePasswordChange   bool             `db:"force_password_change" json:"force_password_change,omitzero"`
+	GivenName             string           `db:"given_name" json:"given_name,omitzero" validate:"required,max=256"`
+	GeoIpCountryIsoCode   string           `db:"geo_ip_country_iso_code" json:"geo_ip_country_iso_code,omitzero" validate:"required,len=2"`
+	GeoIpLocation         string           `db:"geo_ip_location" json:"geo_ip_location,omitzero" validate:"required,max=256"`
 	Ip                    netip.Addr       `db:"ip" json:"ip,omitzero" validate:"required"`
 	LastAccessAt          lystype.Datetime `db:"last_access_at" json:"last_access_at,omitzero" validate:"required"`
-	ProfilePic            string           `db:"profile_pic" json:"profile_pic,omitempty" validate:"max=256"`
-	Roles                 []string         `db:"roles" json:"roles,omitempty" validate:"required"`
+	ProfilePic            string           `db:"profile_pic" json:"profile_pic,omitzero" validate:"max=256"`
+	Roles                 []string         `db:"roles" json:"roles,omitzero" validate:"required"`
 	Token                 string           `db:"token" json:"-" validate:"required,max=64"`
-	UserAgent             string           `db:"user_agent" json:"user_agent,omitempty" validate:"required,max=256"`
-	UserFk                int64            `db:"user_fk" json:"user_fk,omitempty" validate:"required"`
-	UserName              string           `db:"user_name" json:"user_name,omitempty" validate:"required,max=64"`
+	UserAgent             string           `db:"user_agent" json:"user_agent,omitzero" validate:"required,max=256"`
+	UserFk                int64            `db:"user_fk" json:"user_fk,omitzero" validate:"required"`
+	UserName              string           `db:"user_name" json:"user_name,omitzero" validate:"required,max=64"`
 }
 
 type Model struct {

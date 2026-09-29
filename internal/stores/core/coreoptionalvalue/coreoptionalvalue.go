@@ -22,20 +22,20 @@ const (
 )
 
 type Input struct {
-	CBool    bool         `db:"c_bool" json:"c_bool,omitempty"`
+	CBool    bool         `db:"c_bool" json:"c_bool,omitzero"`
 	CDateCet lystype.Date `db:"c_date_cet" json:"c_date_cet,omitzero"`
-	CEnum    string       `db:"c_enum" json:"c_enum,omitempty"`
-	CInt     int64        `db:"c_int" json:"c_int,omitempty"`
-	CNumeric float64      `db:"c_numeric" json:"c_numeric,omitempty"`
-	CTableFk int64        `db:"c_table_fk" json:"c_table_fk,omitempty"`
-	CText    string       `db:"c_text" json:"c_text,omitempty" validate:"max=256"`
+	CEnum    string       `db:"c_enum" json:"c_enum,omitzero"`
+	CInt     int64        `db:"c_int" json:"c_int,omitzero"`
+	CNumeric float64      `db:"c_numeric" json:"c_numeric,omitzero"`
+	CTableFk int64        `db:"c_table_fk" json:"c_table_fk,omitzero"`
+	CText    string       `db:"c_text" json:"c_text,omitzero" validate:"max=256"`
 	CTime    lystype.Time `db:"c_time" json:"c_time,omitzero"`
 }
 
 type Model struct {
-	Id        int64            `db:"id" json:"id,omitempty"`
+	Id        int64            `db:"id" json:"id,omitzero"`
 	CreatedAt lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
-	CTable    string           `db:"c_table" json:"c_table,omitempty"`
+	CTable    string           `db:"c_table" json:"c_table,omitzero"`
 	UpdatedAt lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
 	Input
 }
