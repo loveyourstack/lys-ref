@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
+	"github.com/loveyourstack/lys/lystree"
 	"github.com/loveyourstack/lys/lystype"
 )
 
@@ -86,18 +87,11 @@ func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error)
 	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
 }
 
-type TreeNode struct {
-	Model
-	Children []*TreeNode `json:"children,omitempty"`
-}
-
 // SelectTree returns all employees in a hierarchical tree structure based on ReportsTo.
-func (s Store) SelectTree(ctx context.Context) (roots []*TreeNode, err error) {
+func (s Store) SelectTree(ctx context.Context) (nodes []*lystree.Node[Model], err error) {
 
 	items, _, err := s.Select(ctx, lyspg.SelectParams{
-
-		// only select the fields needed for UI tree view
-		Fields: []string{
+		Fields: []string{ // only select the fields needed for UI tree view
 			"department",
 			"full_name",
 			"id",
@@ -112,36 +106,11 @@ func (s Store) SelectTree(ctx context.Context) (roots []*TreeNode, err error) {
 		return nil, fmt.Errorf("s.Select failed: %w", err)
 	}
 
-	empNodeMap := make(map[int64]*TreeNode, len(items))
-
-	// for each employee, create a TreeNode and store it in the map by id
-	for _, item := range items {
-		empNodeMap[item.Id] = &TreeNode{
-			Model:    item,
-			Children: []*TreeNode{},
-		}
-	}
-
-	// for each employee
-	for _, item := range items {
-
-		// root employees report to themselves
-		if item.ReportsTo == item.Id {
-			roots = append(roots, empNodeMap[item.Id])
-			continue
-		}
-
-		// find his parent node and add him as a child
-		if parent, ok := empNodeMap[item.ReportsTo]; ok {
-			parent.Children = append(parent.Children, empNodeMap[item.Id])
-		}
-	}
-
-	if len(roots) == 0 {
-		return nil, fmt.Errorf("no root employee found (an employee with reports_to = id)")
-	}
-
-	return roots, nil
+	return lystree.FromItems(
+		items,
+		func(item Model) int64 { return item.Id },
+		func(item Model) int64 { return item.ReportsTo },
+	)
 }
 
 func (s Store) Update(ctx context.Context, input Input, id int64) (err error) {

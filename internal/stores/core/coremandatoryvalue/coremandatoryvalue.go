@@ -45,10 +45,8 @@ type Input struct {
 	// don't use validate:"required": it will reject false
 	CBool bool `db:"c_bool" json:"c_bool,omitzero"`
 
-	// note use of omitzero rather than omitempty for lystype types
 	CDateCet lystype.Date `db:"c_date_cet" json:"c_date_cet,omitzero" validate:"required"`
-
-	CEnum string `db:"c_enum" json:"c_enum,omitzero" validate:"required"`
+	CEnum    string       `db:"c_enum" json:"c_enum,omitzero" validate:"required"`
 
 	// numbers: if zero is allowed, don't use validate:"required": it will reject 0
 	// use gte/lte rather than min/max to ensure correct validation message
