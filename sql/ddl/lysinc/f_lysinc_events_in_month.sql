@@ -1,5 +1,5 @@
-
-CREATE OR REPLACE FUNCTION lysinc.events_in_month (
+DROP FUNCTION IF EXISTS lysinc.f_events_in_month;
+CREATE OR REPLACE FUNCTION lysinc.f_events_in_month (
 	_date date
 )
 RETURNS TABLE (
@@ -11,8 +11,9 @@ RETURNS TABLE (
   job_title text,
   sex lysinc.sex,
   years int
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 SELECT
   l_d.name AS department,
@@ -42,6 +43,4 @@ FROM lysinc.employee l_e
 JOIN lysinc.department l_d ON l_e.department_fk = l_d.id
 WHERE EXTRACT(MONTH FROM l_e.join_date) = EXTRACT(MONTH FROM _date);
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;

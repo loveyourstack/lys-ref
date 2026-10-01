@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS digmark.campaign_optimizer;
-CREATE OR REPLACE FUNCTION digmark.campaign_optimizer (
+DROP FUNCTION IF EXISTS digmark.f_campaign_optimizer;
+CREATE OR REPLACE FUNCTION digmark.f_campaign_optimizer (
 	_period core.performance_period
 )
 RETURNS TABLE (
@@ -26,8 +26,9 @@ RETURNS TABLE (
   spend_eur numeric,
   trend numeric,
   volatility numeric
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 WITH agg_perf AS (
   SELECT *
@@ -64,6 +65,4 @@ JOIN geo.country geo_c ON dm_c.country_fk = geo_c.id
 JOIN digmark.vertical dm_v ON dm_c.vertical_fk = dm_v.id
 LEFT JOIN agg_perf ON dm_c.id = agg_perf.campaign_fk;
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;

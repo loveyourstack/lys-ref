@@ -122,7 +122,7 @@ func (s Store) createByPeriod(ctx context.Context, period perfperiod.Enum, fromC
 			"period", day, from_currency_fk, from_currency_code, normalized_perf, rate, to_currency_fk, to_currency_code)
 		SELECT 
 			'%s', perf_day, %d, '%s', normalized_perf, rate, to_currency_fk, to_currency_code
-		FROM ecb.normalized_xr_perf($1, $2, $3);`,
+		FROM ecb.f_normalized_xr_perf($1, $2, $3);`,
 		schemaName, tableName, period, fromCurrId, fromCurrCode)
 
 	cmd, err = tx.Exec(ctx, stmt, fromCurrId, daysBefore, daysAfter)

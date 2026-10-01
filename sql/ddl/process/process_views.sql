@@ -6,7 +6,7 @@ CREATE OR REPLACE VIEW process.v_flow AS
     proc_f.name,
     proc_f.params,
     COALESCE(array_to_string(ARRAY(
-      SELECT process.replace_dates(param)
+      SELECT process.f_replace_dates(param)
       FROM unnest(COALESCE(proc_f.params, ARRAY[]::text[])) AS param
     ), ' '), '') AS params_replaced,
     proc_f.updated_at,

@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE FUNCTION system.notify_change_trigger()
+CREATE OR REPLACE FUNCTION system.tf_notify_change()
   RETURNS trigger AS
 $BODY$
 DECLARE

@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS digmark.perf_summary;
-CREATE OR REPLACE FUNCTION digmark.perf_summary (
+DROP FUNCTION IF EXISTS digmark.f_perf_summary;
+CREATE OR REPLACE FUNCTION digmark.f_perf_summary (
 	_days_before int
 )
 RETURNS TABLE (
@@ -14,8 +14,9 @@ RETURNS TABLE (
   return_on_investment numeric,
   revenue_eur numeric,
   spend_eur numeric
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 SELECT
   current_date -$1 +1 AS start_day,
@@ -33,6 +34,4 @@ SELECT
 FROM digmark.campaign_performance dm_cp
 WHERE dm_cp.day_cet > current_date -$1;
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;

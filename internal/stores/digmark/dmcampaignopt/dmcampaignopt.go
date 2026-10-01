@@ -22,7 +22,7 @@ const (
 	name           string = "Digmark campaign optimizer"
 	schemaName     string = "digmark"
 	tableName      string = "campaign" // campaign table is base in setFunc: ok to use for rowcounts
-	setFuncName    string = "campaign_optimizer"
+	setFuncName    string = "f_campaign_optimizer"
 	defaultOrderBy string = "name"
 )
 

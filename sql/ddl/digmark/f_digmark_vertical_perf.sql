@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS digmark.vertical_perf;
-CREATE OR REPLACE FUNCTION digmark.vertical_perf (
+DROP FUNCTION IF EXISTS digmark.f_vertical_perf;
+CREATE OR REPLACE FUNCTION digmark.f_vertical_perf (
 	_days_before int
 )
 RETURNS TABLE (
@@ -14,8 +14,9 @@ RETURNS TABLE (
   revenue_eur numeric,
   spend_eur numeric,
   vertical text
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 SELECT
   current_date -$1 +1 AS start_day,
@@ -36,6 +37,4 @@ JOIN digmark.vertical dm_v ON dm_c.vertical_fk = dm_v.id
 WHERE dm_cp.day_cet > current_date -$1
 GROUP BY dm_v.name;
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;

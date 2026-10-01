@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS digmark.aggregate_campaign_perf;
-CREATE OR REPLACE FUNCTION digmark.aggregate_campaign_perf (
+DROP FUNCTION IF EXISTS digmark.f_aggregate_campaign_perf;
+CREATE OR REPLACE FUNCTION digmark.f_aggregate_campaign_perf (
 	_days_before int,
 	_days_after int
 )
@@ -15,8 +15,9 @@ RETURNS TABLE (
   spend_eur numeric,
   trend numeric,
   volatility numeric
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 WITH day_seq AS (
   -- for each campaign, first day is 1, second day is 2, etc. Used for slope func below
@@ -45,6 +46,5 @@ JOIN day_seq USING (campaign_fk, day_cet)
 WHERE dm_cp.day_cet BETWEEN current_date +$1 AND current_date +$2
 GROUP BY dm_cp.campaign_fk;
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;
+

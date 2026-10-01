@@ -41,7 +41,7 @@ func (s Store) SelectDailyTrend(ctx context.Context, days int) ([]DailyTrend, er
 		days = 7
 	}
 
-	stmt := fmt.Sprintf(`SELECT %s, day FROM %s.daily_trend($1) ORDER BY day;`, strings.Join(metricDbCols.Values(), ", "), schemaName)
+	stmt := fmt.Sprintf(`SELECT %s, day FROM %s.f_daily_trend($1) ORDER BY day;`, strings.Join(metricDbCols.Values(), ", "), schemaName)
 	return lyspg.SelectT[DailyTrend](ctx, s.Db, stmt, days)
 }
 
@@ -67,7 +67,7 @@ type PerfSummary struct {
 func (s Store) SelectPerfSummary(ctx context.Context, period aggperiod.Enum) (PerfSummary, error) {
 	daysBack := aggperiod.DaysBefore(period)
 
-	stmt := fmt.Sprintf(`SELECT %s, active_campaigns, end_day, start_day FROM %s.perf_summary($1);`, strings.Join(metricDbCols.Values(), ", "), schemaName)
+	stmt := fmt.Sprintf(`SELECT %s, active_campaigns, end_day, start_day FROM %s.f_perf_summary($1);`, strings.Join(metricDbCols.Values(), ", "), schemaName)
 	rows, err := lyspg.SelectT[PerfSummary](ctx, s.Db, stmt, daysBack)
 	if err != nil {
 		return PerfSummary{}, fmt.Errorf("lyspg.SelectT failed: %w", err)
@@ -96,7 +96,7 @@ func (s Store) SelectVerticalPerformance(ctx context.Context, period aggperiod.E
 	}
 
 	stmt := fmt.Sprintf(`SELECT %s, end_day, start_day, vertical
-		FROM %s.vertical_perf($1) ORDER BY %s DESC;`, strings.Join(metricDbCols.Values(), ", "), schemaName, orderCol)
+		FROM %s.f_vertical_perf($1) ORDER BY %s DESC;`, strings.Join(metricDbCols.Values(), ", "), schemaName, orderCol)
 
 	return lyspg.SelectT[VerticalPerf](ctx, s.Db, stmt, daysBack)
 }
@@ -125,7 +125,7 @@ func (s Store) SelectTopCampaigns(ctx context.Context, period aggperiod.Enum, or
 	}
 
 	stmt := fmt.Sprintf(`SELECT %s, campaign, end_day, start_day, manager, vertical
-		FROM %s.top_campaigns($1) ORDER BY %s DESC LIMIT $2;`, strings.Join(metricDbCols.Values(), ", "), schemaName, orderCol)
+		FROM %s.f_top_campaigns($1) ORDER BY %s DESC LIMIT $2;`, strings.Join(metricDbCols.Values(), ", "), schemaName, orderCol)
 
 	return lyspg.SelectT[TopCampaigns](ctx, s.Db, stmt, daysBack, limit)
 }

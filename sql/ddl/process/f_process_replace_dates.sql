@@ -1,11 +1,16 @@
-DROP FUNCTION IF EXISTS process.replace_dates;
-CREATE OR REPLACE FUNCTION process.replace_dates(_input text) RETURNS text AS
+DROP FUNCTION IF EXISTS process.f_replace_dates;
+CREATE OR REPLACE FUNCTION process.f_replace_dates(_input text) RETURNS text AS
 $BODY$
 DECLARE
 	v_ret text;
 	v_match text[];
 	v_token text;
 	v_offset integer;
+
+/*
+not using SQL-standard format: no dependencies to track, and uses regex and PG-specific functions
+*/
+
 BEGIN
 	v_ret = _input;
 

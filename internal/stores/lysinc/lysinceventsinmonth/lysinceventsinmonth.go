@@ -20,7 +20,7 @@ import (
 const (
 	name           string = "Lys Inc employees"
 	schemaName     string = "lysinc"
-	setFuncName    string = "events_in_month"
+	setFuncName    string = "f_events_in_month"
 	defaultOrderBy string = "full_name"
 )
 

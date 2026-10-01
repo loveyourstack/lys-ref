@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS digmark.daily_trend;
-CREATE OR REPLACE FUNCTION digmark.daily_trend (
+DROP FUNCTION IF EXISTS digmark.f_daily_trend;
+CREATE OR REPLACE FUNCTION digmark.f_daily_trend (
 	_days_before int
 )
 RETURNS TABLE (
@@ -12,8 +12,9 @@ RETURNS TABLE (
   return_on_investment numeric,
   revenue_eur numeric,
   spend_eur numeric
-) AS
-$BODY$
+)
+LANGUAGE sql
+BEGIN ATOMIC
 
 SELECT
   dm_cp.day_cet AS day,
@@ -30,6 +31,4 @@ FROM digmark.campaign_performance dm_cp
 WHERE dm_cp.day_cet > current_date -$1
 GROUP BY dm_cp.day_cet;
 
-$BODY$
-  LANGUAGE sql VOLATILE
-  COST 100;
+END;

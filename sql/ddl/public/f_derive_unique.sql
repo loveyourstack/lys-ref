@@ -1,5 +1,5 @@
-
-CREATE OR REPLACE FUNCTION derive_unique(_schema text, _table text, _tar_col text, _id bigint, VARIADIC _parts text[]) RETURNS text AS
+DROP FUNCTION IF EXISTS f_derive_unique;
+CREATE OR REPLACE FUNCTION f_derive_unique(_schema text, _table text, _tar_col text, _id bigint, VARIADIC _parts text[]) RETURNS text AS
 $BODY$
 DECLARE
 	v_ret text = '';
@@ -37,5 +37,5 @@ $BODY$
 
 /*
 select * from hr.employee
-select * from derive_unique('hr', 'employee', 'given_name', 10, 'Michaela')
+select * from f_derive_unique('hr', 'employee', 'given_name', 10, 'Michaela')
 */

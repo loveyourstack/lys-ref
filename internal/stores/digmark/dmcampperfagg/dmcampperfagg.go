@@ -102,7 +102,7 @@ func (s Store) createByPeriod(ctx context.Context, period perfperiod.Enum, daysB
 		SELECT 
 			campaign_fk, '%s', start_day, end_day,
 			clicks, conversions, impressions, revenue_eur, spend_eur, trend, volatility
-		FROM digmark.aggregate_campaign_perf($1, $2);`,
+		FROM digmark.f_aggregate_campaign_perf($1, $2);`,
 		schemaName, tableName, period)
 
 	cmd, err = tx.Exec(ctx, stmt, daysBefore, daysAfter)
