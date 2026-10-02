@@ -147,6 +147,8 @@ github.com/loveyourstack/lys v0.3.58 h1:ZiUAFiW8sYJNeVeK7vz+OXEVyy+klTOFUyhxQGiB
 github.com/loveyourstack/lys v0.3.58/go.mod h1:SffQcA3U+P2zOc5sWuOwPXXicQPJaKzjhQBwSiM1lV0=
 github.com/loveyourstack/lys v0.3.59 h1:yxuHWr5WXgRD5UDoxNS3iBHgSzwIsvFb84a82xgFxfs=
 github.com/loveyourstack/lys v0.3.59/go.mod h1:SffQcA3U+P2zOc5sWuOwPXXicQPJaKzjhQBwSiM1lV0=
+github.com/loveyourstack/lys v0.3.60 h1:8h5WHmdJDPaVOR5WvRqTAxxcsB4Htz98jxogzdI9rS4=
+github.com/loveyourstack/lys v0.3.60/go.mod h1:SffQcA3U+P2zOc5sWuOwPXXicQPJaKzjhQBwSiM1lV0=
 github.com/mark3labs/mcp-go v0.55.0 h1:lJfz2aoctiwK+sI991+uIYwmKNIBciI+O7zsyDsa4U8=
 github.com/mark3labs/mcp-go v0.55.0/go.mod h1:+8WclSK1ZUweCP3hvktSji8n8ABG/95QaEkeVE/Uwas=
 github.com/peterbourgon/diskv/v3 v3.0.1 h1:x06SQA46+PKIUftmEujdwSEpIx8kR+M9eLYsUxeYveU=

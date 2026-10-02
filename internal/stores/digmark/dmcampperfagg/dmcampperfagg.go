@@ -7,9 +7,10 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys-ref/internal/enums/perfperiod"
-	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
 	"github.com/loveyourstack/lys/lystype"
@@ -60,65 +61,71 @@ type Store struct {
 
 func (s Store) Create(ctx context.Context, logger *slog.Logger) error {
 
-	for _, p := range perfperiod.All {
+	/*
+	  shows how to capture and handle PostgreSQL notices using pgx for demonstration purposes
+	  would normally be used in a more complex SQL process than this
+	*/
 
-		daysBefore, daysAfter, err := perfperiod.Days(p, time.Now())
-		if err != nil {
-			return fmt.Errorf("perfperiod.Days failed: %w", err)
-		}
+	var notices []*pgconn.Notice
 
-		rowsDeleted, rowsInserted, err := s.createByPeriod(ctx, p, daysBefore, daysAfter)
-		if err != nil {
-			return fmt.Errorf("s.createByPeriod failed for period %v: %w", p, err)
-		}
-		logger.Debug("created camp perf agg records", slog.String("period", p.String()), slog.Int64("rowsDeleted", rowsDeleted), slog.Int64("rowsInserted", rowsInserted))
+	// copy the store connection config and set a notice handler
+	cc := s.Db.Config().ConnConfig.Copy()
+	cc.OnNotice = func(conn *pgconn.PgConn, notice *pgconn.Notice) {
+		notices = append(notices, notice)
 	}
 
-	return nil
-}
-
-func (s Store) createByPeriod(ctx context.Context, period perfperiod.Enum, daysBefore, daysAfter int) (rowsDeleted, rowsInserted int64, err error) {
-
-	// begin tx
-	tx, err := s.Db.Begin(ctx)
+	// make a connection using the modified config
+	conn, err := pgx.ConnectConfig(ctx, cc)
 	if err != nil {
-		return 0, 0, fmt.Errorf("s.Db.Begin failed: %w", err)
+		return fmt.Errorf("pgx.ConnectConfig failed: %w", err)
+	}
+	defer conn.Close(ctx)
+
+	// begin tx to ensure periods are aggregated atomically
+	// this is ok because p_aggregate_campaign_perf_by_period has no tx control of its own
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("conn.Begin failed: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
-	// delete existing records for the period
-	stmt := fmt.Sprintf(`DELETE FROM %s.%s WHERE period = $1;`, schemaName, tableName)
+	// capture Now() outside loop to ensure consistent reference time for all periods
+	baseTime := time.Now()
 
-	cmd, err := tx.Exec(ctx, stmt, period)
+	// prepare tx statement outside loop
+	_, err = tx.Prepare(ctx, "agg_camp_perf", fmt.Sprintf("CALL %s.p_aggregate_campaign_perf_by_period($1, $2, $3)", schemaName))
 	if err != nil {
-		return 0, 0, lyserr.Db{Err: fmt.Errorf("tx.Exec (delete) failed: %w", err), Stmt: stmt}
+		return fmt.Errorf("tx.Prepare failed: %w", err)
 	}
-	rowsDeleted = cmd.RowsAffected()
 
-	// insert new records
-	stmt = fmt.Sprintf(`INSERT INTO %s.%s (
-			campaign_fk, "period", start_day, end_day,
-			clicks, conversions, impressions, revenue_eur, spend_eur, trend, volatility)
-		SELECT 
-			campaign_fk, '%s', start_day, end_day,
-			clicks, conversions, impressions, revenue_eur, spend_eur, trend, volatility
-		FROM digmark.f_aggregate_campaign_perf($1, $2);`,
-		schemaName, tableName, period)
+	for _, p := range perfperiod.All {
 
-	cmd, err = tx.Exec(ctx, stmt, daysBefore, daysAfter)
-	if err != nil {
-		fmt.Println(stmt)
-		return 0, 0, lyserr.Db{Err: fmt.Errorf("tx.Exec (insert) failed: %w", err), Stmt: stmt}
+		daysBefore, daysAfter, err := perfperiod.Days(p, baseTime)
+		if err != nil {
+			return fmt.Errorf("perfperiod.Days failed on period: %s: %w", p, err)
+		}
+
+		// call prepared statement for this period using tx from notice-handling connection
+		_, err = tx.Exec(ctx, "agg_camp_perf", p, daysBefore, daysAfter)
+		if err != nil {
+			return fmt.Errorf("tx.Exec failed on period: %s: %w", p, err)
+		}
 	}
-	rowsInserted = cmd.RowsAffected()
 
 	// success: commit tx
 	err = tx.Commit(ctx)
 	if err != nil {
-		return 0, 0, fmt.Errorf("tx.Commit failed: %w", err)
+		return fmt.Errorf("tx.Commit failed: %w", err)
 	}
 
-	return rowsDeleted, rowsInserted, nil
+	// print notices
+	for _, notice := range notices {
+		logger.Debug("camp perf agg",
+			slog.String("severity", notice.Severity),
+			slog.String("message", notice.Message))
+	}
+
+	return nil
 }
 
 func (s Store) GetName() string {
