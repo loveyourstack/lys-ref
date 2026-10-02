@@ -51,10 +51,18 @@ type LatestPerfSummary struct {
 	TotalSpend   float64      `db:"total_spend" json:"total_spend"`
 }
 
+const latestPerfSummaryMv = "mv_latest_perf_summary"
+
 // SelectLatestPerfSummary returns a summary of daily revenue and spend performance for the most recent week.
 func (s Store) SelectLatestPerfSummary(ctx context.Context) (items []LatestPerfSummary, err error) {
-	stmt := fmt.Sprintf(`SELECT day, total_spend, total_revenue FROM %s.v_latest_perf_summary;`, schemaName)
+	stmt := fmt.Sprintf(`SELECT day, total_spend, total_revenue FROM %s.%s;`, schemaName, latestPerfSummaryMv)
 	return lyspg.SelectT[LatestPerfSummary](ctx, s.Db, stmt)
+}
+
+func (s Store) RefreshLatestPerfSummary(ctx context.Context) error {
+	stmt := fmt.Sprintf(`REFRESH MATERIALIZED VIEW %s.%s;`, schemaName, latestPerfSummaryMv)
+	_, err := s.Db.Exec(ctx, stmt)
+	return err
 }
 
 type PerfSummary struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampperf"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampperfagg"
 	"github.com/spf13/cobra"
 )
@@ -18,10 +19,18 @@ func AggCampPerfCmd(cliApp *cliapp.App) *cobra.Command {
 
 			defer cliApp.Db.Close()
 
+			// aggregate camp perf
 			aggCampPerfStore := dmcampperfagg.Store{Db: cliApp.Db}
 			err = aggCampPerfStore.Create(context.Background(), cliApp.Logger)
 			if err != nil {
 				return fmt.Errorf("aggCampPerfStore.Create failed: %w", err)
+			}
+
+			// refresh latest perf summary
+			campPerfStore := dmcampperf.Store{Db: cliApp.Db}
+			err = campPerfStore.RefreshLatestPerfSummary(context.Background())
+			if err != nil {
+				return fmt.Errorf("campPerfStore.RefreshLatestPerfSummary failed: %w", err)
 			}
 
 			return nil
