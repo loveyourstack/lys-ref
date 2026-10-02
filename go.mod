@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/loveyourstack/connectors v0.3.23
-	github.com/loveyourstack/lys v0.3.60
+	github.com/loveyourstack/lys v0.3.61
 	github.com/mark3labs/mcp-go v0.55.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
@@ -22,6 +22,8 @@ require (
 	golang.org/x/sync v0.21.0
 	google.golang.org/genai v1.63.0
 )
+
+replace github.com/loveyourstack/lys => /home/james/src/lys
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
