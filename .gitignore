@@ -1,6 +1,6 @@
 /bin
 /prompts
-/sql/migrations
+/sql/migrations/*/
 /srvconfigs
 
 /*config.toml
