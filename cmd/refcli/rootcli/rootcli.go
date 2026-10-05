@@ -53,6 +53,7 @@ var cliApp *cliapp.App
 func addSubCommands() {
 	rootCmd.AddCommand(CreateDbCmd(cliApp))
 	rootCmd.AddCommand(GenHashCmd(cliApp))
+	rootCmd.AddCommand(EnhanceMigrationFileCmd(cliApp))
 	rootCmd.AddCommand(ResetDbDataCmd(cliApp))
 	rootCmd.AddCommand(SleepCmd(cliApp))
 
