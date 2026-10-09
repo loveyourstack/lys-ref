@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/refrpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+message DmVerticalInput {
+  string name = 1;
+}
+
+/* Note: Input columns are repeated in model message below.
+ * Embedded message is allowed, but when marshaled to JSON, input is not flattened.
+*/
+message DmVertical {
+  int64 id = 1;
+  int32 campaign_count = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  
+  string name = 5;
+}

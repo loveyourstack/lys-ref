@@ -37,8 +37,8 @@ type Model struct {
 	CountryIso2      string           `db:"country_iso2" json:"country_iso2,omitzero"`
 	CreatedAt        lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
 	PerformanceRange string           `db:"performance_range" json:"performance_range,omitzero"`
-	Vertical         string           `db:"vertical" json:"vertical,omitzero"`
 	UpdatedAt        lystype.Datetime `db:"updated_at" json:"updated_at,omitzero"` // assigned by trigger
+	Vertical         string           `db:"vertical" json:"vertical,omitzero"`
 	Input
 }
 

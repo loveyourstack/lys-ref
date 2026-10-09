@@ -69,7 +69,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		ctx := r.Context()
 
 		// allow skipping auth in dev env by using a dummy user
-		if srvApp.Config.General.Env == appenv.Dev && !srvApp.Config.API.UseAuthentication {
+		if srvApp.Config.General.Env == appenv.Dev && !srvApp.Config.Api.UseAuthentication {
 			reqUserInfo := ReqUserInfo{
 				Roles:    []sysrole.Enum{sysrole.Tech},
 				UserId:   1,

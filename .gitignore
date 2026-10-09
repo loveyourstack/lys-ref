@@ -1,4 +1,8 @@
 /bin
+
+/cmd/refrpcsrv/pb/*
+!/cmd/refrpcsrv/pb/README.md
+
 /prompts
 /sql/migrations/*/
 /srvconfigs

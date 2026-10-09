@@ -99,7 +99,8 @@ type Config struct {
 	DbServerUser lyspgdb.User
 	DbCliUser    lyspgdb.User
 	DbLisUser    lyspgdb.User
-	API          api
+	Api          api
+	RpcApi       api
 	UI           ui
 	Developer    developer
 	McpServer    McpServer
@@ -130,8 +131,8 @@ func (c *Config) LoadFromFile(configFilePath string) (err error) {
 
 	// enforce dev-only rules
 	if c.General.Env != appenv.Dev {
-		if !c.API.UseAuthentication {
-			return fmt.Errorf("config validation failed: API.UseAuthentication cannot be false when General.Env is not dev")
+		if !c.Api.UseAuthentication {
+			return fmt.Errorf("config validation failed: Api.UseAuthentication cannot be false when General.Env is not dev")
 		}
 	}
 

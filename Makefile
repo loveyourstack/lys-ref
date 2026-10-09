@@ -29,7 +29,7 @@ resetdbdata: cli
 
 ###########################################################
 
-# ref server start
+# http server start
 .PHONY: srv
 srv:
 	go run ./cmd/refsrv
@@ -43,6 +43,22 @@ suppsrv:
 .PHONY: lis
 lis:
 	go run ./cmd/reflis
+
+#######
+
+PROTO_FILES := $(shell find . -type f -name '*.proto' -not -path './.git/*')
+
+# generate protobuf code (using @ to suppress Make's command echo, since list of files can be long. stdout and stderr are unaffected)
+.PHONY: genpb
+genpb:
+	@protoc --go_out=. --go_opt=module=github.com/loveyourstack/lys-ref \
+		--go-grpc_out=. --go-grpc_opt=module=github.com/loveyourstack/lys-ref \
+		$(PROTO_FILES)
+
+# gRPC server start
+.PHONY: rpcsrv
+rpcsrv: genpb
+	go run ./cmd/refrpcsrv
 
 ###########################################################
 

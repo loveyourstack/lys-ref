@@ -154,7 +154,7 @@ func main() {
 	timedHttpHandler := http.TimeoutHandler(rawHandler, 5*time.Second, "request timed out")
 
 	srv := &http.Server{
-		Addr: ":" + srvApp.Config.API.Port,
+		Addr: ":" + srvApp.Config.Api.Port,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			// http.TimeoutHandler does not implement the http.Hijacker interface, which is needed for WebSocket upgrades
@@ -209,7 +209,7 @@ func main() {
 	// --------------------------------
 
 	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting refsrv on port: %s", srvApp.Config.API.Port)
+	startupMsg := fmt.Sprintf("starting refsrv on port: %s", srvApp.Config.Api.Port)
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}

@@ -33,6 +33,10 @@ password = ""
 port = "8000"
 useAuthentication = true # may only be false if env = dev above
 
+[rpcApi]
+port = "8001"
+useAuthentication = false # may only be false if env = dev above
+
 [ui]
 url = "http://localhost:3000"
 

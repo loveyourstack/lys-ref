@@ -89,7 +89,7 @@ func main() {
 
 	// create HTTP server using srvApp's routes and handlers
 	srv := &http.Server{
-		Addr:              ":" + srvApp.Config.API.Port,
+		Addr:              ":" + srvApp.Config.Api.Port,
 		Handler:           http.TimeoutHandler(srvApp.getRouter(), 5*time.Second, "request timed out"),
 		IdleTimeout:       time.Second,
 		MaxHeaderBytes:    1024 * 1024, // 1 MB
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting suppsrv on port: %s", srvApp.Config.API.Port)
+	startupMsg := fmt.Sprintf("starting suppsrv on port: %s", srvApp.Config.Api.Port)
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}

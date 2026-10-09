@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/refrpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+message DmCampaignInput {
+  int64 country_fk = 1;
+  double daily_budget_eur = 2;
+  bool is_active = 3;
+  string manager = 4;
+  string name = 5;
+  int64 vertical_fk = 6;
+}
+
+message DmCampaign {
+  int64 id = 1;
+  string country = 2;
+  string country_iso2 = 3;
+  google.protobuf.Timestamp created_at = 4;
+  string performance_range = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  string vertical = 7;
+  
+  int64 country_fk = 8;
+  double daily_budget_eur = 9;
+  bool is_active = 10;
+  string manager = 11;
+  string name = 12;
+  int64 vertical_fk = 13;
+}
