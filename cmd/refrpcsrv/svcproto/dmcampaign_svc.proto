@@ -12,7 +12,6 @@ import "internal/stores/digmark/dmcampaign/dmcampaign.proto";
 message ListCampaignsRequest {}
 message ListCampaignsResponse { repeated DmCampaign items = 1; }
 message GetCampaignRequest { int64 id = 1; }
-message CreateCampaignRequest { DmCampaignInput input = 1; }
 message UpdateCampaignRequest {
   int64 id = 1;
   DmCampaignInput input = 2;
@@ -23,7 +22,7 @@ message DeleteCampaignRequest { int64 id = 1; }
 service CampaignService {
   rpc List(ListCampaignsRequest)     returns (ListCampaignsResponse);
   rpc Get(GetCampaignRequest)        returns (DmCampaign);
-  rpc Create(CreateCampaignRequest)  returns (DmCampaign);   // body = DmCampaignInput
+  rpc Create(DmCampaignInput)        returns (DmCampaign);
   rpc Update(UpdateCampaignRequest)  returns (DmCampaign);   // id + DmCampaignInput + field_mask
   rpc Delete(DeleteCampaignRequest)  returns (google.protobuf.Empty);
 }

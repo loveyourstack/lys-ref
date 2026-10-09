@@ -12,7 +12,6 @@ import "internal/stores/digmark/dmvertical/dmvertical.proto";
 message ListVerticalsRequest {}
 message ListVerticalsResponse { repeated DmVertical items = 1; }
 message GetVerticalRequest { int64 id = 1; }
-message CreateVerticalRequest { DmVerticalInput input = 1; }
 message UpdateVerticalRequest {
   int64 id = 1;
   DmVerticalInput input = 2;
@@ -23,7 +22,7 @@ message DeleteVerticalRequest { int64 id = 1; }
 service VerticalService {
   rpc List(ListVerticalsRequest)     returns (ListVerticalsResponse);
   rpc Get(GetVerticalRequest)        returns (DmVertical);
-  rpc Create(CreateVerticalRequest)  returns (DmVertical);   // body = DmVerticalInput
+  rpc Create(DmVerticalInput)        returns (DmVertical);
   rpc Update(UpdateVerticalRequest)  returns (DmVertical);   // id + DmVerticalInput + field_mask
   rpc Delete(DeleteVerticalRequest)  returns (google.protobuf.Empty);
 }

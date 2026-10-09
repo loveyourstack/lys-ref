@@ -11,7 +11,9 @@ message DmVerticalInput {
 }
 
 /* Note: Input columns are repeated in model message below.
- * Embedded message is allowed, but when marshaled to JSON, input is not flattened.
+ * An embedded message is allowed, but in reponse, embedded message can't be flattened, so repetition is preferred.
+ *
+ * Note2: In response, timestamps are converted to UTC.
 */
 message DmVertical {
   int64 id = 1;

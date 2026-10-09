@@ -10,6 +10,8 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/cmd/refrpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
+	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -63,13 +65,17 @@ func main() {
 
 	// create gRPC server
 	var opts []grpc.ServerOption
+
+	// use interceptor to distinguish between expected client errors and unexpected server errors
+	opts = append(opts, grpc.UnaryInterceptor(rpcSrvApp.unaryErrorInterceptor))
+
 	grpcServer := grpc.NewServer(opts...)
 
 	// register services
-	pb.RegisterCampaignServiceServer(grpcServer, &campaignServer{gRpcServerApplication: rpcSrvApp})
-	pb.RegisterVerticalServiceServer(grpcServer, &verticalServer{gRpcServerApplication: rpcSrvApp})
+	pb.RegisterCampaignServiceServer(grpcServer, &campaignServer{gRpcServerApplication: rpcSrvApp, store: dmcampaign.Store{Db: rpcSrvApp.Db}})
+	pb.RegisterVerticalServiceServer(grpcServer, &verticalServer{gRpcServerApplication: rpcSrvApp, store: dmvertical.Store{Db: rpcSrvApp.Db}})
 
-	// if debug mode is enabled, enable server reflection
+	// if debug mode is enabled, enable server reflection for test clients
 	if conf.General.Debug {
 		reflection.Register(grpcServer)
 	}
