@@ -7,12 +7,14 @@ import (
 	"log"
 	"net"
 
+	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
-	"github.com/loveyourstack/lys-ref/cmd/refrpcsrv/pb"
+	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys/lyspgdb"
+	"github.com/loveyourstack/lys/lysset"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -41,6 +43,17 @@ func main() {
 	// create rRPC server app
 	rpcSrvApp := &gRpcServerApplication{
 		Application: app,
+	}
+
+	// attach Get options
+	rpcSrvApp.GetOptions, err = lys.FillGetOptions(lys.GetOptions{
+		FieldsParamName:  "fields",
+		PageParamName:    "page",
+		PerPageParamName: "per_page",
+		SortParamName:    "sorts",
+	})
+	if err != nil {
+		log.Fatalf("initialization: failed to fill GetOptions: %s", err.Error())
 	}
 
 	// connect to db and assign pool to rpcSrvApp
@@ -72,8 +85,13 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	// register services
-	pb.RegisterCampaignServiceServer(grpcServer, &campaignServer{gRpcServerApplication: rpcSrvApp, store: dmcampaign.Store{Db: rpcSrvApp.Db}})
-	pb.RegisterVerticalServiceServer(grpcServer, &verticalServer{gRpcServerApplication: rpcSrvApp, store: dmvertical.Store{Db: rpcSrvApp.Db}})
+	campStore := dmcampaign.Store{Db: rpcSrvApp.Db}
+	pb.RegisterCampaignServiceServer(grpcServer, &campaignServer{gRpcServerApplication: rpcSrvApp, store: campStore,
+		dbNames: lysset.FromSlice(campStore.GetPlan().DbNames()), jsonKeyDbNameMap: campStore.GetPlan().JsonKeyDbNameMap()})
+
+	vertStore := dmvertical.Store{Db: rpcSrvApp.Db}
+	pb.RegisterVerticalServiceServer(grpcServer, &verticalServer{gRpcServerApplication: rpcSrvApp, store: vertStore,
+		dbNames: lysset.FromSlice(vertStore.GetPlan().DbNames()), jsonKeyDbNameMap: vertStore.GetPlan().JsonKeyDbNameMap()})
 
 	// if debug mode is enabled, enable server reflection for test clients
 	if conf.General.Debug {

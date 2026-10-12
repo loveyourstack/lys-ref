@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/loveyourstack/lys-ref/cmd/refrpcsrv/pb";
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
 
 package pb;
 

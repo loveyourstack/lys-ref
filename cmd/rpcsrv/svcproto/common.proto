@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
+
+package pb;
+
+message DeleteByIdRequest { int64 id = 1; }
+message GetByIdRequest { int64 id = 1; }
+message EmptyRequest {}
+message ListRequest {
+    repeated string fields = 1;
+    int32 page = 2;
+    int32 per_page = 3;
+    repeated string sorts = 4;
+    map<string, string> filters = 5;
+}

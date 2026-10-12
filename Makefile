@@ -58,7 +58,7 @@ genpb:
 # gRPC server start
 .PHONY: rpcsrv
 rpcsrv: genpb
-	go run ./cmd/refrpcsrv
+	go run ./cmd/rpcsrv
 
 ###########################################################
 
