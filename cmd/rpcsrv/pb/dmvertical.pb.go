@@ -71,6 +71,7 @@ func (x *DmVerticalInput) GetName() string {
 // Note: Input columns are repeated in model message below.
 // An embedded message is allowed, but in reponse, embedded message can't be flattened, so repetition is preferred.
 //
+// Note: In response, int64 is marshaled to string to avoid precision loss in clients which can't represent int64 properly.
 // Note2: In response, timestamps are converted to UTC.
 type DmVertical struct {
 	state         protoimpl.MessageState

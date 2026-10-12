@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
@@ -17,6 +18,7 @@ import (
 	"github.com/loveyourstack/lys/lysset"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func main() {
@@ -86,11 +88,11 @@ func main() {
 
 	// register services
 	campStore := dmcampaign.Store{Db: rpcSrvApp.Db}
-	pb.RegisterCampaignServiceServer(grpcServer, &campaignServer{gRpcServerApplication: rpcSrvApp, store: campStore,
+	pb.RegisterDmCampaignSvcServer(grpcServer, &dmCampSrv{gRpcServerApplication: rpcSrvApp, store: campStore,
 		dbNames: lysset.FromSlice(campStore.GetPlan().DbNames()), jsonKeyDbNameMap: campStore.GetPlan().JsonKeyDbNameMap()})
 
 	vertStore := dmvertical.Store{Db: rpcSrvApp.Db}
-	pb.RegisterVerticalServiceServer(grpcServer, &verticalServer{gRpcServerApplication: rpcSrvApp, store: vertStore,
+	pb.RegisterDmVerticalSvcServer(grpcServer, &dmVertServer{gRpcServerApplication: rpcSrvApp, store: vertStore,
 		dbNames: lysset.FromSlice(vertStore.GetPlan().DbNames()), jsonKeyDbNameMap: vertStore.GetPlan().JsonKeyDbNameMap()})
 
 	// if debug mode is enabled, enable server reflection for test clients
@@ -102,4 +104,21 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func toPbMetadata(m lys.GetMetadata, itemCount int) *pb.GetMetadata {
+	return &pb.GetMetadata{
+		Count:                 int32(itemCount),
+		TotalCount:            m.TotalCount,
+		TotalCountIsEstimated: m.TotalCountIsEstimated,
+	}
+}
+
+// tsToPb converts a time.Time to a protobuf Timestamp, returning nil if the time is zero.
+// Use this to ensure that zero-value timestamps are omitted when using the fields param.
+func tsToPb(t time.Time) *timestamppb.Timestamp {
+	if t.IsZero() {
+		return nil
+	}
+	return timestamppb.New(t)
 }

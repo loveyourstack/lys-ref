@@ -20,7 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DeleteByIdRequest struct {
+type DeleteByIdReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -28,8 +28,8 @@ type DeleteByIdRequest struct {
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
-func (x *DeleteByIdRequest) Reset() {
-	*x = DeleteByIdRequest{}
+func (x *DeleteByIdReq) Reset() {
+	*x = DeleteByIdReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -37,13 +37,13 @@ func (x *DeleteByIdRequest) Reset() {
 	}
 }
 
-func (x *DeleteByIdRequest) String() string {
+func (x *DeleteByIdReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteByIdRequest) ProtoMessage() {}
+func (*DeleteByIdReq) ProtoMessage() {}
 
-func (x *DeleteByIdRequest) ProtoReflect() protoreflect.Message {
+func (x *DeleteByIdReq) ProtoReflect() protoreflect.Message {
 	mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,19 +55,19 @@ func (x *DeleteByIdRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteByIdRequest.ProtoReflect.Descriptor instead.
-func (*DeleteByIdRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteByIdReq.ProtoReflect.Descriptor instead.
+func (*DeleteByIdReq) Descriptor() ([]byte, []int) {
 	return file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DeleteByIdRequest) GetId() int64 {
+func (x *DeleteByIdReq) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type GetByIdRequest struct {
+type GetByIdReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -75,8 +75,8 @@ type GetByIdRequest struct {
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
-func (x *GetByIdRequest) Reset() {
-	*x = GetByIdRequest{}
+func (x *GetByIdReq) Reset() {
+	*x = GetByIdReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -84,13 +84,13 @@ func (x *GetByIdRequest) Reset() {
 	}
 }
 
-func (x *GetByIdRequest) String() string {
+func (x *GetByIdReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetByIdRequest) ProtoMessage() {}
+func (*GetByIdReq) ProtoMessage() {}
 
-func (x *GetByIdRequest) ProtoReflect() protoreflect.Message {
+func (x *GetByIdReq) ProtoReflect() protoreflect.Message {
 	mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -102,26 +102,30 @@ func (x *GetByIdRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetByIdRequest.ProtoReflect.Descriptor instead.
-func (*GetByIdRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetByIdReq.ProtoReflect.Descriptor instead.
+func (*GetByIdReq) Descriptor() ([]byte, []int) {
 	return file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetByIdRequest) GetId() int64 {
+func (x *GetByIdReq) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type EmptyRequest struct {
+type GetMetadata struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Count                 int32 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	TotalCount            int64 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	TotalCountIsEstimated bool  `protobuf:"varint,3,opt,name=total_count_is_estimated,json=totalCountIsEstimated,proto3" json:"total_count_is_estimated,omitempty"`
 }
 
-func (x *EmptyRequest) Reset() {
-	*x = EmptyRequest{}
+func (x *GetMetadata) Reset() {
+	*x = GetMetadata{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -129,13 +133,13 @@ func (x *EmptyRequest) Reset() {
 	}
 }
 
-func (x *EmptyRequest) String() string {
+func (x *GetMetadata) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EmptyRequest) ProtoMessage() {}
+func (*GetMetadata) ProtoMessage() {}
 
-func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
+func (x *GetMetadata) ProtoReflect() protoreflect.Message {
 	mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -147,25 +151,40 @@ func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
-func (*EmptyRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetMetadata.ProtoReflect.Descriptor instead.
+func (*GetMetadata) Descriptor() ([]byte, []int) {
 	return file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP(), []int{2}
 }
 
-type ListRequest struct {
+func (x *GetMetadata) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *GetMetadata) GetTotalCount() int64 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *GetMetadata) GetTotalCountIsEstimated() bool {
+	if x != nil {
+		return x.TotalCountIsEstimated
+	}
+	return false
+}
+
+type EmptyReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Fields  []string          `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
-	Page    int32             `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	PerPage int32             `protobuf:"varint,3,opt,name=per_page,json=perPage,proto3" json:"per_page,omitempty"`
-	Sorts   []string          `protobuf:"bytes,4,rep,name=sorts,proto3" json:"sorts,omitempty"`
-	Filters map[string]string `protobuf:"bytes,5,rep,name=filters,proto3" json:"filters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
-func (x *ListRequest) Reset() {
-	*x = ListRequest{}
+func (x *EmptyReq) Reset() {
+	*x = EmptyReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -173,13 +192,13 @@ func (x *ListRequest) Reset() {
 	}
 }
 
-func (x *ListRequest) String() string {
+func (x *EmptyReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListRequest) ProtoMessage() {}
+func (*EmptyReq) ProtoMessage() {}
 
-func (x *ListRequest) ProtoReflect() protoreflect.Message {
+func (x *EmptyReq) ProtoReflect() protoreflect.Message {
 	mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -191,40 +210,84 @@ func (x *ListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListRequest.ProtoReflect.Descriptor instead.
-func (*ListRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use EmptyReq.ProtoReflect.Descriptor instead.
+func (*EmptyReq) Descriptor() ([]byte, []int) {
 	return file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ListRequest) GetFields() []string {
+type ListReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Fields  []string          `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
+	Page    int32             `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PerPage int32             `protobuf:"varint,3,opt,name=per_page,json=perPage,proto3" json:"per_page,omitempty"`
+	Sorts   []string          `protobuf:"bytes,4,rep,name=sorts,proto3" json:"sorts,omitempty"`
+	Filters map[string]string `protobuf:"bytes,5,rep,name=filters,proto3" json:"filters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *ListReq) Reset() {
+	*x = ListReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListReq) ProtoMessage() {}
+
+func (x *ListReq) ProtoReflect() protoreflect.Message {
+	mi := &file_cmd_rpcsrv_svcproto_common_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListReq.ProtoReflect.Descriptor instead.
+func (*ListReq) Descriptor() ([]byte, []int) {
+	return file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListReq) GetFields() []string {
 	if x != nil {
 		return x.Fields
 	}
 	return nil
 }
 
-func (x *ListRequest) GetPage() int32 {
+func (x *ListReq) GetPage() int32 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListRequest) GetPerPage() int32 {
+func (x *ListReq) GetPerPage() int32 {
 	if x != nil {
 		return x.PerPage
 	}
 	return 0
 }
 
-func (x *ListRequest) GetSorts() []string {
+func (x *ListReq) GetSorts() []string {
 	if x != nil {
 		return x.Sorts
 	}
 	return nil
 }
 
-func (x *ListRequest) GetFilters() map[string]string {
+func (x *ListReq) GetFilters() map[string]string {
 	if x != nil {
 		return x.Filters
 	}
@@ -236,30 +299,37 @@ var File_cmd_rpcsrv_svcproto_common_proto protoreflect.FileDescriptor
 var file_cmd_rpcsrv_svcproto_common_proto_rawDesc = []byte{
 	0x0a, 0x20, 0x63, 0x6d, 0x64, 0x2f, 0x72, 0x70, 0x63, 0x73, 0x72, 0x76, 0x2f, 0x73, 0x76, 0x63,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x22, 0x23, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
-	0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x20, 0x0a, 0x0e, 0x47,
-	0x65, 0x74, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x0e, 0x0a,
-	0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xde, 0x01,
-	0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a,
-	0x06, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x66,
-	0x69, 0x65, 0x6c, 0x64, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x05, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x70, 0x65, 0x72,
-	0x5f, 0x70, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70, 0x65, 0x72,
-	0x50, 0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x6f, 0x72, 0x74, 0x73, 0x18, 0x04, 0x20,
-	0x03, 0x28, 0x09, 0x52, 0x05, 0x73, 0x6f, 0x72, 0x74, 0x73, 0x12, 0x36, 0x0a, 0x07, 0x66, 0x69,
-	0x6c, 0x74, 0x65, 0x72, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x70, 0x62,
-	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x46, 0x69, 0x6c,
-	0x74, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x66, 0x69, 0x6c, 0x74, 0x65,
-	0x72, 0x73, 0x1a, 0x3a, 0x0a, 0x0c, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74,
-	0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x30,
-	0x5a, 0x2e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x6f, 0x76,
-	0x65, 0x79, 0x6f, 0x75, 0x72, 0x73, 0x74, 0x61, 0x63, 0x6b, 0x2f, 0x6c, 0x79, 0x73, 0x2d, 0x72,
-	0x65, 0x66, 0x2f, 0x63, 0x6d, 0x64, 0x2f, 0x72, 0x70, 0x63, 0x73, 0x72, 0x76, 0x2f, 0x70, 0x62,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x22, 0x1f, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
+	0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x1c, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x42, 0x79,
+	0x49, 0x64, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x7d, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x74, 0x6f,
+	0x74, 0x61, 0x6c, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x37, 0x0a, 0x18, 0x74,
+	0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x73, 0x5f, 0x65, 0x73,
+	0x74, 0x69, 0x6d, 0x61, 0x74, 0x65, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x15, 0x74,
+	0x6f, 0x74, 0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x73, 0x45, 0x73, 0x74, 0x69, 0x6d,
+	0x61, 0x74, 0x65, 0x64, 0x22, 0x0a, 0x0a, 0x08, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71,
+	0x22, 0xd6, 0x01, 0x0a, 0x07, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06,
+	0x66, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x66, 0x69,
+	0x65, 0x6c, 0x64, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x5f,
+	0x70, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70, 0x65, 0x72, 0x50,
+	0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x6f, 0x72, 0x74, 0x73, 0x18, 0x04, 0x20, 0x03,
+	0x28, 0x09, 0x52, 0x05, 0x73, 0x6f, 0x72, 0x74, 0x73, 0x12, 0x32, 0x0a, 0x07, 0x66, 0x69, 0x6c,
+	0x74, 0x65, 0x72, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x70, 0x62, 0x2e,
+	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x2e, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x45,
+	0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x1a, 0x3a, 0x0a,
+	0x0c, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a,
+	0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12,
+	0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x30, 0x5a, 0x2e, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x6f, 0x76, 0x65, 0x79, 0x6f, 0x75, 0x72,
+	0x73, 0x74, 0x61, 0x63, 0x6b, 0x2f, 0x6c, 0x79, 0x73, 0x2d, 0x72, 0x65, 0x66, 0x2f, 0x63, 0x6d,
+	0x64, 0x2f, 0x72, 0x70, 0x63, 0x73, 0x72, 0x76, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -274,16 +344,17 @@ func file_cmd_rpcsrv_svcproto_common_proto_rawDescGZIP() []byte {
 	return file_cmd_rpcsrv_svcproto_common_proto_rawDescData
 }
 
-var file_cmd_rpcsrv_svcproto_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_cmd_rpcsrv_svcproto_common_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_cmd_rpcsrv_svcproto_common_proto_goTypes = []any{
-	(*DeleteByIdRequest)(nil), // 0: pb.DeleteByIdRequest
-	(*GetByIdRequest)(nil),    // 1: pb.GetByIdRequest
-	(*EmptyRequest)(nil),      // 2: pb.EmptyRequest
-	(*ListRequest)(nil),       // 3: pb.ListRequest
-	nil,                       // 4: pb.ListRequest.FiltersEntry
+	(*DeleteByIdReq)(nil), // 0: pb.DeleteByIdReq
+	(*GetByIdReq)(nil),    // 1: pb.GetByIdReq
+	(*GetMetadata)(nil),   // 2: pb.GetMetadata
+	(*EmptyReq)(nil),      // 3: pb.EmptyReq
+	(*ListReq)(nil),       // 4: pb.ListReq
+	nil,                   // 5: pb.ListReq.FiltersEntry
 }
 var file_cmd_rpcsrv_svcproto_common_proto_depIdxs = []int32{
-	4, // 0: pb.ListRequest.filters:type_name -> pb.ListRequest.FiltersEntry
+	5, // 0: pb.ListReq.filters:type_name -> pb.ListReq.FiltersEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -298,7 +369,7 @@ func file_cmd_rpcsrv_svcproto_common_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_cmd_rpcsrv_svcproto_common_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteByIdRequest); i {
+			switch v := v.(*DeleteByIdReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -310,7 +381,7 @@ func file_cmd_rpcsrv_svcproto_common_proto_init() {
 			}
 		}
 		file_cmd_rpcsrv_svcproto_common_proto_msgTypes[1].Exporter = func(v any, i int) any {
-			switch v := v.(*GetByIdRequest); i {
+			switch v := v.(*GetByIdReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -322,7 +393,7 @@ func file_cmd_rpcsrv_svcproto_common_proto_init() {
 			}
 		}
 		file_cmd_rpcsrv_svcproto_common_proto_msgTypes[2].Exporter = func(v any, i int) any {
-			switch v := v.(*EmptyRequest); i {
+			switch v := v.(*GetMetadata); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -334,7 +405,19 @@ func file_cmd_rpcsrv_svcproto_common_proto_init() {
 			}
 		}
 		file_cmd_rpcsrv_svcproto_common_proto_msgTypes[3].Exporter = func(v any, i int) any {
-			switch v := v.(*ListRequest); i {
+			switch v := v.(*EmptyReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cmd_rpcsrv_svcproto_common_proto_msgTypes[4].Exporter = func(v any, i int) any {
+			switch v := v.(*ListReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -352,7 +435,7 @@ func file_cmd_rpcsrv_svcproto_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_cmd_rpcsrv_svcproto_common_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

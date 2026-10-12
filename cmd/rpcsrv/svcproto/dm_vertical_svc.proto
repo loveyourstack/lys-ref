@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+import "cmd/rpcsrv/svcproto/common.proto";
+import "internal/stores/digmark/dmvertical/dmvertical.proto";
+
+message ListDmVerticalsResp { 
+  repeated DmVertical   data = 1;
+  optional GetMetadata  metadata = 2;
+}
+
+message UpdateDmVerticalReq {
+  int64                     id = 1;
+  DmVerticalInput           input = 2;
+  google.protobuf.FieldMask field_mask = 3;
+}
+
+service DmVerticalSvc {
+  rpc List(ListReq)                 returns (ListDmVerticalsResp);
+  rpc Get(GetByIdReq)               returns (DmVertical);
+  rpc Create(DmVerticalInput)       returns (DmVertical);
+  rpc Update(UpdateDmVerticalReq)   returns (DmVertical);   // id + DmVerticalInput + field_mask
+  rpc Delete(DeleteByIdReq)         returns (google.protobuf.Empty);
+}
