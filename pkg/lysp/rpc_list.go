@@ -54,8 +54,8 @@ func RpcList[modelT, pbModelT, pbRespT any](
 		data = append(data, toPb(item))
 	}
 
-	// when using fields param, Postman still shows fields with zero values, but using protojson.Marshal
-	// shows the actual response. Use this to check that fields are omitted correctly.
+	// when using fields param, Postman by default still shows fields with zero values. Either change the Postman setting,
+	// or use protojson.Marshal below to show the actual response to check that fields are omitted correctly.
 	//b, _ := protojson.Marshal(data)
 	//fmt.Println(string(b))
 

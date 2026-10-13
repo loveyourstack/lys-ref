@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
@@ -17,7 +16,6 @@ import (
 	"github.com/loveyourstack/lys/lyspgdb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func main() {
@@ -111,13 +109,4 @@ func toPbMetadata(m lys.GetMetadata, itemCount int) *pb.GetMetadata {
 		TotalCount:            m.TotalCount,
 		TotalCountIsEstimated: m.TotalCountIsEstimated,
 	}
-}
-
-// tsToPb converts a time.Time to a protobuf Timestamp, returning nil if the time is zero.
-// Use this to ensure that zero-value timestamps are omitted when using the fields param.
-func tsToPb(t time.Time) *timestamppb.Timestamp {
-	if t.IsZero() {
-		return nil
-	}
-	return timestamppb.New(t)
 }
