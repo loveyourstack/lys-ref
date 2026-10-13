@@ -15,7 +15,6 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys/lyspgdb"
-	"github.com/loveyourstack/lys/lysset"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -89,11 +88,11 @@ func main() {
 	// register services
 	campStore := dmcampaign.Store{Db: rpcSrvApp.Db}
 	pb.RegisterDmCampaignSvcServer(grpcServer, &dmCampSrv{gRpcServerApplication: rpcSrvApp, store: campStore,
-		dbNames: lysset.FromSlice(campStore.GetPlan().DbNames()), jsonKeyDbNameMap: campStore.GetPlan().JsonKeyDbNameMap()})
+		jsonKeyDbNameMap: campStore.GetPlan().JsonKeyDbNameMap()})
 
 	vertStore := dmvertical.Store{Db: rpcSrvApp.Db}
 	pb.RegisterDmVerticalSvcServer(grpcServer, &dmVertServer{gRpcServerApplication: rpcSrvApp, store: vertStore,
-		dbNames: lysset.FromSlice(vertStore.GetPlan().DbNames()), jsonKeyDbNameMap: vertStore.GetPlan().JsonKeyDbNameMap()})
+		jsonKeyDbNameMap: vertStore.GetPlan().JsonKeyDbNameMap()})
 
 	// if debug mode is enabled, enable server reflection for test clients
 	if conf.General.Debug {

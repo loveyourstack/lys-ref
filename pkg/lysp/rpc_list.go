@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// iRpcListable is a store that can be used by RpcList.
+// in lys: use iGetable
 type iRpcListable[T any] interface {
 	GetPlan() lysmeta.Plan
 	Select(ctx context.Context, params lyspg.SelectParams) (items []T, unpagedCount lyspg.TotalCount, err error)

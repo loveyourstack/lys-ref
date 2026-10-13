@@ -2,19 +2,12 @@ package main
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"slices"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys-ref/pkg/lysp"
-	"github.com/loveyourstack/lys/lysset"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -24,48 +17,19 @@ type dmVertServer struct {
 	*gRpcServerApplication
 
 	store            dmvertical.Store
-	dbNames          lysset.Set[string]
 	jsonKeyDbNameMap map[string]string
 }
 
 func (s *dmVertServer) Create(ctx context.Context, req *pb.DmVerticalInput) (*pb.DmVertical, error) {
-
-	input := dmvertical.Input{
-		Name: req.Name,
-	}
-
-	item, err := s.store.InsertSelect(ctx, input)
-	if err != nil {
-		return nil, fmt.Errorf("s.store.InsertSelect failed: %w", err)
-	}
-
-	return dmVerticalToPb(item), nil
+	return lysp.RpcCreate(ctx, req, s.store, dmVerticalPbToInput, dmVerticalToPb)
 }
 
 func (s *dmVertServer) Delete(ctx context.Context, req *pb.DeleteByIdReq) (*emptypb.Empty, error) {
-
-	err := s.store.Delete(ctx, req.Id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, status.Error(codes.NotFound, "vertical not found")
-		}
-		return nil, fmt.Errorf("s.store.Delete failed: %w", err)
-	}
-
-	return &emptypb.Empty{}, nil
+	return lysp.RpcDelete(ctx, req.Id, s.store)
 }
 
 func (s *dmVertServer) Get(ctx context.Context, req *pb.GetByIdReq) (*pb.DmVertical, error) {
-
-	item, err := s.store.SelectById(ctx, req.Id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, status.Error(codes.NotFound, "vertical not found")
-		}
-		return nil, fmt.Errorf("s.store.SelectById failed: %w", err)
-	}
-
-	return dmVerticalToPb(item), nil
+	return lysp.RpcGetById(ctx, req.Id, s.store, dmVerticalToPb)
 }
 
 func (s *dmVertServer) List(ctx context.Context, req *pb.ListReq) (*pb.ListDmVerticalsResp, error) {
@@ -76,38 +40,13 @@ func (s *dmVertServer) List(ctx context.Context, req *pb.ListReq) (*pb.ListDmVer
 }
 
 func (s *dmVertServer) Update(ctx context.Context, req *pb.UpdateDmVerticalReq) (*pb.DmVertical, error) {
+	return lysp.RpcUpdate(ctx, req.Input, req.FieldMask, req.Id, s.jsonKeyDbNameMap, s.store, dmVerticalToPb)
+}
 
-	if req.Input == nil {
-		return nil, status.Error(codes.InvalidArgument, "input is required")
+func dmVerticalPbToInput(pb *pb.DmVerticalInput) dmvertical.Input {
+	return dmvertical.Input{
+		Name: pb.Name,
 	}
-	input := req.Input
-
-	if req.FieldMask == nil {
-		return nil, status.Error(codes.InvalidArgument, "field mask is required")
-	}
-	paths := req.FieldMask.Paths
-
-	assMap := map[string]any{}
-
-	if slices.Contains(paths, "name") {
-		assMap["name"] = input.Name
-	}
-
-	if len(assMap) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "no fields to update")
-	}
-
-	err := s.store.UpdatePartial(ctx, assMap, req.Id)
-	if err != nil {
-		return nil, fmt.Errorf("s.store.UpdatePartial failed: %w", err)
-	}
-
-	item, err := s.store.SelectById(ctx, req.Id)
-	if err != nil {
-		return nil, fmt.Errorf("s.store.SelectById failed: %w", err)
-	}
-
-	return dmVerticalToPb(item), nil
 }
 
 func dmVerticalToPb(m dmvertical.Model) *pb.DmVertical {
