@@ -9,9 +9,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
-	"github.com/loveyourstack/lys-ref/pkg/lysp"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
+	"github.com/loveyourstack/lys/lysrpc"
 	"github.com/loveyourstack/lys/lystype"
 )
 
@@ -49,8 +49,8 @@ var (
 )
 
 // dmcampaign is available via RPC: create store/protobuff struct conversion funcs at startup
-var ModelToPbFunc = lysp.NewToPb[Model, pb.DmCampaign]()
-var InputFromPbFunc = lysp.NewFromPb[Input, pb.DmCampaignInput]()
+var ModelToPbFunc = lysrpc.NewToPb[Model, pb.DmCampaign]()
+var InputFromPbFunc = lysrpc.NewFromPb[Input, pb.DmCampaignInput]()
 
 func init() {
 	var err error

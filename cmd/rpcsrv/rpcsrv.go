@@ -7,12 +7,12 @@ import (
 	"log"
 	"net"
 
-	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmcampaign"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// attach Get options
-	rpcSrvApp.GetOptions, err = lys.FillGetOptions(lys.GetOptions{
+	rpcSrvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
 		FieldsParamName:  "fields",
 		PageParamName:    "page",
 		PerPageParamName: "per_page",
@@ -103,7 +103,7 @@ func main() {
 	}
 }
 
-func toPbMetadata(m lys.GetMetadata, itemCount int) *pb.GetMetadata {
+func toPbMetadata(m lysapi.SelectMetadata, itemCount int) *pb.GetMetadata {
 	return &pb.GetMetadata{
 		Count:                 int32(itemCount),
 		TotalCount:            m.TotalCount,

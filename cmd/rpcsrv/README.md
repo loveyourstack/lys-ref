@@ -9,8 +9,7 @@ gRPC server.
 sudo apt install -y protobuf-compiler
 ```
 
-### Add Go packages needing for running gRPC server
+### Add Go package needed for running gRPC server
 ```shell
 go get google.golang.org/grpc
-go get google.golang.org/protobuf
 ```

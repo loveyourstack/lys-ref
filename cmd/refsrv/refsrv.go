@@ -23,7 +23,6 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/connectors/tedb/tedbapi"
 	"github.com/loveyourstack/connectors/tedb/tedbsvc"
-	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/connectors/awsbedrockapi"
 	"github.com/loveyourstack/lys-ref/internal/connectors/gemapi"
@@ -40,6 +39,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lysws"
@@ -73,7 +73,7 @@ func main() {
 	// create http server app
 	srvApp := &httpServerApplication{
 		Application: app,
-		PostOptions: lys.FillPostOptions(lys.PostOptions{}), // use defaults
+		PostOptions: lysapi.FillPostOptions(lysapi.PostOptions{}), // use defaults
 
 		AuthedRateLimits:   lysauth.NewAppRateLimits(5, 20, 1*time.Hour),  // 5 rps with burst of 20. Buckets expire after 1 hour of inactivity
 		UnauthedRateLimits: lysauth.NewAppRateLimits(0.5, 3, 1*time.Hour), // ~1 every 2s with burst of 3
@@ -83,7 +83,7 @@ func main() {
 	go srvApp.runRateLimitCleanup(ctx, 30*time.Minute)
 
 	// attach Get options
-	srvApp.GetOptions, err = lys.FillGetOptions(lys.GetOptions{
+	srvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
 		CsvDelimiter: '|',
 	}) // use defaults for others
 	if err != nil {

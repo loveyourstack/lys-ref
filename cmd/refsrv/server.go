@@ -21,6 +21,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lysws"
 )
@@ -28,8 +29,8 @@ import (
 type httpServerApplication struct {
 	*cmd.Application
 
-	GetOptions  lys.GetOptions
-	PostOptions lys.PostOptions
+	GetOptions  lysapi.GetOptions
+	PostOptions lysapi.PostOptions
 
 	// auth-related
 	LoginAttempts    *lysauth.AppLoginAttempts

@@ -10,14 +10,15 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 )
 
 type httpServerApplication struct {
 	*cmd.Application
 
-	GetOptions  lys.GetOptions
-	PostOptions lys.PostOptions
+	GetOptions  lysapi.GetOptions
+	PostOptions lysapi.PostOptions
 
 	// add login attempts so that suppsrv can use rejectBlockedIp middleware
 	// at the moment, suppsrv restart is needed to refresh the internal blocked IPs. In real app, could add a db listener

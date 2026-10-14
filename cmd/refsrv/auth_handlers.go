@@ -12,6 +12,7 @@ import (
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyserr"
 	"golang.org/x/crypto/bcrypt"
@@ -79,7 +80,7 @@ func (srvApp *httpServerApplication) authGetLoginAttempts(w http.ResponseWriter,
 	resp := lys.StdResponse{
 		Status: lys.ReqSucceeded,
 		Data:   srvApp.LoginAttempts.ListByCreatedAt(false),
-		GetMetadata: &lys.GetMetadata{
+		GetMetadata: &lysapi.SelectMetadata{
 			Count:      srvApp.LoginAttempts.Count(),
 			TotalCount: int64(srvApp.LoginAttempts.Count()),
 		},
@@ -93,7 +94,7 @@ func (srvApp *httpServerApplication) authGetSessions(w http.ResponseWriter, r *h
 	resp := lys.StdResponse{
 		Status: lys.ReqSucceeded,
 		Data:   srvApp.Sessions.ListByLastAccessAt(false),
-		GetMetadata: &lys.GetMetadata{
+		GetMetadata: &lysapi.SelectMetadata{
 			Count:      srvApp.Sessions.Count(),
 			TotalCount: int64(srvApp.Sessions.Count()),
 		},

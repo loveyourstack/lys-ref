@@ -12,12 +12,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssrvreq"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 )
@@ -48,7 +48,7 @@ func main() {
 	// create http server app
 	srvApp := &httpServerApplication{
 		Application: app,
-		PostOptions: lys.FillPostOptions(lys.PostOptions{}), // use defaults
+		PostOptions: lysapi.FillPostOptions(lysapi.PostOptions{}), // use defaults
 
 		RateLimits: lysauth.NewAppRateLimits(2, 5, 1*time.Hour), // 2 rps with burst of 5
 	}
@@ -57,7 +57,7 @@ func main() {
 	go srvApp.runRateLimitCleanup(ctx, 30*time.Minute)
 
 	// attach Get options
-	srvApp.GetOptions, err = lys.FillGetOptions(lys.GetOptions{}) // use defaults
+	srvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{}) // use defaults
 	if err != nil {
 		log.Fatalf("initialization: failed to fill GetOptions: %s", err.Error())
 	}

@@ -7,9 +7,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
-	"github.com/loveyourstack/lys-ref/pkg/lysp"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
+	"github.com/loveyourstack/lys/lysrpc"
 	"github.com/loveyourstack/lys/lystype"
 )
 
@@ -38,8 +38,8 @@ var (
 	plan, inputPlan lysmeta.Plan
 )
 
-var ModelToPbFunc = lysp.NewToPb[Model, pb.DmVertical]()
-var InputFromPbFunc = lysp.NewFromPb[Input, pb.DmVerticalInput]()
+var ModelToPbFunc = lysrpc.NewToPb[Model, pb.DmVertical]()
+var InputFromPbFunc = lysrpc.NewFromPb[Input, pb.DmVerticalInput]()
 
 func init() {
 	var err error

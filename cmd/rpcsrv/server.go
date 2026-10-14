@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys/lysapi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,7 +17,7 @@ import (
 type gRpcServerApplication struct {
 	*cmd.Application
 
-	GetOptions lys.GetOptions
+	GetOptions lysapi.GetOptions
 }
 
 func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req any,

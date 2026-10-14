@@ -73,6 +73,8 @@ func (x *DmVerticalInput) GetName() string {
 //
 // Note: In response, int64 is marshaled to string to avoid precision loss in clients which can't represent int64 properly.
 // Note2: In response, timestamps are converted to UTC.
+//
+// Currently not generating these files. The field numbers must not change once in production, so some manual intervention might be needed.
 type DmVertical struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
