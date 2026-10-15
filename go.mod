@@ -15,7 +15,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/loveyourstack/connectors v0.3.23
-	github.com/loveyourstack/lys v0.3.64
+	github.com/loveyourstack/lys v0.3.65
 	github.com/mark3labs/mcp-go v0.55.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1

@@ -20,7 +20,7 @@ message DmVerticalInput {
 */
 message DmVertical {
   int64 id = 1;
-  int32 campaign_count = 2;
+  int64 campaign_count = 2; // use int64 for Go int
   google.protobuf.Timestamp created_at = 3;
   google.protobuf.Timestamp updated_at = 4;
   

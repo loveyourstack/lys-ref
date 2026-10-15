@@ -1,7 +1,7 @@
 /bin
 
-/cmd/refrpcsrv/pb/*
-!/cmd/refrpcsrv/pb/README.md
+/cmd/rpcsrv/pb/*
+!/cmd/rpcsrv/pb/README.md
 
 /prompts
 /sql/migrations/*/
