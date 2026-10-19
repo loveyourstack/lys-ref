@@ -19,3 +19,5 @@ CREATE OR REPLACE VIEW digmark.v_campaign AS
   JOIN geo.country geo_c ON dm_c.country_fk = geo_c.id
   JOIN digmark.vertical dm_v ON dm_c.vertical_fk = dm_v.id
   LEFT JOIN (SELECT campaign_fk, MIN(day_cet) AS min_day, MAX(day_cet) AS max_day FROM digmark.campaign_performance GROUP BY campaign_fk) dm_cp ON dm_c.id = dm_cp.campaign_fk;
+
+GRANT SELECT ON digmark.v_campaign TO lysref_rpc;

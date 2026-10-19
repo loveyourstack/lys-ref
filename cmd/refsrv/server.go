@@ -87,9 +87,9 @@ func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handl
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// get remote IP
-		ip, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -122,9 +122,9 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		}
 
 		// get remote ip
-		remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -184,9 +184,9 @@ func (srvApp *httpServerApplication) logUnauthedRequest(next http.Handler) http.
 		ctx := r.Context()
 
 		// get remote ip
-		remoteHostIP, err := lysauth.GetRemoteHostIP(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logUnauthedRequest: lysauth.GetRemoteHostIP failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logUnauthedRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 

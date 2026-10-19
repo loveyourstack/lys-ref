@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+message SysRpcSessionInput {
+    bool allow_multiple_sessions = 1;
+    google.protobuf.Timestamp created_at = 2;
+    string email = 3;
+    google.protobuf.Timestamp expires_at = 4;
+    string family_name = 5;
+    bool force_password_change = 6;
+    string given_name = 7;
+    string geo_ip_country_iso_code = 8;
+    string geo_ip_location = 9;
+    string ip = 10;
+    google.protobuf.Timestamp last_access_at = 11;
+    string profile_pic = 12;
+    repeated string roles = 13;
+    string token = 14;
+    string user_agent = 15;
+    int64 user_fk = 16;
+    string user_name = 17;
+}
+
+message SysRpcSession {
+    bool allow_multiple_sessions = 1;
+    google.protobuf.Timestamp created_at = 2;
+    string email = 3;
+    google.protobuf.Timestamp expires_at = 4;
+    string family_name = 5;
+    bool force_password_change = 6;
+    string given_name = 7;
+    string geo_ip_country_iso_code = 8;
+    string geo_ip_location = 9;
+    string ip = 10;
+    google.protobuf.Timestamp last_access_at = 11;
+    string profile_pic = 12;
+    repeated string roles = 13;
+    string token = 14;
+    string user_agent = 15;
+    int64 user_fk = 16;
+    string user_name = 17;
+}

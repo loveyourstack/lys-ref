@@ -51,6 +51,9 @@ GRANT USAGE ON SCHEMA digmark TO lysref_mcp;
 ALTER DEFAULT PRIVILEGES IN SCHEMA digmark GRANT SELECT ON TABLES TO lysref_mcp;
 ALTER DEFAULT PRIVILEGES IN SCHEMA digmark GRANT USAGE, SELECT ON SEQUENCES TO lysref_mcp;
 
+-- rpcsrv currently only has a couple of endpoints: user doesn't need default privileges
+GRANT USAGE ON SCHEMA digmark TO lysref_rpc;
+
 ----------------
 
 CREATE SCHEMA ecb AUTHORIZATION lysref_owner;
@@ -120,6 +123,8 @@ GRANT USAGE ON SCHEMA maxmind TO lysref_cli;
 ALTER DEFAULT PRIVILEGES IN SCHEMA maxmind GRANT SELECT, UPDATE, INSERT, DELETE ON TABLES TO lysref_cli;
 ALTER DEFAULT PRIVILEGES IN SCHEMA maxmind GRANT USAGE, SELECT ON SEQUENCES TO lysref_cli;
 
+GRANT USAGE ON SCHEMA maxmind TO lysref_rpc;
+
 ----------------
 
 CREATE SCHEMA process AUTHORIZATION lysref_owner;
@@ -170,6 +175,7 @@ COMMENT ON SCHEMA system IS 'shortname: sys';
 GRANT USAGE ON SCHEMA system TO lysref_server;
 GRANT USAGE ON SCHEMA system TO lysref_cli;
 GRANT USAGE ON SCHEMA system TO lysref_lis;
+GRANT USAGE ON SCHEMA system TO lysref_rpc;
 
 ----------------
 

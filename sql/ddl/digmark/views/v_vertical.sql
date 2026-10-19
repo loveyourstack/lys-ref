@@ -8,3 +8,5 @@ CREATE OR REPLACE VIEW digmark.v_vertical AS
     COALESCE(dm_c.cnt, 0) AS campaign_count
   FROM digmark.vertical dm_v
   LEFT JOIN (SELECT vertical_fk, count(*) AS cnt FROM digmark.campaign GROUP BY vertical_fk) dm_c ON dm_v.id = dm_c.vertical_fk;
+
+GRANT SELECT ON digmark.v_vertical TO lysref_rpc;

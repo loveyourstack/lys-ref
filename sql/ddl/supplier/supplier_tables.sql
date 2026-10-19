@@ -17,7 +17,7 @@ ALTER TABLE supplier.company ENABLE ROW LEVEL SECURITY; -- needed due to externa
 CREATE POLICY lysref_owner_all ON supplier.company TO lysref_owner USING (true) WITH CHECK (true);
 CREATE POLICY lysref_server_all ON supplier.company TO lysref_server USING (true) WITH CHECK (true);
 
--- enforce RLS for external supplier role: only their own records should be visible
+-- enforce RLS for external supplier role: only their own record should be visible
 CREATE POLICY lysref_supplier_self_only ON supplier.company TO lysref_supplier USING (id = current_setting('app.company_id')::bigint);
 
 ------------------------------------------------------------------------------------------

@@ -29,6 +29,14 @@ password = ""
 userName = "lysref_cli" # this PG user only has the db access needed for CLI commands
 password = ""
 
+[dbLisUser]
+userName = "lysref_lis" # this PG user only has the db access needed for db listener operations
+password = ""
+
+[dbRpcUser]
+userName = "lysref_rpc" # this PG user only has the db access needed for the RPC server
+password = ""
+
 [api]
 port = "8000"
 useAuthentication = true # may only be false if env = dev above

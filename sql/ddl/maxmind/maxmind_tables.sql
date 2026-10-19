@@ -32,6 +32,8 @@ CREATE UNLOGGED TABLE maxmind.geoip2_network (
 CREATE INDEX ON maxmind.geoip2_network USING gist (network inet_ops);
 GRANT TRUNCATE ON maxmind.geoip2_network TO lysref_cli;
 
+GRANT SELECT ON maxmind.geoip2_network TO lysref_rpc;
+
 
 CREATE UNLOGGED TABLE maxmind.geoip2_location_en (
   city_name text_medium_mandatory,

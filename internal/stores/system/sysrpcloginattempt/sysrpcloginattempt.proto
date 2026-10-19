@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+message SysRpcLoginAttemptInput {
+    google.protobuf.Timestamp created_at = 1;
+    string ip = 2;
+    bool is_blocked = 3;
+    int64 num_attempts = 4;
+}
+
+message SysRpcLoginAttempt {
+    google.protobuf.Timestamp created_at = 1;
+    string ip = 2;
+    bool is_blocked = 3;
+    int64 num_attempts = 4;
+}

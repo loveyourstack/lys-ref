@@ -8,6 +8,8 @@ CREATE TABLE digmark.vertical
 );
 COMMENT ON TABLE digmark.vertical IS 'shortname: dm_v';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON digmark.vertical TO lysref_rpc;
+
 
 CREATE TABLE digmark.campaign
 (
@@ -23,6 +25,8 @@ CREATE TABLE digmark.campaign
   UNIQUE (country_fk, vertical_fk) -- natural key
 );
 COMMENT ON TABLE digmark.campaign IS 'shortname: dm_c';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON digmark.campaign TO lysref_rpc;
 
 
 CREATE TABLE digmark.campaign_performance

@@ -99,6 +99,7 @@ type Config struct {
 	DbServerUser lyspgdb.User
 	DbCliUser    lyspgdb.User
 	DbLisUser    lyspgdb.User
+	DbRpcUser    lyspgdb.User
 	Api          api
 	RpcApi       api
 	UI           ui

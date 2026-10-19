@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = "github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb";
+
+package pb;
+
+import "google/protobuf/empty.proto";
+
+import "cmd/rpcsrv/svcproto/common.proto";
+import "internal/stores/system/sysrpcloginattempt/sysrpcloginattempt.proto";
+import "internal/stores/system/sysrpcsession/sysrpcsession.proto";
+
+message LoginReq {
+    string user_name = 1;
+    string password = 2;
+}
+
+message LoginResp {
+    bool force_password_change = 1;
+    string geo_ip_country_iso_code = 2;
+    string geo_ip_country_iso_location = 3;
+    string ip = 4;
+    string profile_pic = 5;
+    repeated string roles = 6;
+    string token = 7;
+    int64 user_id = 8;
+    string user_name = 9;
+}
+
+message ListLoginAttemptsResp { 
+  repeated SysRpcLoginAttempt data = 1;
+}
+
+message ListSessionsResp { 
+  repeated SysRpcSession data = 1;
+}
+
+service AuthSvc {
+  rpc Login(LoginReq)               returns (LoginResp);
+  rpc Logout(EmptyReq)              returns (google.protobuf.Empty);
+  rpc ListLoginAttempts(EmptyReq)   returns (ListLoginAttemptsResp);
+  rpc ListSessions(EmptyReq)        returns (ListSessionsResp);
+}

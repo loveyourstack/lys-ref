@@ -7,8 +7,17 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
+	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsessionhist"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
 	"github.com/loveyourstack/lys/lysapi"
+	"github.com/loveyourstack/lys/lysauth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,6 +27,23 @@ type gRpcServerApplication struct {
 	*cmd.Application
 
 	GetOptions lysapi.GetOptions
+
+	// auth-related
+	LoginAttempts    *lysauth.AppLoginAttempts
+	Sessions         *lysauth.AppSessions
+	UseXForwardedFor bool // whether to use X-Forwarded-For header to determine IP
+	XForwardedForIdx int  // if using X-Forwarded-For, which index to use (0 for first, etc)
+
+	// stores
+	BlockedIPStore    sysblockedip.Store
+	CountryStore      geocountry.Store
+	GeoLocationStore  mmlocation.Store
+	GeoNetworkStore   mmnetwork.Store
+	LoginAttemptStore sysrpcloginattempt.Store
+	SessionStore      sysrpcsession.Store
+	SessionHistStore  sysrpcsessionhist.Store
+	//SrvLogStore       syssrvreq.Store
+	UserStore sysuser.Store
 }
 
 func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req any,
