@@ -8,9 +8,11 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lyspg"
+	"github.com/loveyourstack/lys/lysrpc"
 	"github.com/loveyourstack/lys/lystype"
 )
 
@@ -37,6 +39,8 @@ type Model struct {
 var (
 	plan, inputPlan lysmeta.Plan
 )
+
+var ModelToPbFunc = lysrpc.NewToPb[Model, pb.SysRpcLoginAttempt]()
 
 func init() {
 	var err error

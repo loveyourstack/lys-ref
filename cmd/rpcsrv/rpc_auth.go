@@ -12,8 +12,12 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
+	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyserr"
+	"github.com/loveyourstack/lys/lysrpc"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -25,14 +29,23 @@ import (
 type authSrv struct {
 	pb.UnimplementedAuthSvcServer
 	*gRpcServerApplication
+
+	laStore   sysrpcloginattempt.Store
+	sessStore sysrpcsession.Store
 }
 
 func (s *authSrv) ListLoginAttempts(ctx context.Context, req *pb.EmptyReq) (*pb.ListLoginAttemptsResp, error) {
-	return nil, nil
+	return lysrpc.List(ctx, s.laStore, new(pb.ListReq{}), s.GetOptions, sysrpcloginattempt.ModelToPbFunc,
+		func(data []*pb.SysRpcLoginAttempt, meta lysapi.SelectMetadata) *pb.ListLoginAttemptsResp {
+			return &pb.ListLoginAttemptsResp{Data: data, Metadata: toPbMetadata(meta, len(data))}
+		})
 }
 
 func (s *authSrv) ListSessions(ctx context.Context, req *pb.EmptyReq) (*pb.ListSessionsResp, error) {
-	return nil, nil
+	return lysrpc.List(ctx, s.sessStore, new(pb.ListReq{}), s.GetOptions, sysrpcsession.ModelToPbFunc,
+		func(data []*pb.SysRpcSession, meta lysapi.SelectMetadata) *pb.ListSessionsResp {
+			return &pb.ListSessionsResp{Data: data, Metadata: toPbMetadata(meta, len(data))}
+		})
 }
 
 func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, error) {

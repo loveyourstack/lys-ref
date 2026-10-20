@@ -29,10 +29,12 @@ message LoginResp {
 
 message ListLoginAttemptsResp { 
   repeated SysRpcLoginAttempt data = 1;
+  optional GetMetadata  metadata = 2;
 }
 
 message ListSessionsResp { 
   repeated SysRpcSession data = 1;
+  optional GetMetadata  metadata = 2;
 }
 
 service AuthSvc {

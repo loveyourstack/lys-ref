@@ -48,7 +48,7 @@ type gRpcServerApplication struct {
 	UserStore sysuser.Store
 }
 
-func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req any,
+func (rpcApp *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
@@ -132,7 +132,7 @@ func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req
 
 	default:
 		// Unexpected server errors: log and return generic error to the client.
-		app.Logger.Error("gRPC method failed",
+		rpcApp.Logger.Error("gRPC method failed",
 			"method", info.FullMethod,
 			"code", code.String(),
 			"error", err,

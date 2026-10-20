@@ -20,10 +20,9 @@ message SysRpcSessionInput {
     google.protobuf.Timestamp last_access_at = 11;
     string profile_pic = 12;
     repeated string roles = 13;
-    string token = 14;
-    string user_agent = 15;
-    int64 user_fk = 16;
-    string user_name = 17;
+    string user_agent = 14;
+    int64 user_fk = 15;
+    string user_name = 16;
 }
 
 message SysRpcSession {
@@ -40,8 +39,7 @@ message SysRpcSession {
     google.protobuf.Timestamp last_access_at = 11;
     string profile_pic = 12;
     repeated string roles = 13;
-    string token = 14;
-    string user_agent = 15;
-    int64 user_fk = 16;
-    string user_name = 17;
+    string user_agent = 14;
+    int64 user_fk = 15;
+    string user_name = 16;
 }

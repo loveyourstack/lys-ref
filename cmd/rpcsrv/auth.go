@@ -33,17 +33,10 @@ type methodPolicy struct {
 // to any user by default.
 var methodPolicies = map[string]methodPolicy{
 
-	pb.AuthSvc_Login_FullMethodName: {
-		public: true,
-	},
-	pb.AuthSvc_Logout_FullMethodName: {},
-
-	pb.AuthSvc_ListLoginAttempts_FullMethodName: {
-		roles: []sysrole.Enum{sysrole.Tech},
-	},
-	pb.AuthSvc_ListSessions_FullMethodName: {
-		roles: []sysrole.Enum{sysrole.Tech},
-	},
+	pb.AuthSvc_Login_FullMethodName:             {public: true},
+	pb.AuthSvc_Logout_FullMethodName:            {},
+	pb.AuthSvc_ListLoginAttempts_FullMethodName: {roles: []sysrole.Enum{sysrole.Tech}},
+	pb.AuthSvc_ListSessions_FullMethodName:      {roles: []sysrole.Enum{sysrole.Tech}},
 
 	pb.DmCampaignSvc_List_FullMethodName:   {},
 	pb.DmCampaignSvc_Get_FullMethodName:    {},

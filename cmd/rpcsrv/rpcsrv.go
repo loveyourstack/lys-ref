@@ -57,12 +57,12 @@ func main() {
 	app := cmd.NewApplication(&conf)
 
 	// create rRPC server app
-	rpcSrvApp := &gRpcServerApplication{
+	rpcApp := &gRpcServerApplication{
 		Application: app,
 	}
 
 	// attach Get options
-	rpcSrvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
+	rpcApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
 		FieldsParamName:  "fields",
 		PageParamName:    "page",
 		PerPageParamName: "per_page",
@@ -73,30 +73,30 @@ func main() {
 	}
 
 	// attach auth
-	if rpcSrvApp.Config.General.Env == appenv.Prod {
-		rpcSrvApp.UseXForwardedFor = true
-		rpcSrvApp.XForwardedForIdx = 0
+	if rpcApp.Config.General.Env == appenv.Prod {
+		rpcApp.UseXForwardedFor = true
+		rpcApp.XForwardedForIdx = 0
 	}
-	rpcSrvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                                                              // block after 5 failed attempts
-	rpcSrvApp.Sessions = lysauth.NewAppSessions(rpcSrvApp.Validate, 10*time.Hour, rpcSrvApp.UseXForwardedFor, rpcSrvApp.XForwardedForIdx) // allow 10 hour sessions
+	rpcApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                                                     // block after 5 failed attempts
+	rpcApp.Sessions = lysauth.NewAppSessions(rpcApp.Validate, 10*time.Hour, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx) // allow 10 hour sessions
 
 	// connect to db and assign pool to rpcSrvApp
-	rpcSrvApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, rpcSrvApp.Config.General.AppName+" Rpc Srv", myapp.TypesToRegister)
+	rpcApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, rpcApp.Config.General.AppName+" Rpc Srv", myapp.TypesToRegister)
 	if err != nil {
 		log.Fatalf("initialization: failed to create regular db connection pool: %s", err.Error())
 	}
-	defer rpcSrvApp.Db.Close()
+	defer rpcApp.Db.Close()
 
 	// attach stores
-	rpcSrvApp.BlockedIPStore = sysblockedip.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.CountryStore = geocountry.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.GeoLocationStore = mmlocation.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.GeoNetworkStore = mmnetwork.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.LoginAttemptStore = sysrpcloginattempt.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.SessionStore = sysrpcsession.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.SessionHistStore = sysrpcsessionhist.Store{Db: rpcSrvApp.Db}
-	//rpcSrvApp.SrvLogStore = syssrvreq.Store{Db: rpcSrvApp.Db}
-	rpcSrvApp.UserStore = sysuser.Store{Db: rpcSrvApp.Db}
+	rpcApp.BlockedIPStore = sysblockedip.Store{Db: rpcApp.Db}
+	rpcApp.CountryStore = geocountry.Store{Db: rpcApp.Db}
+	rpcApp.GeoLocationStore = mmlocation.Store{Db: rpcApp.Db}
+	rpcApp.GeoNetworkStore = mmnetwork.Store{Db: rpcApp.Db}
+	rpcApp.LoginAttemptStore = sysrpcloginattempt.Store{Db: rpcApp.Db}
+	rpcApp.SessionStore = sysrpcsession.Store{Db: rpcApp.Db}
+	rpcApp.SessionHistStore = sysrpcsessionhist.Store{Db: rpcApp.Db}
+	//rpcApp.SrvLogStore = syssrvreq.Store{Db: rpcSrvApp.Db}
+	rpcApp.UserStore = sysuser.Store{Db: rpcApp.Db}
 
 	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", conf.RpcApi.Port))
@@ -109,22 +109,23 @@ func main() {
 
 	// define interceptor chain
 	opts = append(opts, grpc.ChainUnaryInterceptor(
-		rpcSrvApp.unaryErrorInterceptor, // outermost: distinguish between expected client errors and unexpected server errors
-		rpcSrvApp.authenticate,          // authenticate requests and add user info to context
-		rpcSrvApp.rejectBlockedIp,       // innermost: check if the request comes from a blocked IP
+		rpcApp.unaryErrorInterceptor, // outermost: distinguish between expected client errors and unexpected server errors
+		rpcApp.authenticate,          // authenticate requests and add user info to context
+		rpcApp.rejectBlockedIp,       // innermost: check if the request comes from a blocked IP
 	))
 
 	grpcServer := grpc.NewServer(opts...)
 
 	// register services
-	pb.RegisterAuthSvcServer(grpcServer, &authSrv{gRpcServerApplication: rpcSrvApp})
+	pb.RegisterAuthSvcServer(grpcServer, &authSrv{gRpcServerApplication: rpcApp,
+		laStore: rpcApp.LoginAttemptStore, sessStore: rpcApp.SessionStore})
 
-	campStore := dmcampaign.Store{Db: rpcSrvApp.Db}
-	pb.RegisterDmCampaignSvcServer(grpcServer, &dmCampSrv{gRpcServerApplication: rpcSrvApp, store: campStore,
+	campStore := dmcampaign.Store{Db: rpcApp.Db}
+	pb.RegisterDmCampaignSvcServer(grpcServer, &dmCampSrv{gRpcServerApplication: rpcApp, store: campStore,
 		jsonKeyDbNameMap: campStore.GetPlan().JsonKeyDbNameMap()})
 
-	vertStore := dmvertical.Store{Db: rpcSrvApp.Db}
-	pb.RegisterDmVerticalSvcServer(grpcServer, &dmVertServer{gRpcServerApplication: rpcSrvApp, store: vertStore,
+	vertStore := dmvertical.Store{Db: rpcApp.Db}
+	pb.RegisterDmVerticalSvcServer(grpcServer, &dmVertServer{gRpcServerApplication: rpcApp, store: vertStore,
 		jsonKeyDbNameMap: vertStore.GetPlan().JsonKeyDbNameMap()})
 
 	// if debug mode is enabled, enable server reflection for test clients
@@ -133,25 +134,25 @@ func main() {
 	}
 
 	// load persisted sessions and login attempts from db, if any
-	err = rpcSrvApp.loadSessionsFromDb(ctx)
+	err = rpcApp.loadSessionsFromDb(ctx)
 	if err != nil {
-		log.Fatalf("initialization: rpcSrvApp.loadSessionsFromDb failed: %s", err.Error())
+		log.Fatalf("initialization: rpcApp.loadSessionsFromDb failed: %s", err.Error())
 	}
-	err = rpcSrvApp.loadLoginAttemptsFromDb(ctx)
+	err = rpcApp.loadLoginAttemptsFromDb(ctx)
 	if err != nil {
-		log.Fatalf("initialization: rpcSrvApp.loadLoginAttemptsFromDb failed: %s", err.Error())
+		log.Fatalf("initialization: rpcApp.loadLoginAttemptsFromDb failed: %s", err.Error())
 	}
 
 	// archive expired sessions immediately, and start goroutine to periodically archive them
-	rpcSrvApp.archiveExpiredSessions(ctx)
-	go rpcSrvApp.runExpiredSessionArchiver(ctx, 5*time.Minute)
+	rpcApp.archiveExpiredSessions(ctx)
+	go rpcApp.runExpiredSessionArchiver(ctx, 5*time.Minute)
 
 	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting refrpcsrv on port: %s", conf.RpcApi.Port)
+	startupMsg := fmt.Sprintf("starting rpcsrv on port: %s", conf.RpcApi.Port)
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}
-	rpcSrvApp.Logger.Info(startupMsg)
+	rpcApp.Logger.Info(startupMsg)
 
 	// start server in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
 	srvErrCh := make(chan error, 1)
@@ -163,10 +164,10 @@ func main() {
 	select {
 	case err := <-srvErrCh:
 		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-			rpcSrvApp.Logger.Error("grpcServer.Serve failed", "error", err)
+			rpcApp.Logger.Error("grpcServer.Serve failed", "error", err)
 		}
 	case <-ctx.Done():
-		rpcSrvApp.Logger.Info("shutdown signal received")
+		rpcApp.Logger.Info("shutdown signal received")
 	}
 
 	// --------------------------------
@@ -184,16 +185,16 @@ func main() {
 	select {
 	case <-stopped:
 	case <-shutdownCtx.Done():
-		rpcSrvApp.Logger.Error("shutdown: graceful stop timed out, forcing stop")
+		rpcApp.Logger.Error("shutdown: graceful stop timed out, forcing stop")
 		grpcServer.Stop()
 	}
 
 	// persist sessions and login attempts to db, for loading on restart
-	if err := rpcSrvApp.persistSessions(shutdownCtx); err != nil {
-		rpcSrvApp.Logger.Error("shutdown: rpcSrvApp.persistSessions failed", "error", err)
+	if err := rpcApp.persistSessions(shutdownCtx); err != nil {
+		rpcApp.Logger.Error("shutdown: rpcApp.persistSessions failed", "error", err)
 	}
-	if err := rpcSrvApp.persistLoginAttempts(shutdownCtx); err != nil {
-		rpcSrvApp.Logger.Error("shutdown: rpcSrvApp.persistLoginAttempts failed", "error", err)
+	if err := rpcApp.persistLoginAttempts(shutdownCtx); err != nil {
+		rpcApp.Logger.Error("shutdown: rpcApp.persistLoginAttempts failed", "error", err)
 	}
 }
 
