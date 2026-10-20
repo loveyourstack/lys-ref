@@ -152,16 +152,16 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	sysUser, err := srvApp.UserStore.SelectByName(ctx, creds.UserName)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusForbidden}, w)
+			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusUnauthorized}, w)
 		} else {
 			lys.HandleError(ctx, fmt.Errorf("authLogin: userStore.SelectByName failed for username %v: %w", creds.UserName, err), srvApp.Logger, w)
 		}
 		return
 	}
 
-	// reject deactivated user
+	// reject deactivated user (use same error message as invalid credentials to avoid disclosing account status)
 	if sysUser.IsDeactivated {
-		lys.HandleUserError(lyserr.User{Message: "deactivated", StatusCode: http.StatusForbidden}, w)
+		lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusUnauthorized}, w)
 		return
 	}
 
@@ -169,7 +169,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	err = bcrypt.CompareHashAndPassword([]byte(sysUser.HashedPw), []byte(creds.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusForbidden}, w)
+			lys.HandleUserError(lyserr.User{Message: "invalid credentials", StatusCode: http.StatusUnauthorized}, w)
 		} else {
 			lys.HandleInternalError(ctx, fmt.Errorf("authLogin: bcrypt.CompareHashAndPassword failed for username %s: %w", creds.UserName, err), srvApp.Logger, w)
 		}

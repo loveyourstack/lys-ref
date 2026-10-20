@@ -42,3 +42,5 @@ CREATE UNLOGGED TABLE maxmind.geoip2_location_en (
   geoname_id int NOT NULL UNIQUE -- surrogate pk
 );
 GRANT TRUNCATE ON maxmind.geoip2_location_en TO lysref_cli;
+
+GRANT SELECT ON maxmind.geoip2_location_en TO lysref_rpc;

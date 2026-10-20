@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
@@ -45,7 +49,9 @@ func main() {
 		log.Fatalf("initialization: conf.LoadFromFile (%s) failed: %s", *configFilePath, err.Error())
 	}
 
-	ctx := context.Background()
+	// create context that listens for interrupt and termination signals to allow for graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	// create non-specific app
 	app := cmd.NewApplication(&conf)
@@ -92,24 +98,21 @@ func main() {
 	//rpcSrvApp.SrvLogStore = syssrvreq.Store{Db: rpcSrvApp.Db}
 	rpcSrvApp.UserStore = sysuser.Store{Db: rpcSrvApp.Db}
 
-	// create TCP listener for the gRPC server
+	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", conf.RpcApi.Port))
 	if err != nil {
 		log.Fatalf("initialization: net.Listen failed: %v", err)
 	}
 
-	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting refrpcsrv on port: %s", conf.RpcApi.Port)
-	if conf.General.Debug {
-		startupMsg += ", debug: true"
-	}
-	rpcSrvApp.Logger.Info(startupMsg)
-
 	// create gRPC server
 	var opts []grpc.ServerOption
 
-	// use interceptor to distinguish between expected client errors and unexpected server errors
-	opts = append(opts, grpc.UnaryInterceptor(rpcSrvApp.unaryErrorInterceptor))
+	// define interceptor chain
+	opts = append(opts, grpc.ChainUnaryInterceptor(
+		rpcSrvApp.unaryErrorInterceptor, // outermost: distinguish between expected client errors and unexpected server errors
+		rpcSrvApp.authenticate,          // authenticate requests and add user info to context
+		rpcSrvApp.rejectBlockedIp,       // innermost: check if the request comes from a blocked IP
+	))
 
 	grpcServer := grpc.NewServer(opts...)
 
@@ -129,9 +132,68 @@ func main() {
 		reflection.Register(grpcServer)
 	}
 
-	// start gRPC server
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// load persisted sessions and login attempts from db, if any
+	err = rpcSrvApp.loadSessionsFromDb(ctx)
+	if err != nil {
+		log.Fatalf("initialization: rpcSrvApp.loadSessionsFromDb failed: %s", err.Error())
+	}
+	err = rpcSrvApp.loadLoginAttemptsFromDb(ctx)
+	if err != nil {
+		log.Fatalf("initialization: rpcSrvApp.loadLoginAttemptsFromDb failed: %s", err.Error())
+	}
+
+	// archive expired sessions immediately, and start goroutine to periodically archive them
+	rpcSrvApp.archiveExpiredSessions(ctx)
+	go rpcSrvApp.runExpiredSessionArchiver(ctx, 5*time.Minute)
+
+	// display startup message with port and debug mode if enabled
+	startupMsg := fmt.Sprintf("starting refrpcsrv on port: %s", conf.RpcApi.Port)
+	if conf.General.Debug {
+		startupMsg += ", debug: true"
+	}
+	rpcSrvApp.Logger.Info(startupMsg)
+
+	// start server in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
+	srvErrCh := make(chan error, 1)
+	go func() {
+		srvErrCh <- grpcServer.Serve(lis)
+	}()
+
+	// wait for shutdown signal or server error
+	select {
+	case err := <-srvErrCh:
+		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			rpcSrvApp.Logger.Error("grpcServer.Serve failed", "error", err)
+		}
+	case <-ctx.Done():
+		rpcSrvApp.Logger.Info("shutdown signal received")
+	}
+
+	// --------------------------------
+
+	// create context with timeout for server shutdown
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	stopped := make(chan struct{})
+	go func() {
+		// gracefully shutdown server, waiting for active requests to finish
+		grpcServer.GracefulStop()
+		close(stopped)
+	}()
+	select {
+	case <-stopped:
+	case <-shutdownCtx.Done():
+		rpcSrvApp.Logger.Error("shutdown: graceful stop timed out, forcing stop")
+		grpcServer.Stop()
+	}
+
+	// persist sessions and login attempts to db, for loading on restart
+	if err := rpcSrvApp.persistSessions(shutdownCtx); err != nil {
+		rpcSrvApp.Logger.Error("shutdown: rpcSrvApp.persistSessions failed", "error", err)
+	}
+	if err := rpcSrvApp.persistLoginAttempts(shutdownCtx); err != nil {
+		rpcSrvApp.Logger.Error("shutdown: rpcSrvApp.persistLoginAttempts failed", "error", err)
 	}
 }
 

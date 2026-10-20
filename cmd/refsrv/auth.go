@@ -269,10 +269,6 @@ func (srvApp *httpServerApplication) persistLoginAttempts(ctx context.Context) (
 	// get all login attempts
 	appLoginAttempts := srvApp.LoginAttempts.All()
 
-	if len(appLoginAttempts) == 0 {
-		return nil
-	}
-
 	// convert to login attempt inputs for bulk insert
 	inputs := appLoginAttemptsToInputs(appLoginAttempts)
 
@@ -289,9 +285,11 @@ func (srvApp *httpServerApplication) persistLoginAttempts(ctx context.Context) (
 		return fmt.Errorf("persistLoginAttempts: LoginAttemptStore.TruncateTx failed: %w", err)
 	}
 
-	_, err = srvApp.LoginAttemptStore.BulkInsertTx(ctx, tx, inputs)
-	if err != nil {
-		return fmt.Errorf("persistLoginAttempts: BulkInsertTx failed: %w", err)
+	if len(inputs) > 0 {
+		_, err = srvApp.LoginAttemptStore.BulkInsertTx(ctx, tx, inputs)
+		if err != nil {
+			return fmt.Errorf("persistLoginAttempts: BulkInsertTx failed: %w", err)
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -306,10 +304,6 @@ func (srvApp *httpServerApplication) persistSessions(ctx context.Context) (err e
 
 	// get all sessions
 	appSessions := srvApp.Sessions.All()
-
-	if len(appSessions) == 0 {
-		return nil
-	}
 
 	// convert to session inputs for bulk insert
 	inputs := appSessionsToInputs(appSessions)
@@ -327,9 +321,11 @@ func (srvApp *httpServerApplication) persistSessions(ctx context.Context) (err e
 		return fmt.Errorf("persistSessions: SessionStore.TruncateTx failed: %w", err)
 	}
 
-	_, err = srvApp.SessionStore.BulkInsertTx(ctx, tx, inputs)
-	if err != nil {
-		return fmt.Errorf("persistSessions: BulkInsertTx failed: %w", err)
+	if len(inputs) > 0 {
+		_, err = srvApp.SessionStore.BulkInsertTx(ctx, tx, inputs)
+		if err != nil {
+			return fmt.Errorf("persistSessions: BulkInsertTx failed: %w", err)
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {

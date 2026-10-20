@@ -243,10 +243,10 @@ func main() {
 	}
 
 	// persist sessions and login attempts to db, for loading on restart
-	if err := srvApp.persistSessions(context.Background()); err != nil {
+	if err := srvApp.persistSessions(srvShutdownCtx); err != nil {
 		srvApp.Logger.Error("shutdown: srvApp.persistSessions failed", "error", err)
 	}
-	if err := srvApp.persistLoginAttempts(context.Background()); err != nil {
+	if err := srvApp.persistLoginAttempts(srvShutdownCtx); err != nil {
 		srvApp.Logger.Error("shutdown: srvApp.persistLoginAttempts failed", "error", err)
 	}
 

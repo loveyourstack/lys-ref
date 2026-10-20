@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/netip"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys/lysauth"
+	"github.com/loveyourstack/lys/lyserr"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -56,21 +58,21 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 	sysUser, err := s.UserStore.SelectByName(ctx, req.UserName)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, status.Error(codes.PermissionDenied, "invalid credentials")
+			return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 		}
 		return nil, fmt.Errorf("Login: userStore.SelectByName failed for username %v: %w", req.UserName, err)
 	}
 
-	// reject deactivated user
+	// reject deactivated user (use same error message as invalid credentials to avoid disclosing account status)
 	if sysUser.IsDeactivated {
-		return nil, status.Error(codes.PermissionDenied, "deactivated")
+		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 	}
 
 	// validate password
 	err = bcrypt.CompareHashAndPassword([]byte(sysUser.HashedPw), []byte(req.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return nil, status.Error(codes.PermissionDenied, "invalid credentials")
+			return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 		}
 		return nil, fmt.Errorf("Login: bcrypt.CompareHashAndPassword failed for username %s: %w", req.UserName, err)
 	}
@@ -144,30 +146,34 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 }
 
 func (s *authSrv) Logout(ctx context.Context, req *pb.EmptyReq) (*emptypb.Empty, error) {
+
+	// get session
+	sess, err := s.authGetSession(ctx)
+	if err != nil {
+		if userErr, ok := errors.AsType[lyserr.User](err); ok {
+			return nil, status.Error(codes.Unauthenticated, userErr.Message)
+		}
+		return nil, fmt.Errorf("Logout: s.authGetSession failed: %w", err)
+	}
+
+	// archive session to db
+	err = s.archiveSessions(ctx, []lysauth.Session{sess})
+	if err != nil {
+		return nil, fmt.Errorf("Logout: s.archiveSessions failed: %w", err)
+	}
+
+	// delete session from app
+	s.Sessions.DeleteByTokens([]string{sess.Token})
+
+	// success
 	return &emptypb.Empty{}, nil
 }
 
 func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Addr, err error) {
 
-	// get remote addr from peer context
-	remoteAddr, err := getRemoteAddr(ctx)
+	remoteHostIp, err = getRemoteHostIp(ctx, s.UseXForwardedFor, s.XForwardedForIdx)
 	if err != nil {
-		return netip.Addr{}, err
-	}
-
-	// get x-forwarded-for header from metadata if needed
-	xffVal := ""
-	if s.UseXForwardedFor {
-		xffVal, err = getXForwardedFor(ctx)
-		if err != nil {
-			return netip.Addr{}, err
-		}
-	}
-
-	// resolve remote ip
-	remoteHostIp, err = lysauth.GetIpAddr(remoteAddr, xffVal, s.UseXForwardedFor, s.XForwardedForIdx)
-	if err != nil {
-		return netip.Addr{}, fmt.Errorf("lysauth.GetIpAddr failed: %w", err)
+		return netip.Addr{}, fmt.Errorf("getRemoteHostIp failed: %w", err)
 	}
 
 	// add login attempt from this IP
@@ -200,18 +206,65 @@ func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Add
 	return remoteHostIp, err
 }
 
+func getBearerToken(ctx context.Context) (string, error) {
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", lyserr.User{Message: "Metadata missing or empty", StatusCode: http.StatusUnauthorized}
+	}
+
+	// metadata keys are lowercased by gRPC
+	authVals := md.Get("authorization")
+	if len(authVals) == 0 {
+		return "", lyserr.User{Message: "Authorization header missing or empty", StatusCode: http.StatusUnauthorized}
+	}
+	if len(authVals) > 1 {
+		return "", lyserr.User{Message: "Authorization header must be a single value", StatusCode: http.StatusUnauthorized}
+	}
+
+	return lysauth.GetBearerToken(authVals[0])
+}
+
 func getRemoteAddr(ctx context.Context) (remoteAddr string, err error) {
+
 	p, ok := peer.FromContext(ctx)
 	if ok {
 		remoteAddr = p.Addr.String()
 	} else {
 		return "", fmt.Errorf("failed to get remote address from peer context")
 	}
+
 	if remoteAddr == "" {
 		return "", fmt.Errorf("remote address is empty")
 	}
 
 	return remoteAddr, nil
+}
+
+func getRemoteHostIp(ctx context.Context, useXForwardedFor bool, xForwardedForIdx int) (netip.Addr, error) {
+
+	// get remote addr from peer context
+	remoteAddr, err := getRemoteAddr(ctx)
+	if err != nil {
+		return netip.Addr{}, err
+	}
+
+	// get x-forwarded-for header from metadata if needed
+	xffVal := ""
+	if useXForwardedFor {
+		xffVal, err = getXForwardedFor(ctx)
+		if err != nil {
+			return netip.Addr{}, err
+		}
+	}
+
+	// resolve remote ip
+	remoteHostIp, err := lysauth.GetIpAddr(remoteAddr, xffVal, useXForwardedFor, xForwardedForIdx)
+	if err != nil {
+		return netip.Addr{}, fmt.Errorf("lysauth.GetIpAddr failed: %w", err)
+	}
+
+	return remoteHostIp, nil
 }
 
 func getUserAgent(ctx context.Context) (userAgent string, err error) {

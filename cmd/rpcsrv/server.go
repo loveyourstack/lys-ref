@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -18,6 +19,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
+	"github.com/loveyourstack/lys/lyserr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -109,6 +111,12 @@ func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req
 		}
 	}
 
+	// user-facing errors (lysauth.Err*, bad credentials, etc): map HTTP status to gRPC code
+	if userErr, ok := errors.AsType[lyserr.User](err); ok {
+		code = userErrCode(userErr.StatusCode)
+		errMsg = userErr.Message
+	}
+
 	// distinguish between error types
 	switch code {
 
@@ -130,5 +138,23 @@ func (app *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req
 			"error", err,
 		)
 		return resp, status.Error(codes.Internal, "internal server error")
+	}
+}
+
+// userErrCode maps HTTP status codes to gRPC codes.
+func userErrCode(httpStatus int) codes.Code {
+	switch httpStatus {
+	case http.StatusUnauthorized:
+		return codes.Unauthenticated
+	case http.StatusForbidden:
+		return codes.PermissionDenied
+	case http.StatusTooManyRequests:
+		return codes.ResourceExhausted
+	case http.StatusNotFound:
+		return codes.NotFound
+	case http.StatusConflict:
+		return codes.AlreadyExists
+	default: // 400 and any other user error
+		return codes.InvalidArgument
 	}
 }

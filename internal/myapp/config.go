@@ -135,6 +135,9 @@ func (c *Config) LoadFromFile(configFilePath string) (err error) {
 		if !c.Api.UseAuthentication {
 			return fmt.Errorf("config validation failed: Api.UseAuthentication cannot be false when General.Env is not dev")
 		}
+		if !c.RpcApi.UseAuthentication {
+			return fmt.Errorf("config validation failed: RpcApi.UseAuthentication cannot be false when General.Env is not dev")
+		}
 	}
 
 	// validate paths

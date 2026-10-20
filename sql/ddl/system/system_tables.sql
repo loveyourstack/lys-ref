@@ -8,6 +8,7 @@ CREATE TABLE system.blocked_ip
 COMMENT ON TABLE system.blocked_ip IS 'shortname: sys_bi';
 
 GRANT SELECT,INSERT,DELETE ON system.blocked_ip TO lysref_server;
+GRANT SELECT,INSERT,DELETE ON system.blocked_ip TO lysref_rpc;
 
 
 CREATE TABLE system.ext_data_sync
