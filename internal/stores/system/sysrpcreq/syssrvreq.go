@@ -1,0 +1,76 @@
+package sysrpcreq
+
+import (
+	"context"
+	"log"
+	"net/netip"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/loveyourstack/lys/lysmeta"
+	"github.com/loveyourstack/lys/lyspg"
+	"github.com/loveyourstack/lys/lystype"
+)
+
+const (
+	name           string = "System RPC server requests"
+	schemaName     string = "system"
+	tableName      string = "rpc_request"
+	viewName       string = "rpc_request"
+	pkColName      string = "id"
+	defaultOrderBy string = "created_at DESC"
+)
+
+type Input struct {
+	DurationMs int64      `db:"duration_ms" json:"duration_ms" validate:"required,min=0"`
+	Endpoint   string     `db:"endpoint" json:"endpoint,omitzero" validate:"required"`
+	Ip         netip.Addr `db:"ip" json:"ip,omitzero" validate:"required"`
+	Status     string     `db:"status" json:"status,omitzero" validate:"required"`
+	UserName   string     `db:"user_name" json:"user_name,omitzero" validate:"required,max=256"`
+}
+
+type Model struct {
+	Id            int64            `db:"id" json:"id,omitzero"`
+	CreatedAt     lystype.Datetime `db:"created_at" json:"created_at,omitzero"`
+	CreatedAtDate lystype.Date     `db:"created_at_date" json:"created_at_date,omitzero"`
+	Input
+}
+
+var (
+	plan lysmeta.Plan
+)
+
+func init() {
+	var err error
+	plan, err = lysmeta.Analyze(Model{})
+	if err != nil {
+		log.Fatalf("lysmeta.Analyze failed for %s.%s: %s", schemaName, tableName, err.Error())
+	}
+}
+
+type Store struct {
+	Db *pgxpool.Pool
+}
+
+func (s Store) GetName() string {
+	return name
+}
+func (s Store) GetPlan() lysmeta.Plan {
+	return plan
+}
+
+func (s Store) Insert(ctx context.Context, input Input) (newId int64, err error) {
+	return lyspg.Insert[Input, int64](ctx, s.Db, schemaName, tableName, pkColName, input)
+}
+
+func (s Store) Select(ctx context.Context, params lyspg.SelectParams) (items []Model, unpagedCount lyspg.TotalCount, err error) {
+	return lyspg.Select[Model](ctx, s.Db, schemaName, tableName, viewName, defaultOrderBy, plan.DbNames(), params)
+}
+
+func (s Store) SelectById(ctx context.Context, id int64) (item Model, err error) {
+	return lyspg.SelectUnique[Model](ctx, s.Db, schemaName, viewName, pkColName, id)
+}
+
+func (s Store) Validate(validate *validator.Validate, input Input) error {
+	return lysmeta.Validate(validate, input)
+}

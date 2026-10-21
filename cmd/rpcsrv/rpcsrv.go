@@ -23,6 +23,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
@@ -95,7 +96,7 @@ func main() {
 	rpcApp.LoginAttemptStore = sysrpcloginattempt.Store{Db: rpcApp.Db}
 	rpcApp.SessionStore = sysrpcsession.Store{Db: rpcApp.Db}
 	rpcApp.SessionHistStore = sysrpcsessionhist.Store{Db: rpcApp.Db}
-	//rpcApp.SrvLogStore = syssrvreq.Store{Db: rpcSrvApp.Db}
+	rpcApp.SrvLogStore = sysrpcreq.Store{Db: rpcApp.Db}
 	rpcApp.UserStore = sysuser.Store{Db: rpcApp.Db}
 
 	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)
@@ -109,9 +110,10 @@ func main() {
 
 	// define interceptor chain
 	opts = append(opts, grpc.ChainUnaryInterceptor(
-		rpcApp.unaryErrorInterceptor, // outermost: distinguish between expected client errors and unexpected server errors
-		rpcApp.authenticate,          // authenticate requests and add user info to context
-		rpcApp.rejectBlockedIp,       // innermost: check if the request comes from a blocked IP
+		rpcApp.logRequest,      // initialize userInfo in context and record final status and duration
+		rpcApp.mapError,        // convert errors to gRPC status codes
+		rpcApp.rejectBlockedIp, // check if the request comes from a blocked IP
+		rpcApp.authenticate,    // authenticate requests and update userInfo in context
 	))
 
 	grpcServer := grpc.NewServer(opts...)
@@ -190,10 +192,10 @@ func main() {
 	}
 
 	// persist sessions and login attempts to db, for loading on restart
-	if err := rpcApp.persistSessions(shutdownCtx); err != nil {
+	if err := rpcApp.persistSessions(context.Background()); err != nil {
 		rpcApp.Logger.Error("shutdown: rpcApp.persistSessions failed", "error", err)
 	}
-	if err := rpcApp.persistLoginAttempts(shutdownCtx); err != nil {
+	if err := rpcApp.persistLoginAttempts(context.Background()); err != nil {
 		rpcApp.Logger.Error("shutdown: rpcApp.persistLoginAttempts failed", "error", err)
 	}
 }

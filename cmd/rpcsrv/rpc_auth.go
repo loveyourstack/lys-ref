@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
@@ -143,6 +144,14 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 	sessToken, err := s.Sessions.Add(sessInput)
 	if err != nil {
 		return nil, fmt.Errorf("Login: s.Sessions.Add failed for username %v: %w", req.UserName, err)
+	}
+
+	// update the user info in the context with the authenticated session details
+	// so that logRequest middleware can show the user name
+	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		ui.Roles = nil // not needed
+		ui.UserId = sysUser.Id
+		ui.UserName = sysUser.Name
 	}
 
 	return &pb.LoginResp{

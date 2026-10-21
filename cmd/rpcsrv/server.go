@@ -1,19 +1,23 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmlocation"
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
+	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsessionhist"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
@@ -44,11 +48,61 @@ type gRpcServerApplication struct {
 	LoginAttemptStore sysrpcloginattempt.Store
 	SessionStore      sysrpcsession.Store
 	SessionHistStore  sysrpcsessionhist.Store
-	//SrvLogStore       syssrvreq.Store
-	UserStore sysuser.Store
+	SrvLogStore       sysrpcreq.Store
+	UserStore         sysuser.Store
 }
 
-func (rpcApp *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, req any,
+func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (any, error) {
+
+	// create user info and attach to context, to be filled in by authenticate later in the chain
+	// must be a pointer so that it can be overwritten
+	userInfo := &ReqUserInfo{}
+	ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
+
+	// run handler with timing
+	start := time.Now()
+	resp, err := handler(ctx, req)
+	duration := time.Since(start)
+
+	// code as determined by mapError
+	code := status.Code(err)
+
+	// get remote ip
+	remoteHostIp, ipErr := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	if ipErr != nil {
+		rpcApp.Logger.Error("logRequest: getRemoteHostIp failed", "error", ipErr)
+		return resp, err
+	}
+
+	// log to file
+	rpcApp.Logger.Info(fmt.Sprintf("%s - %s - %s - %s - %dms",
+		remoteHostIp, cmp.Or(userInfo.UserName, "-"), info.FullMethod, code, duration.Milliseconds()))
+
+	// exit if user is not authenticated
+	if userInfo.UserId == 0 {
+		return resp, err
+	}
+
+	// log to db for activity monitoring
+
+	// separate context so logging happens even if the request context is cancelled
+	_, insErr := rpcApp.SrvLogStore.Insert(context.Background(), sysrpcreq.Input{
+		DurationMs: duration.Milliseconds(),
+		Endpoint:   info.FullMethod,
+		Ip:         remoteHostIp,
+		Status:     code.String(),
+		UserName:   userInfo.UserName,
+	})
+	if insErr != nil {
+		rpcApp.Logger.Error("logRequest: SrvLogStore.Insert failed", "error", insErr)
+	}
+
+	return resp, err
+}
+
+func (rpcApp *gRpcServerApplication) mapError(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
@@ -122,6 +176,8 @@ func (rpcApp *gRpcServerApplication) unaryErrorInterceptor(ctx context.Context, 
 
 	// Expected client errors: return, but don't log
 	case codes.AlreadyExists,
+		codes.Canceled,
+		codes.DeadlineExceeded,
 		codes.FailedPrecondition,
 		codes.InvalidArgument,
 		codes.NotFound,

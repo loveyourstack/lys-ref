@@ -142,12 +142,13 @@ func (rpcApp *gRpcServerApplication) authenticate(ctx context.Context, req any,
 		return nil, status.Error(codes.PermissionDenied, "insufficient role")
 	}
 
-	// add the user info to the request context, then continue
-	ctx = context.WithValue(ctx, lys.UserInfoCtxKey, ReqUserInfo{
-		Roles:    sysRoles,
-		UserId:   sess.UserId,
-		UserName: sess.UserName,
-	})
+	// update the user info in the context (defined in logRequest) with the authenticated session details
+	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		ui.Roles = sysRoles
+		ui.UserId = sess.UserId
+		ui.UserName = sess.UserName
+	}
+
 	return handler(ctx, req)
 }
 
