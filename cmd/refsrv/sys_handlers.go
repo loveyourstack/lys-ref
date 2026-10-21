@@ -16,7 +16,7 @@ func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWrite
 	ctx := r.Context()
 
 	// get user from request
-	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
+	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
 	if !ok {
 		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: user not authenticated"), srvApp.Logger, w)
 		return

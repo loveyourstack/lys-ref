@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"net/http"
@@ -66,7 +67,7 @@ func (srvApp *httpServerApplication) limitAuthed(next http.Handler) http.Handler
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// get user info from context (set by authenticate middleware)
-		userInfo, ok := r.Context().Value(lys.UserInfoCtxKey).(ReqUserInfo)
+		userInfo, ok := r.Context().Value(lys.UserInfoCtxKey).(*ReqUserInfo)
 		if !ok {
 			lys.HandleUserError(lys.ErrUserInfoMissing, w)
 			return
@@ -102,29 +103,34 @@ func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handl
 	})
 }
 
-// logAuthedRequest is middleware that logs requests in the app's info log
-func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Handler {
+// logRequest is middleware that logs requests in the app's info log and the database for activity monitoring.
+func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// create user info and attach to context, to be filled in by authenticate and login later in the chain
+		// must be a pointer so that it can be overwritten
+		userInfo := &ReqUserInfo{}
+		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
+
 		// exclude websocket registration: request is long-lived
 		if r.URL.Path == "/a/ws/notifications/register" {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 
 		// get user from request
-		userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
+		/*userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
 		if !ok {
 			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: user not authenticated"), srvApp.Logger, w)
 			return
-		}
+		}*/
 
 		// get remote ip
 		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -132,7 +138,7 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 		sw := &lys.StatusWriter{ResponseWriter: w}
 
 		start := time.Now()
-		next.ServeHTTP(sw, r)
+		next.ServeHTTP(sw, r.WithContext(ctx))
 		duration := time.Since(start)
 
 		status := sw.Status
@@ -150,13 +156,17 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 
 		// log to file
 		srvApp.Logger.Info(fmt.Sprintf("%s - %s - %s %s %s - %d - %dms",
-			remoteHostIP, userInfo.UserName, r.Proto, r.Method, r.URL.RequestURI(), status, duration.Milliseconds()))
+			remoteHostIP, cmp.Or(userInfo.UserName, "-"), r.Proto, r.Method, r.URL.RequestURI(), status, duration.Milliseconds()))
+
+		// exit if user is not authenticated
+		if userInfo.UserId == 0 {
+			return
+		}
 
 		// unescape url for readability
 		endpoint, err := url.QueryUnescape(r.URL.RequestURI())
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: url.QueryUnescape failed: %w", err), srvApp.Logger, w)
-			return
+			srvApp.Logger.Error("logRequest: url.QueryUnescape failed", "error", err)
 		}
 
 		// log to db for activity monitoring
@@ -172,33 +182,8 @@ func (srvApp *httpServerApplication) logAuthedRequest(next http.Handler) http.Ha
 			UserName:   userInfo.UserName,
 		})
 		if err != nil {
-			lys.HandleInternalError(logCtx, fmt.Errorf("logAuthedRequest: failed to insert log: %w", err), srvApp.Logger, w)
-			return
+			srvApp.Logger.Error("logRequest: failed to insert log", "error", err)
 		}
-	})
-}
-
-func (srvApp *httpServerApplication) logUnauthedRequest(next http.Handler) http.Handler {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logUnauthedRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
-			return
-		}
-
-		// use a custom writer that captures the response status code
-		sw := &lys.StatusWriter{ResponseWriter: w}
-
-		start := time.Now()
-		next.ServeHTTP(sw, r)
-		duration := time.Since(start)
-
-		srvApp.Logger.Info(fmt.Sprintf("%s - %s %s %s - %d - %dms",
-			remoteHostIP, r.Proto, r.Method, r.URL.RequestURI(), sw.Status, duration.Milliseconds()))
 	})
 }
 

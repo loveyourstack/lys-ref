@@ -93,6 +93,16 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 
 	// success
 
+	// update the user info in the context with the authenticated session details
+	// so that logRequest middleware can show the user name
+	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		ui.Roles = nil // not needed
+		ui.UserId = sysUser.Id
+		ui.UserName = sysUser.Name
+	} else {
+		return nil, fmt.Errorf("Login: user info not found in context")
+	}
+
 	// delete login attempt for the user's IP
 	found, err := s.LoginAttempts.DeleteByIp(remoteHostIp)
 	if err != nil {
@@ -144,14 +154,6 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 	sessToken, err := s.Sessions.Add(sessInput)
 	if err != nil {
 		return nil, fmt.Errorf("Login: s.Sessions.Add failed for username %v: %w", req.UserName, err)
-	}
-
-	// update the user info in the context with the authenticated session details
-	// so that logRequest middleware can show the user name
-	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
-		ui.Roles = nil // not needed
-		ui.UserId = sysUser.Id
-		ui.UserName = sysUser.Name
 	}
 
 	return &pb.LoginResp{

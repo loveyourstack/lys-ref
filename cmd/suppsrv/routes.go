@@ -28,6 +28,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 	r := mux.NewRouter()
 
 	// define middleware for all routes
+	r.Use(srvApp.logRequest) // log all requests and initialize user info in ctx
 	r.Use(secureHeaders)
 	r.Use(srvApp.rejectBlockedIp)
 	r.Use(srvApp.limit) // global rate limit based on IP
@@ -41,7 +42,6 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 
 	// define middleware for authed routes
 	authedR.Use(srvApp.authenticate)
-	authedR.Use(srvApp.logAuthedRequest) // must come after authentication
 
 	// add subroutes into main router
 	for _, subRoute := range srvApp.getSubRoutes(apiEnv) {

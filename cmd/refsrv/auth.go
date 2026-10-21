@@ -70,15 +70,19 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 
 		// allow skipping auth in dev env by using a dummy user
 		if srvApp.Config.General.Env == appenv.Dev && !srvApp.Config.Api.UseAuthentication {
-			reqUserInfo := ReqUserInfo{
-				Roles:    []sysrole.Enum{sysrole.Tech},
-				UserId:   1,
-				UserName: "Unauthed Dev",
+
+			// update the user info in the context (defined in logRequest) with the authenticated session details
+			if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+				ui.Roles = []sysrole.Enum{sysrole.Tech}
+				ui.UserId = 1
+				ui.UserName = "Unauthed Dev"
+			} else {
+				lys.HandleInternalError(ctx, fmt.Errorf("authenticate (dev bypass): user info not found in context"), srvApp.Logger, w)
+				return
 			}
 
-			// add the dummy user info to the request context, then continue
-			ctx = context.WithValue(ctx, lys.UserInfoCtxKey, reqUserInfo)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			// continue
+			next.ServeHTTP(w, r)
 			return
 		}
 
@@ -98,16 +102,18 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 			return
 		}
 
-		// write fields that need to be attached to the request
-		reqUserInfo := ReqUserInfo{
-			Roles:    sysRoles,
-			UserId:   sess.UserId,
-			UserName: sess.UserName,
+		// update the user info in the context (defined in logRequest) with the authenticated session details
+		if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+			ui.Roles = sysRoles
+			ui.UserId = sess.UserId
+			ui.UserName = sess.UserName
+		} else {
+			lys.HandleInternalError(ctx, fmt.Errorf("authenticate: user info not found in context"), srvApp.Logger, w)
+			return
 		}
 
-		// add the user info to the request context, then continue
-		ctx = context.WithValue(r.Context(), lys.UserInfoCtxKey, reqUserInfo)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		// continue
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -425,7 +431,7 @@ func authorizeRole(allowedRoles []sysrole.Enum) func(http.Handler) http.Handler 
 			ctx := r.Context()
 
 			// get the user info from context
-			userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
+			userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
 			if !ok {
 				lys.HandleUserError(lys.ErrUserInfoMissing, w)
 				return

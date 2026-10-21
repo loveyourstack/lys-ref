@@ -178,6 +178,17 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 
 	// success
 
+	// update the user info in the context with the authenticated session details
+	// so that logRequest middleware can show the user name
+	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		ui.Roles = nil // not needed
+		ui.UserId = sysUser.Id
+		ui.UserName = sysUser.Name
+	} else {
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: user info not found in context"), srvApp.Logger, w)
+		return
+	}
+
 	// delete login attempt for the user's IP
 	found, err := srvApp.LoginAttempts.DeleteByIp(remoteHostIP)
 	if err != nil {
@@ -344,6 +355,17 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 	defaultLocale, err := srvApp.CountryStore.SelectDefaultLocaleByIso2(ctx, sess.GeoIpCountryIsoCode)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.CountryStore.SelectDefaultLocaleByIso2 failed for username %v: %w", sess.UserName, err), srvApp.Logger, w)
+		return
+	}
+
+	// update the user info in the context with the authenticated session details
+	// so that logRequest middleware can show the user name
+	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		ui.Roles = nil // not needed
+		ui.UserId = sess.UserId
+		ui.UserName = sess.UserName
+	} else {
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: user info not found in context"), srvApp.Logger, w)
 		return
 	}
 

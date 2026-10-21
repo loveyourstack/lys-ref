@@ -11,7 +11,7 @@ func (srvApp *httpServerApplication) wsNotificationsRegister(w http.ResponseWrit
 	ctx := r.Context()
 
 	// get user from request
-	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
+	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
 	if !ok {
 		lys.HandleInternalError(ctx, fmt.Errorf("wsNotificationsRegister: user not authenticated"), srvApp.Logger, w)
 		return

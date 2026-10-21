@@ -79,6 +79,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 	r := mux.NewRouter()
 
 	// define middleware for all routes
+	r.Use(srvApp.logRequest) // log all requests and initialize user info in ctx
 	r.Use(secureHeaders)
 	r.Use(srvApp.rejectBlockedIp)
 
@@ -87,7 +88,6 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 	// public subrouter: use unauthenticated middleware
 	pubR := r.NewRoute().Subrouter()
 	pubR.Use(srvApp.limitUnauthed)
-	pubR.Use(srvApp.logUnauthedRequest)
 
 	pubR.HandleFunc("/login", srvApp.authLogin).Methods("POST")
 	pubR.HandleFunc("/session-token-login", srvApp.authSessionTokenLogin).Methods("POST")
@@ -97,8 +97,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 
 	// define middleware for authed routes
 	authedR.Use(srvApp.authenticate)
-	authedR.Use(srvApp.limitAuthed)      // must come after authenticate
-	authedR.Use(srvApp.logAuthedRequest) // must come after authenticate
+	authedR.Use(srvApp.limitAuthed) // must come after authenticate
 
 	// logout
 	authedR.HandleFunc("/logout", srvApp.authLogout).Methods("POST")

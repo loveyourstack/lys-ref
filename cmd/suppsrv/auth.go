@@ -29,12 +29,15 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 			return
 		}
 
-		// add the employee info to the request context
-		reqUserInfo := ReqUserInfo{
-			UserId:   employee.Id,
-			UserName: employee.GivenName + " " + employee.FamilyName,
+		// update the user info in the context with the employee details
+		// so that logRequest middleware can show the user name
+		if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+			ui.UserId = employee.Id
+			ui.UserName = employee.GivenName + " " + employee.FamilyName
+		} else {
+			lys.HandleInternalError(ctx, fmt.Errorf("authenticate: user info not found in context"), srvApp.Logger, w)
+			return
 		}
-		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, reqUserInfo)
 
 		// add the company id under a separate ctx key for use by lyspgdb.GetPoolWithCtxSetting (for RLS)
 		ctx = context.WithValue(ctx, CompanyCtxKey, employee.CompanyFk)

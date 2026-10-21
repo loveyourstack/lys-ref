@@ -56,7 +56,7 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
-	// create user info and attach to context, to be filled in by authenticate later in the chain
+	// create user info and attach to context, to be filled in by authenticate and login later in the chain
 	// must be a pointer so that it can be overwritten
 	userInfo := &ReqUserInfo{}
 	ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
