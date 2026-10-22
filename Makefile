@@ -94,9 +94,14 @@ suppsrvb:
 lisb:
 	go build -o ./bin ./cmd/reflis
 
+# build gRPC server
+.PHONY: rpcb
+rpcb: genpb
+	go build -o ./bin ./cmd/rpcsrv
+
 # build all apps
 .PHONY: build
-build: clib mcpb srvb suppsrvb lisb
+build: clib mcpb srvb suppsrvb lisb rpcb
 
 ###########################################################
 
@@ -124,6 +129,11 @@ copysuppsrv: suppsrvb
 .PHONY: copylis
 copylis: lisb
 	rsync -az -e ssh ./bin/reflis lysref:/home/ubuntu/bin
+
+# build and copy gRPC server to remote
+.PHONY: copyrpc
+copyrpc: rpcb
+	rsync -az -e ssh ./bin/rpcsrv lysref:/home/ubuntu/bin
 
 # build and copy ui/dist to remote
 .PHONY: copyui

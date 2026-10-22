@@ -120,13 +120,6 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 			return
 		}
 
-		// get user from request
-		/*userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(ReqUserInfo)
-		if !ok {
-			lys.HandleInternalError(ctx, fmt.Errorf("logAuthedRequest: user not authenticated"), srvApp.Logger, w)
-			return
-		}*/
-
 		// get remote ip
 		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {
@@ -138,7 +131,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		sw := &lys.StatusWriter{ResponseWriter: w}
 
 		start := time.Now()
-		next.ServeHTTP(sw, r.WithContext(ctx))
+		next.ServeHTTP(sw, r.WithContext(ctx)) // don't return responses after this point: log errors only
 		duration := time.Since(start)
 
 		status := sw.Status

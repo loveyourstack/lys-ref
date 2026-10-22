@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgerrcode"
@@ -40,6 +41,10 @@ type gRpcServerApplication struct {
 	UseXForwardedFor bool // whether to use X-Forwarded-For header to determine IP
 	XForwardedForIdx int  // if using X-Forwarded-For, which index to use (0 for first, etc)
 
+	// rate limits
+	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
+	UnauthedRateLimits *lysauth.AppRateLimits
+
 	// stores
 	BlockedIPStore    sysblockedip.Store
 	CountryStore      geocountry.Store
@@ -50,6 +55,51 @@ type gRpcServerApplication struct {
 	SessionHistStore  sysrpcsessionhist.Store
 	SrvLogStore       sysrpcreq.Store
 	UserStore         sysuser.Store
+}
+
+// limitUnauthed rate limits public methods by IP. Authenticated methods are limited by user ID in limitAuthed
+func (rpcApp *gRpcServerApplication) limitUnauthed(ctx context.Context, req any,
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (any, error) {
+
+	// only apply rate limiting to public methods
+	// continue on methods with no policy: authenticate will handle them
+	if policy, ok := methodPolicies[info.FullMethod]; !ok || !policy.public {
+		return handler(ctx, req)
+	}
+
+	ip, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	if err != nil {
+		return nil, fmt.Errorf("limitUnauthed: getRemoteHostIp failed: %w", err)
+	}
+
+	if !rpcApp.UnauthedRateLimits.Allow(ip.String()) {
+		return nil, lysauth.ErrTooManyRequests
+	}
+
+	return handler(ctx, req)
+}
+
+// limitAuthed rate limits authenticated requests by user ID. Must run after authenticate
+func (rpcApp *gRpcServerApplication) limitAuthed(ctx context.Context, req any,
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (any, error) {
+
+	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+	if !ok {
+		return nil, lys.ErrUserInfoMissing
+	}
+
+	// public methods skip authentication and were already limited by limitUnauthed
+	if userInfo.UserId == 0 {
+		return handler(ctx, req)
+	}
+
+	if !rpcApp.AuthedRateLimits.Allow(strconv.FormatInt(userInfo.UserId, 10)) {
+		return nil, lysauth.ErrTooManyRequests
+	}
+
+	return handler(ctx, req)
 }
 
 func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
@@ -194,6 +244,20 @@ func (rpcApp *gRpcServerApplication) mapError(ctx context.Context, req any,
 			"error", err,
 		)
 		return resp, status.Error(codes.Internal, "internal server error")
+	}
+}
+
+func (rpcApp *gRpcServerApplication) runRateLimitCleanup(ctx context.Context, every time.Duration) {
+	ticker := time.NewTicker(every)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			rpcApp.AuthedRateLimits.CleanupExpired()
+			rpcApp.UnauthedRateLimits.CleanupExpired()
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 

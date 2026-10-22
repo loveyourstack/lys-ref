@@ -42,7 +42,7 @@ port = "8000"
 useAuthentication = true # may only be false if env = dev above
 
 [rpcApi]
-port = "8001"
+port = "8002"
 useAuthentication = false # may only be false if env = dev above
 
 [ui]

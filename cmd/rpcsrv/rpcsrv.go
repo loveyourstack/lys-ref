@@ -60,7 +60,13 @@ func main() {
 	// create rRPC server app
 	rpcApp := &gRpcServerApplication{
 		Application: app,
+
+		AuthedRateLimits:   lysauth.NewAppRateLimits(5, 20, 1*time.Hour),  // 5 rps with burst of 20. Buckets expire after 1 hour of inactivity
+		UnauthedRateLimits: lysauth.NewAppRateLimits(0.5, 3, 1*time.Hour), // ~1 every 2s with burst of 3
 	}
+
+	// start goroutine to periodically clean up expired rate limit buckets
+	go rpcApp.runRateLimitCleanup(ctx, 30*time.Minute)
 
 	// attach Get options
 	rpcApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
@@ -113,7 +119,9 @@ func main() {
 		rpcApp.logRequest,      // initialize userInfo in context and record final status and duration
 		rpcApp.mapError,        // convert errors to gRPC status codes
 		rpcApp.rejectBlockedIp, // check if the request comes from a blocked IP
+		rpcApp.limitUnauthed,   // rate limit public methods by IP
 		rpcApp.authenticate,    // authenticate requests and update userInfo in context
+		rpcApp.limitAuthed,     // rate limit authenticated methods by user ID
 	))
 
 	grpcServer := grpc.NewServer(opts...)
