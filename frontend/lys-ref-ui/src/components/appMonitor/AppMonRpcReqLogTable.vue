@@ -23,11 +23,11 @@
 
       <v-row density="compact">
         <v-col>
-          <app-mon-req-log-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
+          <app-mon-rpc-req-log-table-filters @update="refreshItems()" @updateDebounced="refreshItemsDebounced()"
             v-model:filterCreatedAtDate="filterCreatedAtDate"
             v-model:filterDurationMs="filterDurationMs"
             v-model:filterEndpoint="filterEndpoint"
-            v-model:filterStatusCodeOk="filterStatusCodeOk"
+            v-model:filterStatus="filterStatus"
             v-model:filterUserName="filterUserName"
           />
         </v-col>
@@ -54,7 +54,7 @@ import { useDateFormat } from '@vueuse/core'
 import { type DateFilter, type NumericFilter, getDateFilterUrlParams, getNumericFilterUrlParams, getTextFilterUrlParam } from 'lys-vue'
 import { useJsonLs, useTableExcelDlUrl, useTableHeaders, useTableState } from 'lys-vue'
 import ax from '@/api'
-import { type ServerRequest } from '@/types/tech'
+import { type RpcRequest } from '@/types/tech'
 
 const props = defineProps<{
   title?: string
@@ -62,26 +62,25 @@ const props = defineProps<{
 
 const headers = [
   { title: 'Created at', key: 'created_at' },
-  { title: 'Method', key: 'method' },
   { title: 'Endpoint', key: 'endpoint' },
   { title: 'User', key: 'user_name' },
   { title: 'IP', key: 'ip' },
-  { title: 'Status code', key: 'status_code', align: 'end' },
+  { title: 'Status', key: 'status' },
   { title: 'Duration (ms)', key: 'duration_ms', align: 'end' },
 ] as const
 const { excludedHeaders, selectedHeaders } = useTableHeaders(headers)
 
-const baseUrl = '/a/tech/server-requests'
+const baseUrl = '/a/tech/rpc-requests'
 const { excelDlUrl } = useTableExcelDlUrl(baseUrl)
 
 const { items, itemsPerPage, page, sortBy, search, totalItems, totalItemsIsEstimate, totalItemsEstimated,
   loadItems, refreshItems, refreshItemsDebounced
-} = useTableState<ServerRequest>({ ax, baseUrl, getFilterStr })
+} = useTableState<RpcRequest>({ ax, baseUrl, getFilterStr })
 
 const filterCreatedAtDate = ref<DateFilter>()
 const filterDurationMs = ref<NumericFilter>()
 const filterEndpoint = ref<string>()
-const filterStatusCodeOk = ref<boolean>()
+const filterStatus = ref<string>()
 const filterUserName = ref<string>()
 
 const formatter = new Intl.NumberFormat()
@@ -93,7 +92,7 @@ const { resetTable } = useJsonLs({
     filterCreatedAtDate,
     filterDurationMs,
     filterEndpoint,
-    filterStatusCodeOk,
+    filterStatus,
     filterUserName,
     itemsPerPage,
     sortBy,
@@ -103,17 +102,10 @@ const { resetTable } = useJsonLs({
 function getFilterStr(): string {
   let ret = ''
 
-  if (filterStatusCodeOk.value != undefined) {
-    if (filterStatusCodeOk.value) {
-      ret += '&status_code=200'
-    } else {
-      ret += '&status_code=!200'
-    }
-  }
-
   ret += getDateFilterUrlParams('created_at_date', filterCreatedAtDate.value)
   ret += getNumericFilterUrlParams('duration_ms', filterDurationMs.value)
   ret += getTextFilterUrlParam('endpoint', filterEndpoint.value)
+  ret += getTextFilterUrlParam('status', filterStatus.value)
   ret += getTextFilterUrlParam('user_name', filterUserName.value)
 
   return ret

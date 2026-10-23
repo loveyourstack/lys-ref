@@ -120,6 +120,12 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 			return
 		}
 
+		// don't log the sessions monitor (auto-refreshes in UI)
+		if r.URL.Path == "/a/tech/sessions" && r.Method == http.MethodGet {
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
 		// get remote ip
 		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
 		if err != nil {

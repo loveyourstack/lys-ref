@@ -6,16 +6,23 @@ export interface LoginAttempt {
   num_attempts: number
 }
 
-export interface ServerRequest {
+export interface RequestBase {
   id: number
   created_at: Date
   created_at_date: Date
   duration_ms: number
   endpoint: string
   ip: string
+  user_name: string
+}
+
+export interface RpcRequest extends RequestBase {
+  status: string
+}
+
+export interface ServerRequest extends RequestBase {
   method: string
   status_code: number
-  user_name: string
 }
 
 export interface Session {

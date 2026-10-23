@@ -51,6 +51,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/supplier/suppproduct"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/tedb/tedbvatratesumm"
 	"github.com/loveyourstack/lys/lysformfile"
 	"github.com/loveyourstack/lys/lyspgdb"
@@ -787,6 +788,11 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 
 		// for testing cancellation
 		r.HandleFunc("/pg-sleep", lys.PgSleep(srvApp.Db, srvApp.Logger, 10, 0)).Methods("GET")
+
+		endpoint = "/rpc-requests"
+
+		rpcReqStore := sysrpcreq.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, rpcReqStore, nil)).Methods("GET")
 
 		endpoint = "/server-requests"
 
