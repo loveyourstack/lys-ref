@@ -22,6 +22,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsessionhist"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/syssvcaccount"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
@@ -55,6 +56,7 @@ type gRpcServerApplication struct {
 	SessionStore      sysrpcsession.Store
 	SessionHistStore  sysrpcsessionhist.Store
 	SrvLogStore       sysrpcreq.Store
+	SvcAccountStore   syssvcaccount.Store
 	UserStore         sysuser.Store
 }
 

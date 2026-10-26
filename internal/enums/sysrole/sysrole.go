@@ -32,12 +32,13 @@ func ToStringSlice(enums []Enum) []string {
 }
 
 const (
-	Standard Enum = "Standard"
-	Tech     Enum = "Tech"
-	Viewer   Enum = "Viewer"
+	Monitor  Enum = "Monitor"  // for gRPC server service account: allows access to internal auth structs
+	Standard Enum = "Standard" // standard user read and write
+	Tech     Enum = "Tech"     // technical super user
+	Viewer   Enum = "Viewer"   // read-only user
 )
 
 var (
-	All    = []Enum{Standard, Tech, Viewer}
+	All    = []Enum{Monitor, Standard, Tech, Viewer}
 	Writer = [...]Enum{Standard, Tech}
 )

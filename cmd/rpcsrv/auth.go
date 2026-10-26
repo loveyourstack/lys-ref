@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/netip"
 	"time"
 
@@ -20,6 +23,7 @@ import (
 	"github.com/loveyourstack/lys/lysslice"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -35,8 +39,8 @@ var methodPolicies = map[string]methodPolicy{
 
 	pb.AuthSvc_Login_FullMethodName:             {public: true},
 	pb.AuthSvc_Logout_FullMethodName:            {},
-	pb.AuthSvc_ListLoginAttempts_FullMethodName: {roles: []sysrole.Enum{sysrole.Tech}},
-	pb.AuthSvc_ListSessions_FullMethodName:      {roles: []sysrole.Enum{sysrole.Tech}},
+	pb.AuthSvc_ListLoginAttempts_FullMethodName: {roles: []sysrole.Enum{sysrole.Monitor, sysrole.Tech}},
+	pb.AuthSvc_ListSessions_FullMethodName:      {roles: []sysrole.Enum{sysrole.Monitor, sysrole.Tech}},
 
 	pb.DmCampaignSvc_List_FullMethodName:   {},
 	pb.DmCampaignSvc_Get_FullMethodName:    {},
@@ -109,7 +113,7 @@ func (rpcApp *gRpcServerApplication) authenticate(ctx context.Context, req any,
 	if rpcApp.Config.General.Env == appenv.Dev && !rpcApp.Config.RpcApi.UseAuthentication {
 
 		sess = lysauth.Session{
-			Roles:    []string{"tech"},
+			Roles:    []string{"Tech"},
 			UserId:   1,
 			UserName: "Unauthed Dev",
 		}
@@ -173,7 +177,64 @@ func (rpcApp *gRpcServerApplication) authGetGeoIp(ctx context.Context, remoteAdd
 	return fmt.Sprintf("%s, %s", loc.CityName, loc.CountryName), loc.CountryIsoCode, nil
 }
 
+func (rpcApp *gRpcServerApplication) authGetServiceAccountSession(ctx context.Context, apiKey string) (sess lysauth.Session, err error) {
+
+	// hash API key using SHA-256
+	hashedApiKey := sha256.Sum256([]byte(apiKey))
+	hashedApiKeyStr := hex.EncodeToString(hashedApiKey[:])
+
+	// lookup hashed key in DB
+	dbSvcAcc, err := rpcApp.SvcAccountStore.SelectByApiKeyHash(ctx, hashedApiKeyStr)
+	if err != nil {
+		if userErr, ok := errors.AsType[lyserr.User](err); ok {
+			return lysauth.Session{}, status.Error(codes.Unauthenticated, userErr.Message)
+		}
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			return lysauth.Session{}, status.Error(codes.Unauthenticated, "Invalid API key")
+		}
+		return lysauth.Session{}, fmt.Errorf("authGetServiceAccountSession: SvcAccountStore.SelectByApiKeyHash failed: %w", err)
+	}
+
+	// create dummy session for service account
+	sess = lysauth.Session{
+		UserName: dbSvcAcc.Name,
+		Roles:    sysrole.ToStringSlice(dbSvcAcc.Roles),
+	}
+
+	return sess, nil
+}
+
 func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess lysauth.Session, err error) {
+
+	// metadata must be present
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return lysauth.Session{}, lyserr.User{Message: "Metadata missing or empty", StatusCode: http.StatusUnauthorized}
+	}
+
+	// check for service account access via API key
+	apiKey, err := getApiKeyIfPresent(md)
+	if err != nil {
+		return lysauth.Session{}, fmt.Errorf("authGetSession: getApiKeyIfPresent failed: %w", err)
+	}
+	if apiKey != "" {
+		sess, err = rpcApp.authGetServiceAccountSession(ctx, apiKey)
+		if err != nil {
+			return lysauth.Session{}, fmt.Errorf("authGetSession: authGetServiceAccountSession failed: %w", err)
+		}
+
+		// successful service account authentication
+		return sess, nil
+	}
+
+	// regular user access
+
+	// get token from Authorization header in metadata
+	token, err := getBearerToken(md)
+	if err != nil {
+		return lysauth.Session{}, fmt.Errorf("authGetSession: getBearerToken failed: %w", err)
+	}
 
 	// get ip
 	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
@@ -185,12 +246,6 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 	userAgent, err := getUserAgent(ctx)
 	if err != nil {
 		return lysauth.Session{}, fmt.Errorf("authGetSession: getUserAgent failed: %w", err)
-	}
-
-	// get token from Authorization header in metadata
-	token, err := getBearerToken(ctx)
-	if err != nil {
-		return lysauth.Session{}, fmt.Errorf("authGetSession: getBearerToken failed: %w", err)
 	}
 
 	// get session

@@ -26,6 +26,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcreq"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsessionhist"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/syssvcaccount"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysuser"
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
@@ -103,6 +104,7 @@ func main() {
 	rpcApp.SessionStore = sysrpcsession.Store{Db: rpcApp.Db}
 	rpcApp.SessionHistStore = sysrpcsessionhist.Store{Db: rpcApp.Db}
 	rpcApp.SrvLogStore = sysrpcreq.Store{Db: rpcApp.Db}
+	rpcApp.SvcAccountStore = syssvcaccount.Store{Db: rpcApp.Db}
 	rpcApp.UserStore = sysuser.Store{Db: rpcApp.Db}
 
 	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)

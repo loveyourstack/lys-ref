@@ -1,4 +1,23 @@
 
+-- development service account
+INSERT INTO system.service_account (
+  api_key_hash,
+  expires_at,
+  is_active,
+  last_access_at,
+  name,
+  roles
+) VALUES (
+  '186ef2a547a06bb9d275a5912eb7cf90b9c7b27a1bbd7349e00b1f109b4eb6cb', -- WvyRcwbTRUSnprjcLllzpKCazXnVbapH / dev only: replace in prod
+  '9999-12-31 12:00:00+00',
+  true,
+  '0001-01-01 12:00:00+00',
+  'RefSrv to RpcSrv Monitor',
+  '{Monitor}'::system.role[]
+);
+
+
+-- dev user
 INSERT INTO system.user (
   allow_multiple_sessions,
   created_by,

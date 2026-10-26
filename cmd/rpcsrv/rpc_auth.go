@@ -15,10 +15,8 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
-	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyserr"
-	"github.com/loveyourstack/lys/lysrpc"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -36,17 +34,55 @@ type authSrv struct {
 }
 
 func (s *authSrv) ListLoginAttempts(ctx context.Context, req *pb.EmptyReq) (*pb.ListLoginAttemptsResp, error) {
-	return lysrpc.List(ctx, s.laStore, new(pb.ListReq{}), s.GetOptions, sysrpcloginattempt.ModelToPbFunc,
-		func(data []*pb.SysRpcLoginAttempt, meta lysapi.SelectMetadata) *pb.ListLoginAttemptsResp {
-			return &pb.ListLoginAttemptsResp{Data: data, Metadata: toPbMetadata(meta, len(data))}
+	las := s.LoginAttempts.ListByCreatedAt(false)
+	pbLas := make([]*pb.SysRpcLoginAttempt, len(las))
+	for i, la := range las {
+		pbLas[i] = sysrpcloginattempt.ModelToPbFunc(sysrpcloginattempt.Model{
+			CreatedAt:   la.CreatedAt,
+			Ip:          la.Ip,
+			IsBlocked:   la.IsBlocked,
+			NumAttempts: la.NumAttempts,
 		})
+	}
+	return &pb.ListLoginAttemptsResp{
+		Data: pbLas,
+		Metadata: &pb.GetMetadata{
+			Count:      int32(len(pbLas)),
+			TotalCount: int64(len(pbLas)),
+		},
+	}, nil
 }
 
 func (s *authSrv) ListSessions(ctx context.Context, req *pb.EmptyReq) (*pb.ListSessionsResp, error) {
-	return lysrpc.List(ctx, s.sessStore, new(pb.ListReq{}), s.GetOptions, sysrpcsession.ModelToPbFunc,
-		func(data []*pb.SysRpcSession, meta lysapi.SelectMetadata) *pb.ListSessionsResp {
-			return &pb.ListSessionsResp{Data: data, Metadata: toPbMetadata(meta, len(data))}
+	sessions := s.Sessions.ListByLastAccessAt(false)
+	pbSessions := make([]*pb.SysRpcSession, len(sessions))
+	for i, sess := range sessions {
+		pbSessions[i] = sysrpcsession.ModelToPbFunc(sysrpcsession.Model{
+			AllowMultipleSessions: sess.AllowMultipleSessions,
+			CreatedAt:             sess.CreatedAt,
+			Email:                 sess.Email,
+			ExpiresAt:             sess.ExpiresAt,
+			FamilyName:            sess.FamilyName,
+			ForcePasswordChange:   sess.ForcePasswordChange,
+			GivenName:             sess.GivenName,
+			GeoIpCountryIsoCode:   sess.GeoIpCountryIsoCode,
+			GeoIpLocation:         sess.GeoIpLocation,
+			Ip:                    sess.Ip,
+			LastAccessAt:          sess.LastAccessAt,
+			ProfilePic:            sess.ProfilePic,
+			Roles:                 sess.Roles,
+			UserAgent:             sess.UserAgent,
+			UserFk:                sess.UserId,
+			UserName:              sess.UserName,
 		})
+	}
+	return &pb.ListSessionsResp{
+		Data: pbSessions,
+		Metadata: &pb.GetMetadata{
+			Count:      int32(len(pbSessions)),
+			TotalCount: int64(len(pbSessions)),
+		},
+	}, nil
 }
 
 func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, error) {
@@ -230,12 +266,23 @@ func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Add
 	return remoteHostIp, err
 }
 
-func getBearerToken(ctx context.Context) (string, error) {
+// getApiKeyIfPresent returns the raw API key if it was sent. If not, returns empty string with no errror.
+func getApiKeyIfPresent(md metadata.MD) (string, error) {
 
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return "", lyserr.User{Message: "Metadata missing or empty", StatusCode: http.StatusUnauthorized}
+	// get api key from metadata
+	apiKeys := md.Get("x-api-key")
+	if len(apiKeys) == 0 {
+		return "", nil
 	}
+
+	if len(apiKeys) > 1 {
+		return "", lyserr.User{Message: "x-api-key header must be a single value", StatusCode: http.StatusUnauthorized}
+	}
+
+	return apiKeys[0], nil
+}
+
+func getBearerToken(md metadata.MD) (string, error) {
 
 	// metadata keys are lowercased by gRPC
 	authVals := md.Get("authorization")

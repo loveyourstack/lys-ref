@@ -26,6 +26,7 @@ export interface Notification {
 }
 
 export enum Role {
+  Monitor = 'Monitor',
   Standard = 'Standard',
   Viewer = 'Viewer',
   Tech = 'Tech',
