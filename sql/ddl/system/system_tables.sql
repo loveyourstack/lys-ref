@@ -186,6 +186,7 @@ COMMENT ON TABLE system.service_account IS 'shortname: sys_sa';
 
 GRANT SELECT,UPDATE ON system.service_account TO lysref_rpc;
 
+
 /* Note: the current session state is in the srv process, not in system.session.
   system.session is only used for persistence between app restarts.
 

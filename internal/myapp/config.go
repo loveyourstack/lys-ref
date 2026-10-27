@@ -45,6 +45,10 @@ type developer struct {
 	Password   string
 }
 
+type interProcess struct {
+	HttpToRpcKey string
+}
+
 type McpServer struct {
 	BinaryPath     string
 	ConfigFilePath string
@@ -104,6 +108,7 @@ type Config struct {
 	RpcApi       api
 	UI           ui
 	Developer    developer
+	InterProcess interProcess
 	McpServer    McpServer
 	Reflis       reflis
 

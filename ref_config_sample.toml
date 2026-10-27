@@ -54,6 +54,9 @@ familyName = ""
 email = ""
 password = ""
 
+[interProcess]
+httpToRpcKey = ""
+
 [mcpServer]
 binaryPath = "/path/to/mcpsrv"
 configFilePath = "/path/to/mcp_config.toml"

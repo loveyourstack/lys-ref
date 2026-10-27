@@ -57,8 +57,16 @@
 
                 <!-- RPC server -->
 
+                <v-window-item value="rpcSessions">
+                  <app-mon-rpc-session-table />
+                </v-window-item>
+
                 <v-window-item value="rpcReqLog">
                   <app-mon-rpc-req-log-table />
+                </v-window-item>
+
+                <v-window-item value="rpcLoginAttempts">
+                  <app-mon-rpc-login-attempt-table />
                 </v-window-item>
 
                 <!-- External APIs -->
@@ -104,7 +112,9 @@ const tabsByGroup = {
     { value: 'httpHubStatus', label: 'Hub status' },
   ],
   rpcServer: [
-    { value: 'rpcReqLog', label: 'Request log' },
+  { value: 'rpcSessions', label: 'Sessions' },  
+  { value: 'rpcReqLog', label: 'Request log' },
+  { value: 'rpcLoginAttempts', label: 'Login attempts' },
   ],
   externalApis: [
     { value: 'awsCalls', label: 'AWS' },

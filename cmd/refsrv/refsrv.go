@@ -43,6 +43,8 @@ import (
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/loveyourstack/lys/lysws"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const maxUserWsConnections = 5
@@ -77,6 +79,8 @@ func main() {
 
 		AuthedRateLimits:   lysauth.NewAppRateLimits(5, 20, 1*time.Hour),  // 5 rps with burst of 20. Buckets expire after 1 hour of inactivity
 		UnauthedRateLimits: lysauth.NewAppRateLimits(0.5, 3, 1*time.Hour), // ~1 every 2s with burst of 3
+
+		RpcKey: conf.InterProcess.HttpToRpcKey,
 	}
 
 	// start goroutine to periodically clean up expired rate limit buckets
@@ -116,6 +120,16 @@ func main() {
 	srvApp.SessionHistStore = syssessionhist.Store{Db: srvApp.Db}
 	srvApp.SrvLogStore = syssrvreq.Store{Db: srvApp.Db}
 	srvApp.UserStore = sysuser.Store{Db: srvApp.Db}
+
+	// make client to internal RPC server (doesn't actually connect until first request)
+	srvApp.rpcClient, err = grpc.NewClient("localhost:"+conf.RpcApi.Port,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithChainUnaryInterceptor(rpcKeyUnaryInterceptor(srvApp.RpcKey)),
+	)
+	if err != nil {
+		log.Fatalf("initialization: failed to connect to internal RPC server: %s", err.Error())
+	}
+	defer srvApp.rpcClient.Close()
 
 	// attach clients
 	srvApp.AwsClient = awsapi.NewClient(conf.Aws, srvApp.Db, srvApp.Logger)

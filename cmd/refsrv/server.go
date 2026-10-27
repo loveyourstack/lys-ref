@@ -25,6 +25,8 @@ import (
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lysws"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type httpServerApplication struct {
@@ -42,6 +44,10 @@ type httpServerApplication struct {
 	// rate limits
 	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
 	UnauthedRateLimits *lysauth.AppRateLimits
+
+	// connection to internal RPC server
+	rpcClient *grpc.ClientConn
+	RpcKey    string
 
 	// ws notifications
 	NotificationHub *lysws.NotificationHub
@@ -158,7 +164,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 			remoteHostIP, cmp.Or(userInfo.UserName, "-"), r.Proto, r.Method, r.URL.RequestURI(), status, duration.Milliseconds()))
 
 		// exit if user is not authenticated
-		if userInfo.UserId == 0 {
+		if userInfo.UserName == "" {
 			return
 		}
 
@@ -198,6 +204,12 @@ func (srvApp *httpServerApplication) runRateLimitCleanup(ctx context.Context, ev
 		case <-ctx.Done():
 			return
 		}
+	}
+}
+
+func rpcKeyUnaryInterceptor(key string) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		return invoker(metadata.AppendToOutgoingContext(ctx, "x-api-key", key), method, req, reply, cc, opts...)
 	}
 }
 

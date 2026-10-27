@@ -15,7 +15,6 @@ import (
 	"github.com/loveyourstack/connectors/maxmind/stores/mmnetwork"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/cmd"
-	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/stores/geo/geocountry"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
@@ -119,11 +118,6 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 	resp, err := handler(ctx, req)
 	duration := time.Since(start)
 
-	// don't log the sessions monitor (auto-refreshes in UI)
-	if info.FullMethod == pb.AuthSvc_ListSessions_FullMethodName {
-		return resp, err
-	}
-
 	// code as determined by mapError
 	code := status.Code(err)
 
@@ -139,7 +133,7 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 		remoteHostIp, cmp.Or(userInfo.UserName, "-"), info.FullMethod, code, duration.Milliseconds()))
 
 	// exit if user is not authenticated
-	if userInfo.UserId == 0 {
+	if userInfo.UserName == "" {
 		return resp, err
 	}
 

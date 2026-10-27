@@ -789,10 +789,18 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 		// for testing cancellation
 		r.HandleFunc("/pg-sleep", lys.PgSleep(srvApp.Db, srvApp.Logger, 10, 0)).Methods("GET")
 
+		endpoint = "/rpc-login-attempts"
+
+		r.HandleFunc(endpoint, srvApp.techRpcLoginAttempts).Methods("GET")
+
 		endpoint = "/rpc-requests"
 
 		rpcReqStore := sysrpcreq.Store{Db: srvApp.Db}
 		r.HandleFunc(endpoint, lys.Get(apiEnv, rpcReqStore, nil)).Methods("GET")
+
+		endpoint = "/rpc-sessions"
+
+		r.HandleFunc(endpoint, srvApp.techRpcSessions).Methods("GET")
 
 		endpoint = "/server-requests"
 
