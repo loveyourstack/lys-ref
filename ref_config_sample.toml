@@ -54,8 +54,8 @@ familyName = ""
 email = ""
 password = ""
 
-[interProcess]
-httpToRpcKey = ""
+[rpcClient]
+apiKey = ""
 
 [mcpServer]
 binaryPath = "/path/to/mcpsrv"

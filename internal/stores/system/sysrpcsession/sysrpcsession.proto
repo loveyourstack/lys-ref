@@ -21,7 +21,7 @@ message SysRpcSessionInput {
     string profile_pic = 12;
     repeated string roles = 13;
     string user_agent = 14;
-    int64 user_fk = 15;
+    int64 user_id = 15;
     string user_name = 16;
 }
 
@@ -40,6 +40,6 @@ message SysRpcSession {
     string profile_pic = 12;
     repeated string roles = 13;
     string user_agent = 14;
-    int64 user_fk = 15;
+    int64 user_id = 15;
     string user_name = 16;
 }

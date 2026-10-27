@@ -12,7 +12,6 @@ import (
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
 	"github.com/loveyourstack/lys-ref/internal/pb"
-	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys/lysauth"
@@ -236,8 +235,8 @@ func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Add
 		return netip.Addr{}, fmt.Errorf("getRemoteHostIp failed: %w", err)
 	}
 
-	// add login attempt from this IP
-	err = s.LoginAttempts.Add(remoteHostIp)
+	// add login attempt from this IP and block if necessary
+	err = s.recordFailedAttempt(ctx, remoteHostIp)
 	if err != nil {
 
 		// ip blocked
@@ -246,21 +245,14 @@ func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Add
 			return netip.Addr{}, lysauth.ErrBlocked
 		}
 
-		// if max attempts exceeded
+		// max attempts exceeded
 		if errors.Is(err, lysauth.ErrMaxAttemptsExceeded) {
 			s.Logger.Debug(fmt.Sprintf("trackLoginAttempt: max attempts exceeded for IP %s", remoteHostIp))
-
-			// persist blocked IP to db
-			_, err := s.BlockedIPStore.Insert(ctx, sysblockedip.Input{Ip: remoteHostIp})
-			if err != nil {
-				return netip.Addr{}, fmt.Errorf("s.BlockedIPStore.Insert failed: %w", err)
-			}
-
 			return netip.Addr{}, lysauth.ErrMaxAttemptsExceeded
 		}
 
 		// other error: shouldn't happen
-		return netip.Addr{}, fmt.Errorf("s.LoginAttempts.Add failed: %w", err)
+		return netip.Addr{}, fmt.Errorf("s.recordFailedAttempt failed: %w", err)
 	}
 
 	return remoteHostIp, err

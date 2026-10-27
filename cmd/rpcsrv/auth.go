@@ -14,6 +14,7 @@ import (
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
+	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys/lysauth"
@@ -101,6 +102,12 @@ func (rpcApp *gRpcServerApplication) authenticate(ctx context.Context, req any,
 			if userErr, ok := errors.AsType[lyserr.User](err); ok {
 				return nil, status.Error(codes.Unauthenticated, userErr.Message)
 			}
+			if errors.Is(err, lysauth.ErrBlocked) {
+				return nil, status.Error(codes.PermissionDenied, "IP blocked")
+			}
+			if errors.Is(err, lysauth.ErrMaxAttemptsExceeded) {
+				return nil, status.Error(codes.PermissionDenied, "Max login attempts exceeded")
+			}
 			return nil, fmt.Errorf("authenticate: rpcApp.authGetSession failed: %w", err)
 		}
 
@@ -148,19 +155,27 @@ func (rpcApp *gRpcServerApplication) authGetGeoIp(ctx context.Context, remoteAdd
 	return fmt.Sprintf("%s, %s", loc.CityName, loc.CountryName), loc.CountryIsoCode, nil
 }
 
-func (rpcApp *gRpcServerApplication) authGetServiceAccountSession(ctx context.Context, apiKey string) (sess lysauth.Session, err error) {
+func (rpcApp *gRpcServerApplication) authGetServiceAccountSession(ctx context.Context, apiKey string, remoteHostIp netip.Addr) (sess lysauth.Session, err error) {
+
+	// note: checking for blocked IP is done by rejectBlockedIp middleware
 
 	// hash API key using SHA-256
 	hashedApiKey := sha256.Sum256([]byte(apiKey))
-	hashedApiKeyStr := hex.EncodeToString(hashedApiKey[:])
+	hash := hex.EncodeToString(hashedApiKey[:])
 
 	// lookup hashed key in DB
-	dbSvcAcc, err := rpcApp.SvcAccountStore.SelectByApiKeyHash(ctx, hashedApiKeyStr)
+	dbSvcAcc, err := rpcApp.SvcAccountStore.SelectByApiKeyHash(ctx, hash)
 	if err != nil {
 		if userErr, ok := errors.AsType[lyserr.User](err); ok {
 			return lysauth.Session{}, userErr
 		}
 		if errors.Is(err, pgx.ErrNoRows) {
+
+			// record failed login attempt for this IP and block if necessary
+			if tErr := rpcApp.recordFailedAttempt(ctx, remoteHostIp); tErr != nil {
+				return lysauth.Session{}, tErr // ErrBlocked / ErrMaxAttemptsExceeded
+			}
+
 			return lysauth.Session{}, lyserr.User{Message: "Invalid API key", StatusCode: http.StatusUnauthorized}
 		}
 		return lysauth.Session{}, fmt.Errorf("authGetServiceAccountSession: SvcAccountStore.SelectByApiKeyHash failed: %w", err)
@@ -184,13 +199,19 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 		return lysauth.Session{}, lyserr.User{Message: "Metadata missing or empty", StatusCode: http.StatusUnauthorized}
 	}
 
+	// get ip
+	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	if err != nil {
+		return lysauth.Session{}, fmt.Errorf("authGetSession: getRemoteHostIp failed: %w", err)
+	}
+
 	// check for service account access via API key
 	apiKey, err := getApiKeyIfPresent(md)
 	if err != nil {
 		return lysauth.Session{}, fmt.Errorf("authGetSession: getApiKeyIfPresent failed: %w", err)
 	}
 	if apiKey != "" {
-		sess, err = rpcApp.authGetServiceAccountSession(ctx, apiKey)
+		sess, err = rpcApp.authGetServiceAccountSession(ctx, apiKey, remoteHostIp)
 		if err != nil {
 			return lysauth.Session{}, fmt.Errorf("authGetSession: authGetServiceAccountSession failed: %w", err)
 		}
@@ -205,12 +226,6 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 	token, err := getBearerToken(md)
 	if err != nil {
 		return lysauth.Session{}, fmt.Errorf("authGetSession: getBearerToken failed: %w", err)
-	}
-
-	// get ip
-	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
-	if err != nil {
-		return lysauth.Session{}, fmt.Errorf("authGetSession: getRemoteHostIp failed: %w", err)
 	}
 
 	// get user agent
@@ -407,6 +422,27 @@ func (rpcApp *gRpcServerApplication) persistSessions(ctx context.Context) (err e
 	}
 
 	return nil
+}
+
+func (rpcApp *gRpcServerApplication) recordFailedAttempt(ctx context.Context, ip netip.Addr) error {
+
+	err := rpcApp.LoginAttempts.Add(ip)
+	if err == nil {
+		return nil
+	}
+
+	// if max attempts exceeded
+	if errors.Is(err, lysauth.ErrMaxAttemptsExceeded) {
+
+		// persist blocked IP to db
+		if _, err := rpcApp.BlockedIPStore.Insert(ctx, sysblockedip.Input{Ip: ip}); err != nil {
+			return fmt.Errorf("BlockedIPStore.Insert failed: %w", err)
+		}
+
+		return lysauth.ErrMaxAttemptsExceeded
+	}
+
+	return err // includes ErrBlocked
 }
 
 func (rpcApp *gRpcServerApplication) rejectBlockedIp(ctx context.Context, req any,

@@ -26,7 +26,6 @@ import (
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lysws"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
 
 type httpServerApplication struct {
@@ -47,7 +46,7 @@ type httpServerApplication struct {
 
 	// connection to internal RPC server
 	rpcClient *grpc.ClientConn
-	RpcKey    string
+	RpcApiKey string
 
 	// ws notifications
 	NotificationHub *lysws.NotificationHub
@@ -207,11 +206,28 @@ func (srvApp *httpServerApplication) runRateLimitCleanup(ctx context.Context, ev
 	}
 }
 
-func rpcKeyUnaryInterceptor(key string) grpc.UnaryClientInterceptor {
+// rpcDefaultDeadlineUnaryInterceptor applies a timeout to RPC calls whose context has no deadline yet.
+// A deadline set by the caller is left alone.
+func rpcDefaultDeadlineUnaryInterceptor(timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		return invoker(metadata.AppendToOutgoingContext(ctx, "x-api-key", key), method, req, reply, cc, opts...)
+		if _, ok := ctx.Deadline(); !ok {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+			defer cancel()
+		}
+		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }
+
+// rpcKeyCredentials attaches the API key to every outgoing RPC as metadata.
+type rpcKeyCredentials struct{ key string }
+
+func (c rpcKeyCredentials) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return map[string]string{"x-api-key": c.key}, nil
+}
+
+// RequireTransportSecurity is false because the RPC server is only reached over loopback.
+func (c rpcKeyCredentials) RequireTransportSecurity() bool { return false }
 
 // secureHeaders is middleware that add XSS protection headers to responses
 func secureHeaders(next http.Handler) http.Handler {

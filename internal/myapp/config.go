@@ -45,8 +45,8 @@ type developer struct {
 	Password   string
 }
 
-type interProcess struct {
-	HttpToRpcKey string
+type rpcClient struct {
+	ApiKey string
 }
 
 type McpServer struct {
@@ -108,7 +108,7 @@ type Config struct {
 	RpcApi       api
 	UI           ui
 	Developer    developer
-	InterProcess interProcess
+	RpcClient    rpcClient
 	McpServer    McpServer
 	Reflis       reflis
 
@@ -154,6 +154,11 @@ func (c *Config) LoadFromFile(configFilePath string) (err error) {
 	}
 	if err = lysos.ValidateDir(c.General.UploadsPath, "Uploads"); err != nil {
 		return err
+	}
+
+	// if RPC server is using auth, must supply an API key for refsrv
+	if c.RpcApi.UseAuthentication && c.RpcClient.ApiKey == "" {
+		return fmt.Errorf("config validation failed: RpcClient.ApiKey must be set when RpcApi.UseAuthentication is true")
 	}
 
 	// validate SMTP config
