@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
+	"github.com/loveyourstack/lys-ref/internal/pb"
 	"github.com/loveyourstack/lys-ref/internal/stores/digmark/dmvertical"
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysrpc"

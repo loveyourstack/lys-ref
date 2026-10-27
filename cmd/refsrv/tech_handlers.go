@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/loveyourstack/lys"
-	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
+	"github.com/loveyourstack/lys-ref/internal/pb"
 	"github.com/loveyourstack/lys/lysapi"
 	"google.golang.org/protobuf/encoding/protojson"
 )

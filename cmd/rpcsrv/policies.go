@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
+	"github.com/loveyourstack/lys-ref/internal/pb"
 )
 
 type methodPolicy struct {

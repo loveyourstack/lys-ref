@@ -10,8 +10,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/loveyourstack/lys"
-	"github.com/loveyourstack/lys-ref/cmd/rpcsrv/pb"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
+	"github.com/loveyourstack/lys-ref/internal/pb"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysblockedip"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
