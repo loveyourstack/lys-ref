@@ -12,7 +12,7 @@ INSERT INTO system.service_account (
   '9999-12-31 12:00:00+00',
   true,
   '0001-01-01 12:00:00+00',
-  'RefSrv to RpcSrv Monitor',
+  'RefSrv Monitor',
   '{Monitor}'::system.role[]
 );
 

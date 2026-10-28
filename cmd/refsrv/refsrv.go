@@ -126,6 +126,7 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithPerRPCCredentials(rpcKeyCredentials{key: srvApp.RpcApiKey}), // attach API key to outgoing RPC requests
 		grpc.WithChainUnaryInterceptor(
+			rpcForwardIpUnaryInterceptor(),                    // forward client IP to RPC server
 			rpcDefaultDeadlineUnaryInterceptor(5*time.Second), // set default call timeout to 5 seconds
 		),
 	)

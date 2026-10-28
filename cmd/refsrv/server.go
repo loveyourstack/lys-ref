@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strconv"
 	"time"
@@ -26,6 +27,7 @@ import (
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lysws"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type httpServerApplication struct {
@@ -114,6 +116,14 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// get remote ip and attach to context, to be forwarded on outgoing RPC calls
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		if err != nil {
+			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			return
+		}
+		ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
+
 		// create user info and attach to context, to be filled in by authenticate and login later in the chain
 		// must be a pointer so that it can be overwritten
 		userInfo := &ReqUserInfo{}
@@ -128,13 +138,6 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		// don't log the sessions monitor (auto-refreshes in UI)
 		if r.URL.Path == "/a/tech/sessions" && r.Method == http.MethodGet {
 			next.ServeHTTP(w, r.WithContext(ctx))
-			return
-		}
-
-		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -215,6 +218,22 @@ func rpcDefaultDeadlineUnaryInterceptor(timeout time.Duration) grpc.UnaryClientI
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+}
+
+type clientIpCtxKeyType struct{}
+
+var clientIpCtxKey = clientIpCtxKeyType{}
+
+// rpcForwardIpUnaryInterceptor sets x-forwarded-for on outgoing RPCs to the end user's IP, which the RPC server requires in prod
+func rpcForwardIpUnaryInterceptor() grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
+		if !ok {
+			return fmt.Errorf("rpcForwardIpUnaryInterceptor: client IP missing from context")
+		}
+		ctx = metadata.AppendToOutgoingContext(ctx, "x-forwarded-for", ip.String())
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

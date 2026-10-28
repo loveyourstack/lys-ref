@@ -41,9 +41,15 @@ type Input struct {
 	Roles                 []string         `db:"roles" json:"roles,omitzero" validate:"required"`
 	Token                 string           `db:"token" json:"-" validate:"required,max=64"`
 	UserAgent             string           `db:"user_agent" json:"user_agent,omitzero" validate:"required,max=256"`
-	UserFk                int64            `db:"user_fk" json:"user_fk,omitzero" validate:"required"`
+	UserId                int64            `db:"user_id" json:"user_id,omitzero" validate:"required"` // see note below
 	UserName              string           `db:"user_name" json:"user_name,omitzero" validate:"required,max=64"`
 }
+
+/*
+UserId is used rather than UserFk so that the field name matches the proto definition.
+The proto definition needs UserId so that it matches the field name of lysauth.Session.UserId.
+This enables the use of the sessionToPb mapping function in rpc_auth.go.
+*/
 
 type Model struct {
 	Input

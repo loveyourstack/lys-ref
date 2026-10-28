@@ -153,7 +153,7 @@ CREATE TABLE system.rpc_session
   roles system.role[] NOT NULL,
   token text_short_mandatory,
   user_agent text_medium_mandatory,
-  user_fk bigint NOT NULL REFERENCES system.user(id),
+  user_id bigint NOT NULL REFERENCES system.user(id), -- see note in store
   user_name text_short_mandatory
 );
 COMMENT ON TABLE system.rpc_session IS 'shortname: sys_rpc_s';

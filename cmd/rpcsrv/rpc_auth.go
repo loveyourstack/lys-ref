@@ -16,6 +16,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysrpcsession"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyserr"
+	"github.com/loveyourstack/lys/lysrpc"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -32,56 +33,19 @@ type authSrv struct {
 	sessStore sysrpcsession.Store
 }
 
+var (
+	loginAttemptToPb = lysrpc.NewToPb[lysauth.LoginAttempt, pb.SysRpcLoginAttempt]()
+	sessionToPb      = lysrpc.NewToPb[lysauth.Session, pb.SysRpcSession]()
+)
+
 func (s *authSrv) ListLoginAttempts(ctx context.Context, req *pb.EmptyReq) (*pb.ListLoginAttemptsResp, error) {
-	las := s.LoginAttempts.ListByCreatedAt(false)
-	pbLas := make([]*pb.SysRpcLoginAttempt, len(las))
-	for i, la := range las {
-		pbLas[i] = sysrpcloginattempt.ModelToPbFunc(sysrpcloginattempt.Model{
-			CreatedAt:   la.CreatedAt,
-			Ip:          la.Ip,
-			IsBlocked:   la.IsBlocked,
-			NumAttempts: la.NumAttempts,
-		})
-	}
-	return &pb.ListLoginAttemptsResp{
-		Data: pbLas,
-		Metadata: &pb.GetMetadata{
-			Count:      int32(len(pbLas)),
-			TotalCount: int64(len(pbLas)),
-		},
-	}, nil
+	data := lysrpc.ToPbSlice(s.LoginAttempts.ListByCreatedAt(false), loginAttemptToPb)
+	return &pb.ListLoginAttemptsResp{Data: data, Metadata: pbUnpagedMetadata(len(data))}, nil
 }
 
 func (s *authSrv) ListSessions(ctx context.Context, req *pb.EmptyReq) (*pb.ListSessionsResp, error) {
-	sessions := s.Sessions.ListByLastAccessAt(false)
-	pbSessions := make([]*pb.SysRpcSession, len(sessions))
-	for i, sess := range sessions {
-		pbSessions[i] = sysrpcsession.ModelToPbFunc(sysrpcsession.Model{
-			AllowMultipleSessions: sess.AllowMultipleSessions,
-			CreatedAt:             sess.CreatedAt,
-			Email:                 sess.Email,
-			ExpiresAt:             sess.ExpiresAt,
-			FamilyName:            sess.FamilyName,
-			ForcePasswordChange:   sess.ForcePasswordChange,
-			GivenName:             sess.GivenName,
-			GeoIpCountryIsoCode:   sess.GeoIpCountryIsoCode,
-			GeoIpLocation:         sess.GeoIpLocation,
-			Ip:                    sess.Ip,
-			LastAccessAt:          sess.LastAccessAt,
-			ProfilePic:            sess.ProfilePic,
-			Roles:                 sess.Roles,
-			UserAgent:             sess.UserAgent,
-			UserFk:                sess.UserId,
-			UserName:              sess.UserName,
-		})
-	}
-	return &pb.ListSessionsResp{
-		Data: pbSessions,
-		Metadata: &pb.GetMetadata{
-			Count:      int32(len(pbSessions)),
-			TotalCount: int64(len(pbSessions)),
-		},
-	}, nil
+	data := lysrpc.ToPbSlice(s.Sessions.ListByLastAccessAt(false), sessionToPb)
+	return &pb.ListSessionsResp{Data: data, Metadata: pbUnpagedMetadata(len(data))}, nil
 }
 
 func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, error) {

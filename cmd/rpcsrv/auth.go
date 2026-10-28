@@ -330,7 +330,7 @@ func (rpcApp *gRpcServerApplication) loadSessionsFromDb(ctx context.Context) (er
 			ProfilePic:            dbSess.ProfilePic,
 			Roles:                 dbSess.Roles,
 			UserAgent:             dbSess.UserAgent,
-			UserId:                dbSess.UserFk,
+			UserId:                dbSess.UserId,
 			UserName:              dbSess.UserName,
 		}
 		appSessions[i] = lysauth.Session{
@@ -514,7 +514,7 @@ func appSessionsToInputs(appSessions []lysauth.Session) []sysrpcsession.Input {
 			Roles:                 appSess.Roles,
 			Token:                 appSess.Token,
 			UserAgent:             appSess.UserAgent,
-			UserFk:                appSess.UserId,
+			UserId:                appSess.UserId,
 			UserName:              appSess.UserName,
 		}
 	}

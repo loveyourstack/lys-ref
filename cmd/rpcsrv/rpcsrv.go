@@ -217,3 +217,8 @@ func toPbMetadata(m lysapi.SelectMetadata, itemCount int) *pb.GetMetadata {
 		TotalCountIsEstimated: m.TotalCountIsEstimated,
 	}
 }
+
+// pbUnpagedMetadata returns metadata for a list that was returned in full, without paging.
+func pbUnpagedMetadata(n int) *pb.GetMetadata {
+	return &pb.GetMetadata{Count: int32(n), TotalCount: int64(n)}
+}
