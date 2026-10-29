@@ -251,3 +251,47 @@ export function GetVariantTypeInputFromItem(item: VariantType): VariantTypeInput
     c_percent: item.c_percent,
   }
 }
+
+export interface SchemaColumnRef {
+  table_id: string
+  column_id: string
+}
+export interface SchemaColumn {
+  id: string
+  name: string
+  type: string
+  pk: boolean
+  not_null: boolean
+  ref?: SchemaColumnRef
+}
+export interface SchemaTable {
+  id: string
+  schema: string
+  name: string
+  x: number
+  y: number
+  columns: SchemaColumn[]
+}
+export function schemaTableLabel(t: Pick<SchemaTable, 'schema' | 'name'>): string {
+  return t.schema && t.schema !== 'public' ? `${t.schema}.${t.name}` : t.name
+}
+export const SchemaColumnTypes = ['integer', 'bigint', 'numeric', 'boolean', 'varchar', 'text', 'date', 'timestamp', 'timestamptz', 'uuid', 'jsonb']
+export function NewSchemaColumn(): SchemaColumn {
+  return {
+    id: crypto.randomUUID(),
+    name: 'new_column',
+    type: 'varchar',
+    pk: false,
+    not_null: false,
+  }
+}
+export function NewSchemaTable(name = 'new_table', x = 0, y = 0): SchemaTable {
+  return {
+    id: crypto.randomUUID(),
+    schema: 'public',
+    name,
+    x,
+    y,
+    columns: [{ ...NewSchemaColumn(), name: 'id', type: 'bigint', pk: true, not_null: true }],
+  }
+}

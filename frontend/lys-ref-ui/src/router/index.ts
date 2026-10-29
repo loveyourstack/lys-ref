@@ -52,6 +52,11 @@ const routes = [
             component: () => import('@/pages/CoreOptionalValues.vue'),
           },
           {
+            path: 'schema-designer',
+            name: 'Schema designer',
+            component: () => import('@/pages/CoreSchemaDesigner.vue'),
+          },
+          {
             path: 'variants',
             name: 'Variants',
             component: () => import('@/pages/CoreVariantTypes.vue'),

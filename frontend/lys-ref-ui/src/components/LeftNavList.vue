@@ -26,6 +26,7 @@
       <v-list-item link :title="$t('optimizer.nav')" to="/digital-marketing/campaign-optimizer" prepend-icon="mdi-counter"></v-list-item>
       <v-list-item link :title="$t('organization.nav')" to="/lysinc/organization" prepend-icon="mdi-file-tree"></v-list-item>
       <v-list-item link :title="$t('calendar.nav')" to="/lysinc/calendar" prepend-icon="mdi-calendar"></v-list-item>
+      <v-list-item link :title="$t('schema_designer.nav')" to="/core/schema-designer" prepend-icon="mdi-database-edit-outline"></v-list-item>
     </div>
 
     <v-list-subheader :title="$t('nav_header.ai')" class="mt-2 clickable" @click="showAiItems = !showAiItems"></v-list-subheader>

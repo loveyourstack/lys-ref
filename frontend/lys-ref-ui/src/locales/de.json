@@ -356,6 +356,33 @@
             "p3": "Jeder gefälschte laufende Prozess hat eine 5%ige Chance pro Sekunde, fehlschlagen."
         }
     },
+    "schema_designer": {
+        "nav": "Schema-Designer",
+        "title": "Datenbankschema-Designer",
+        "p1": "Tabellen per Drag-and-drop anordnen, Spalten im Seitenpanel bearbeiten und von einem Spalten-Anschluss zum anderen ziehen, um einen Fremdschlüssel zu erstellen.",
+        "add_table": "Tabelle hinzufügen",
+        "delete_table": "Tabelle löschen",
+        "fit": "Ansicht anpassen",
+        "export_json": "JSON exportieren",
+        "import_json": "JSON importieren",
+        "export_sql": "SQL exportieren",
+        "reset": "Zurücksetzen",
+        "schema_name": "Schemaname",
+        "table_name": "Tabellenname",
+        "columns": "Spalten",
+        "add_column": "Spalte hinzufügen",
+        "name": "Name",
+        "type": "Typ",
+        "pk": "Primärschl.",
+        "not_null": "Nicht null",
+        "references": "Verweist auf",
+        "none": "Keine",
+        "select_table": "Tabelle zum Bearbeiten auswählen",
+        "sql_title": "SQL",
+        "copy": "Kopieren",
+        "close": "Schließen",
+        "invalid_file": "Ungültige Schemadatei"
+    },
     "supplier_employees": {
         "title": "Lieferantenmitarbeiter",
         "new_item": "Neuer Mitarbeiter"

@@ -356,6 +356,33 @@
             "p3": "Each fake running process has a 5% chance per second of failing."
         }
     },
+    "schema_designer": {
+        "nav": "Schema designer",
+        "title": "Database schema designer",
+        "p1": "Drag tables to arrange them, edit columns in the side panel, and drag from one column handle to another to create a foreign key.",
+        "add_table": "Add table",
+        "delete_table": "Delete table",
+        "fit": "Fit view",
+        "export_json": "Export JSON",
+        "import_json": "Import JSON",
+        "export_sql": "Export SQL",
+        "reset": "Reset",
+        "schema_name": "Schema name",
+        "table_name": "Table name",
+        "columns": "Columns",
+        "add_column": "Add column",
+        "name": "Name",
+        "type": "Type",
+        "pk": "Primary key",
+        "not_null": "Not null",
+        "references": "References",
+        "none": "None",
+        "select_table": "Select a table to edit it",
+        "sql_title": "SQL",
+        "copy": "Copy",
+        "close": "Close",
+        "invalid_file": "Invalid schema file"
+    },
     "supplier_employees": {
         "title": "Supplier employees",
         "new_item": "New employee"
