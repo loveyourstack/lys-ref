@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,19 +22,22 @@ import (
 )
 
 func main() {
-
-	configFileName := "suppsrv_config.toml"
-
-	// mandatory flag if not using default
-	configFilePath := flag.String("configFilePath", configFileName, "Path to the config file")
-
+	configFilePath := flag.String("configFilePath", "suppsrv_config.toml", "Path to the config file")
 	flag.Parse()
+
+	if err := run(*configFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(configFilePath string) error {
 
 	// load config from file
 	conf := myapp.Config{}
-	err := conf.LoadFromFile(*configFilePath)
+	err := conf.LoadFromFile(configFilePath)
 	if err != nil {
-		log.Fatalf("initialization: conf.LoadFromFile (%s) failed: %s", *configFilePath, err.Error())
+		return fmt.Errorf("conf.LoadFromFile (%s) failed: %w", configFilePath, err)
 	}
 
 	// create context that listens for interrupt and termination signals to allow for graceful shutdown
@@ -53,13 +55,10 @@ func main() {
 		RateLimits: lysauth.NewAppRateLimits(2, 5, 1*time.Hour), // 2 rps with burst of 5
 	}
 
-	// start goroutine to periodically clean up expired rate limit buckets
-	go srvApp.runRateLimitCleanup(ctx, 30*time.Minute)
-
 	// attach Get options
 	srvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{}) // use defaults
 	if err != nil {
-		log.Fatalf("initialization: failed to fill GetOptions: %s", err.Error())
+		return fmt.Errorf("lysapi.FillGetOptions failed: %w", err)
 	}
 
 	// attach auth
@@ -70,16 +69,16 @@ func main() {
 	srvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5) // block after 5 failed attempts
 
 	// RLS connection (main connection for queries, with company_id setting applied for RLS)
-	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, srvApp.Config.General.AppName, "app.company_id", CompanyCtxKey, srvApp.Logger)
+	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, conf.General.AppName, "app.company_id", CompanyCtxKey, srvApp.Logger)
 	if err != nil {
-		log.Fatalf("initialization: failed to create RLS db connection pool: %s", err.Error())
+		return fmt.Errorf("lyspgdb.GetPoolWithCtxSetting failed: %w", err)
 	}
 	defer srvApp.Db.Close()
 
 	// owner db connection for queries that need to bypass RLS
 	srvApp.OwnerDb, err = lyspgdb.GetPool(ctx, conf.Db, conf.DbOwnerUser, conf.General.AppName+" (owner)")
 	if err != nil {
-		log.Fatalf("initialization: failed to create owner db connection pool: %s", err.Error())
+		return fmt.Errorf("lyspgdb.GetPool (owner) failed: %w", err)
 	}
 	defer srvApp.OwnerDb.Close()
 
@@ -101,11 +100,14 @@ func main() {
 	// load persisted blocked IPs from db, if any
 	err = srvApp.loadBlockedIPsFromDb(ctx)
 	if err != nil {
-		log.Fatalf("initialization: failed to load blocked IPs from db: %s", err.Error())
+		return fmt.Errorf("initialization: failed to load blocked IPs from db: %w", err)
 	}
 
+	// start goroutine to periodically clean up expired rate limit buckets
+	go srvApp.runRateLimitCleanup(ctx, 30*time.Minute)
+
 	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting suppsrv on port: %s", srvApp.Config.Api.Port)
+	startupMsg := fmt.Sprintf("starting suppsrv on port: %s", conf.Api.Port)
 	if conf.General.Debug {
 		startupMsg += ", debug: true"
 	}
@@ -118,14 +120,21 @@ func main() {
 	}()
 
 	// wait for shutdown signal or server error
+	var serveErr error
 	select {
 	case err := <-errCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("initialization: srv.ListenAndServe failed: %s", err.Error())
+			serveErr = fmt.Errorf("srv.ListenAndServe failed: %w", err)
 		}
 	case <-ctx.Done():
 		srvApp.Logger.Info("shutdown signal received")
 	}
+
+	// stop background goroutines, restore default signal handling
+	stop()
+
+	// every shutdown step runs regardless of earlier failures; errors are collected and returned at the end
+	runErr := serveErr
 
 	// create context with timeout for server shutdown
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
@@ -133,6 +142,14 @@ func main() {
 
 	// gracefully shutdown server, waiting for active requests to finish or timeout before forcefully closing
 	if err := srv.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("shutdown: srv.Shutdown failed: %s", err.Error())
+
+		// graceful shutdown failed (typically deadline exceeded): force-close remaining connections
+		if closeErr := srv.Close(); closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("srv.Close failed: %w", closeErr))
+		}
+
+		runErr = errors.Join(runErr, fmt.Errorf("shutdown: srv.Shutdown failed: %w", err))
 	}
+
+	return runErr
 }

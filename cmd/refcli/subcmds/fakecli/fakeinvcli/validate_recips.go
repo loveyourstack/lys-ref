@@ -16,8 +16,6 @@ func ValRecipsCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "invoices valrecips", 2, cliApp.Logger)
 			if err != nil {
 				if errors.Is(err, context.Canceled) {

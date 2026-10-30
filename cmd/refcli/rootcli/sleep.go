@@ -19,9 +19,6 @@ func SleepCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			// ensure that connection is closed even on context cancelation or other error
-			defer cliApp.Db.Close()
-
 			// only possible in dev env
 			if cliApp.Config.General.Env != appenv.Dev {
 				return fmt.Errorf("this command may only be used in dev environment")

@@ -2,7 +2,6 @@ package rootcli
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
@@ -20,8 +19,6 @@ func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			// only possible in dev env
 			if cliApp.Config.General.Env != appenv.Dev {
 				return fmt.Errorf("this command may only be used in dev environment")
@@ -30,7 +27,7 @@ func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 			// get file replacements from configs where needed
 			fileReplacements, err := cliApp.Config.Developer.GetReplacements()
 			if err != nil {
-				log.Fatalf("cliApp.Config.Developer.GetReplacements failed: %s", err.Error())
+				return fmt.Errorf("cliApp.Config.Developer.GetReplacements failed: %w", err)
 			}
 
 			dbSuperUser := lyspgdb.User{

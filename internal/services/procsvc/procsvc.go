@@ -2,7 +2,6 @@ package procsvc
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"strings"
 
@@ -15,10 +14,10 @@ type Service struct {
 	Logger *slog.Logger
 }
 
-func NewService(conf myapp.Process, logger *slog.Logger) (svc Service) {
+func NewService(conf myapp.Process, logger *slog.Logger) (svc Service, err error) {
 
 	if conf.CliCmdPrefix == "" {
-		log.Fatalf("procsvc: conf.CliCmdPrefix is required")
+		return Service{}, fmt.Errorf("procsvc: conf.CliCmdPrefix is required")
 	}
 
 	svcShortname := "proc"
@@ -27,7 +26,7 @@ func NewService(conf myapp.Process, logger *slog.Logger) (svc Service) {
 		Conf: conf,
 
 		Logger: logger.With("svc", svcShortname),
-	}
+	}, nil
 }
 
 func (svc Service) prefixAndSplitCmd(cmd string) (splitCmd []string, err error) {

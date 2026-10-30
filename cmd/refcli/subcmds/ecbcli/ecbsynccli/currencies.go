@@ -20,8 +20,6 @@ func CurrenciesCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			// select API items map with Code as key
 			cApiItemsMap, err := cliApp.EcbClient.GetCurrenciesMap(cmd.Context())
 			if err != nil {

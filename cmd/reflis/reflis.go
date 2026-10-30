@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json/v2"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -25,25 +26,22 @@ type dbListenerApplication struct {
 }
 
 func main() {
-	if err := run(); err != nil {
+	configFilePath := flag.String("configFilePath", "ref_config.toml", "Path to the config file")
+	flag.Parse()
+
+	if err := run(*configFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
-
-	configFileName := "ref_config.toml"
-
-	// mandatory flag if not using default
-	configFilePath := flag.String("configFilePath", configFileName, "Path to the config file")
-
-	flag.Parse()
+func run(configFilePath string) error {
 
 	// load config from file
 	conf := myapp.Config{}
-	err := conf.LoadFromFile(*configFilePath)
+	err := conf.LoadFromFile(configFilePath)
 	if err != nil {
-		return fmt.Errorf("initialization: conf.LoadFromFile (%s) failed: %w", *configFilePath, err)
+		return fmt.Errorf("conf.LoadFromFile (%s) failed: %w", configFilePath, err)
 	}
 
 	// create context that listens for interrupt and termination signals to allow for graceful shutdown
@@ -59,14 +57,17 @@ func run() error {
 	}
 
 	// connect to db and assign pool to lisApp
-	lisApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbLisUser, lisApp.Config.General.AppName+" Lis", myapp.TypesToRegister)
+	lisApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbLisUser, conf.General.AppName+" Lis", myapp.TypesToRegister)
 	if err != nil {
-		return fmt.Errorf("initialization: failed to create db connection pool: %w", err)
+		return fmt.Errorf("lyspgdb.GetPoolWithTypes failed: %w", err)
 	}
 	defer lisApp.Db.Close()
 
 	// attach services
-	lisApp.LaunchSvc = launchsvc.NewService(lisApp.Db, conf.Reflis.PrepBatchSize, lisApp.Logger)
+	lisApp.LaunchSvc, err = launchsvc.NewService(lisApp.Db, conf.Reflis.PrepBatchSize, lisApp.Logger)
+	if err != nil {
+		return fmt.Errorf("launchsvc.NewService failed: %w", err)
+	}
 
 	// create prep runners
 	fbPrepRunner := newPreparationRunner(ctx, lisApp.LaunchSvc.RunFbPreparation, lisApp.Logger)
@@ -79,7 +80,7 @@ func run() error {
 	// acquire a connection from the pool for listening
 	conn, err := lisApp.Db.Acquire(ctx)
 	if err != nil {
-		return fmt.Errorf("initialization: failed to acquire connection: %w", err)
+		return fmt.Errorf("lisApp.Db.Acquire failed: %w", err)
 	}
 	defer conn.Release()
 
@@ -87,7 +88,7 @@ func run() error {
 	pgChanName := "change"
 	_, err = conn.Exec(ctx, fmt.Sprintf("LISTEN %s;", pgx.Identifier{pgChanName}.Sanitize()))
 	if err != nil {
-		return fmt.Errorf("initialization: failed to listen to '%s' channel: %w", pgChanName, err)
+		return fmt.Errorf("conn.Exec (LISTEN) failed: channel '%s': %w", pgChanName, err)
 	}
 
 	// trigger runners once at startup in case listener was down when changes were made
@@ -101,22 +102,33 @@ func run() error {
 	lisApp.Logger.Info(fmt.Sprintf("listening for events on pg channel: %s", pgChanName))
 
 	// listen for notifications and handle them
-	err = listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, fbProcessingRunner, gadsProcessingRunner, lisApp.Logger)
+	listenErr := listen(ctx, conn.Conn(), fbPrepRunner, gadsPrepRunner, fbProcessingRunner, gadsProcessingRunner, lisApp.Logger)
 
-	// wait for runners to complete before exit
-	fbPrepRunner.Wait()
-	gadsPrepRunner.Wait()
+	// cancel runners on every exit path (no-op if already canceled by a signal)
+	stop()
 
-	fbProcessingRunner.Wait()
-	gadsProcessingRunner.Wait()
+	// wait for runners to exit, bounded so a runFunc that ignores ctx can't hang shutdown
+	runnersDoneCh := make(chan struct{})
+	go func() {
+		defer close(runnersDoneCh)
+		fbPrepRunner.Wait()
+		gadsPrepRunner.Wait()
+		fbProcessingRunner.Wait()
+		gadsProcessingRunner.Wait()
+	}()
 
-	if err != nil {
-		lisApp.Logger.Error("reflis shutdown: listen failed", "error", err)
-		return err
+	runErr := listenErr
+	select {
+	case <-runnersDoneCh:
+	case <-time.After(10 * time.Second):
+		runErr = errors.Join(runErr, errors.New("shutdown: timeout waiting for runners to exit"))
 	}
 
-	lisApp.Logger.Info("reflis shutdown signal received")
-	return nil
+	if listenErr == nil {
+		lisApp.Logger.Info("shutdown signal received")
+	}
+
+	return runErr
 }
 
 func listen(ctx context.Context, conn *pgx.Conn,

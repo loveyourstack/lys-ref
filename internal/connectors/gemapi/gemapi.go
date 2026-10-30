@@ -3,7 +3,6 @@ package gemapi
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,13 +23,13 @@ type Client struct {
 }
 
 // NewClient creates a new Gemini API client.
-func NewClient(ctx context.Context, conf Conf, generatedPath string, db *pgxpool.Pool, logger *slog.Logger) Client {
+func NewClient(ctx context.Context, conf Conf, generatedPath string, db *pgxpool.Pool, logger *slog.Logger) (Client, error) {
 
 	if conf.ApiKey == "" {
-		log.Fatal("gemapi: conf.ApiKey is empty")
+		return Client{}, fmt.Errorf("gemapi: conf.ApiKey is empty")
 	}
 	if generatedPath == "" {
-		log.Fatal("gemapi: generatedPath is empty")
+		return Client{}, fmt.Errorf("gemapi: generatedPath is empty")
 	}
 
 	genAiClient, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -38,7 +37,7 @@ func NewClient(ctx context.Context, conf Conf, generatedPath string, db *pgxpool
 		Backend: genai.BackendGeminiAPI,
 	})
 	if err != nil {
-		log.Fatal(fmt.Errorf("genai.NewClient failed: %w", err))
+		return Client{}, fmt.Errorf("genai.NewClient failed: %w", err)
 	}
 
 	return Client{
@@ -47,5 +46,5 @@ func NewClient(ctx context.Context, conf Conf, generatedPath string, db *pgxpool
 		genAiClient:   genAiClient,
 		generatedPath: generatedPath,
 		logger:        logger.With("api", "gem"),
-	}
+	}, nil
 }

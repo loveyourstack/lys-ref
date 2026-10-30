@@ -16,8 +16,6 @@ func CheckDbCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			// connect as owner (for permission to perform admin tasks)
 			dbOwnerUser := lyspgdb.User{
 				Name:     cliApp.Config.DbOwnerUser.Name,

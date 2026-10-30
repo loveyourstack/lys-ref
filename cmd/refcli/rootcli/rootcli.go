@@ -2,9 +2,7 @@ package rootcli
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,7 +30,6 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysextdatasync"
-	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Version:       version,
 	Short:         "refcli - CLI tool for LysRef",
 	Long:          `refcli is a CLI tool for running LysRef admin tasks`,
-	SilenceErrors: true, // subcommand errors are returned upwards via RunE and handled in Execute() below
+	SilenceErrors: true, // subcommand errors are returned upwards via RunE to Run() below, then to main()
 	SilenceUsage:  true,
 	// no Run function: a subcommand is always needed
 }
@@ -70,7 +67,7 @@ func addSubCommands() {
 	rootCmd.AddCommand(tedbcli.NewCmd(cliApp))
 }
 
-func Execute() {
+func Run() error {
 
 	configFileName := "ref_config.toml"
 
@@ -84,7 +81,7 @@ func Execute() {
 	conf := myapp.Config{}
 	err := conf.LoadFromFile(fmt.Sprintf("/usr/local/etc/%s", configFileName))
 	if err != nil {
-		log.Fatalf("initialization: conf.LoadFromFile (%s) failed: %s", configFileName, err.Error())
+		return fmt.Errorf("conf.LoadFromFile (%s) failed: %w", configFileName, err)
 	}
 
 	// create non-specific app
@@ -98,33 +95,42 @@ func Execute() {
 	// connect to db and assign pool to cliApp
 	cliApp.Db, err = lyspgdb.GetPool(ctx, conf.Db, conf.DbCliUser, conf.General.AppName+" Cli")
 	if err != nil {
-		log.Fatalf("initialization: failed to create db connection pool: %s", err.Error())
+		return fmt.Errorf("lyspgdb.GetPool failed: %w", err)
 	}
 	defer cliApp.Db.Close()
 
 	// attach API clients
-	cliApp.AwsClient = awsapi.NewClient(conf.Aws, cliApp.Db, cliApp.Logger)
+	cliApp.AwsClient, err = awsapi.NewClient(conf.Aws, cliApp.Db, cliApp.Logger)
+	if err != nil {
+		return fmt.Errorf("awsapi.NewClient failed: %w", err)
+	}
 	cliApp.EcbClient = ecbapi.NewClient(cliApp.Db, cliApp.Logger)
-	cliApp.MaxMindClient = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.Logger)
+	cliApp.MaxMindClient, err = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.Logger)
+	if err != nil {
+		return fmt.Errorf("mmapi.NewClient failed: %w", err)
+	}
 	cliApp.TedbClient = tedbapi.NewClient(cliApp.Db, cliApp.Logger)
 
 	// attach services
 	syncStore := sysextdatasync.Store{Db: cliApp.Db}
-	cliApp.AwsSvc = awssvc.NewService(cliApp.Db, cliApp.AwsClient, cliApp.Logger)
+	cliApp.AwsSvc, err = awssvc.NewService(cliApp.Db, cliApp.AwsClient, cliApp.Logger)
+	if err != nil {
+		return fmt.Errorf("awssvc.NewService failed: %w", err)
+	}
 	cliApp.EcbSvc = ecbsvc.NewServiceWithSyncStore(cliApp.EcbClient, cliApp.Logger, syncStore)
-	cliApp.MaxMindSvc = mmsvc.NewServiceWithSyncStore(cliApp.MaxMindClient, cliApp.Config.General.DownloadsPath, cliApp.Logger, syncStore)
-	cliApp.ProcSvc = procsvc.NewService(conf.Process, cliApp.Logger)
+	cliApp.MaxMindSvc, err = mmsvc.NewServiceWithSyncStore(cliApp.MaxMindClient, cliApp.Config.General.DownloadsPath, cliApp.Logger, syncStore)
+	if err != nil {
+		return fmt.Errorf("mmsvc.NewServiceWithSyncStore failed: %w", err)
+	}
+	cliApp.ProcSvc, err = procsvc.NewService(conf.Process, cliApp.Logger)
+	if err != nil {
+		return fmt.Errorf("procsvc.NewService failed: %w", err)
+	}
 	cliApp.TedbSvc = tedbsvc.NewServiceWithSyncStore(cliApp.TedbClient, cliApp.Db, cliApp.Logger, syncStore)
-
-	// note that defer db Close is also needed in subcommands or else context cancelation doesn't propagate to db
 
 	// subcommands
 	addSubCommands()
 
-	if err := rootCmd.Execute(); err != nil {
-		if userErr, ok := errors.AsType[lyserr.User](err); ok {
-			log.Fatal(userErr)
-		}
-		log.Fatal(err.Error())
-	}
+	// execute the root command, which runs the appropriate subcommand based on user input
+	return rootCmd.Execute()
 }

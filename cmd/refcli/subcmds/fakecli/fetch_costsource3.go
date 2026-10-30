@@ -16,8 +16,6 @@ func FetchCostSource3Cmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "costsource3", 7, cliApp.Logger)
 			if err != nil {
 				if errors.Is(err, context.Canceled) {

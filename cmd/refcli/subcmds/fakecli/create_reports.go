@@ -16,8 +16,6 @@ func CreateReportsCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			err = cliApp.ProcSvc.RunFakeCmd(cmd.Context(), "createreports", 5, cliApp.Logger, args[0], args[1])
 			if err != nil {
 				if errors.Is(err, context.Canceled) {

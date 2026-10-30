@@ -17,8 +17,6 @@ func AggCampPerfCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			// aggregate camp perf
 			aggCampPerfStore := dmcampperfagg.Store{Db: cliApp.Db}
 			err = aggCampPerfStore.Create(context.Background(), cliApp.Logger)

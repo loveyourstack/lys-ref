@@ -1,7 +1,7 @@
 package launchsvc
 
 import (
-	"log"
+	"fmt"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,10 +24,10 @@ type Service struct {
 	Logger *slog.Logger
 }
 
-func NewService(db *pgxpool.Pool, prepBatchSize int, logger *slog.Logger) (svc Service) {
+func NewService(db *pgxpool.Pool, prepBatchSize int, logger *slog.Logger) (svc Service, err error) {
 
 	if prepBatchSize <= 0 {
-		log.Fatal("prepBatchSize must be > 0")
+		return Service{}, fmt.Errorf("prepBatchSize must be > 0")
 	}
 
 	svcShortname := "launch"
@@ -43,5 +43,5 @@ func NewService(db *pgxpool.Pool, prepBatchSize int, logger *slog.Logger) (svc S
 
 		Db:     db,
 		Logger: logger.With("svc", svcShortname),
-	}
+	}, nil
 }

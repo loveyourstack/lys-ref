@@ -20,8 +20,6 @@ func ExchangeRatesCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			startDate, err := time.Parse("2006-01-02", args[0])
 			if err != nil {
 				return fmt.Errorf("time.Parse (start) failed: %w", err)

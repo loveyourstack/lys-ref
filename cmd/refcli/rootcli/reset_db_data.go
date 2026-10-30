@@ -17,8 +17,6 @@ func ResetDbDataCmd(cliApp *cliapp.App) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx := cmd.Context()
 
-			defer cliApp.Db.Close()
-
 			dbOwnerUser := lyspgdb.User{
 				Name:     cliApp.Config.DbOwnerUser.Name,
 				Password: cliApp.Config.DbOwnerUser.Password,

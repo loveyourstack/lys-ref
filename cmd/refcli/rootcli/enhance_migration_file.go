@@ -18,8 +18,6 @@ func EnhanceMigrationFileCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			res, err := lyspgdb.EnhanceMigrationFile(args[0], ddl.SQLAssets, migrations.SQLAssets)
 			if err != nil {
 				return err

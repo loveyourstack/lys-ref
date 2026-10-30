@@ -16,8 +16,6 @@ func MustRunCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			stepId, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				return fmt.Errorf("strconv.ParseInt failed: %w", err)

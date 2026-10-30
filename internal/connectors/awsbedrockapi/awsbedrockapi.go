@@ -3,7 +3,6 @@ package awsbedrockapi
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -28,16 +27,16 @@ type Client struct {
 }
 
 // NewClient creates a new AWS API client.
-func NewClient(conf awsapi.Conf, generatedPath string, db *pgxpool.Pool, logger *slog.Logger) *Client {
+func NewClient(conf awsapi.Conf, generatedPath string, db *pgxpool.Pool, logger *slog.Logger) (*Client, error) {
 
 	if conf.AccessKeyId == "" {
-		log.Fatal("awsapi client: conf.AccessKeyId is required")
+		return nil, fmt.Errorf("awsapi client: conf.AccessKeyId is required")
 	}
 	if conf.Region == "" {
-		log.Fatal("awsapi client: conf.Region is required")
+		return nil, fmt.Errorf("awsapi client: conf.Region is required")
 	}
 	if conf.SecretAccessKey == "" {
-		log.Fatal("awsapi client: conf.SecretAccessKey is required")
+		return nil, fmt.Errorf("awsapi client: conf.SecretAccessKey is required")
 	}
 
 	apiShortname := "awsbedrock"
@@ -52,7 +51,7 @@ func NewClient(conf awsapi.Conf, generatedPath string, db *pgxpool.Pool, logger 
 
 		generatedPath: generatedPath,
 		logger:        logger.With("api", apiShortname),
-	}
+	}, nil
 }
 
 // connect return AWS config using the provided credentials and region.

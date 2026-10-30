@@ -5,10 +5,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -36,19 +36,22 @@ import (
 )
 
 func main() {
-
-	configFileName := "ref_config.toml"
-
-	// mandatory flag if not using default
-	configFilePath := flag.String("configFilePath", configFileName, "Path to the config file")
-
+	configFilePath := flag.String("configFilePath", "ref_config.toml", "Path to the config file")
 	flag.Parse()
+
+	if err := run(*configFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(configFilePath string) error {
 
 	// load config from file
 	conf := myapp.Config{}
-	err := conf.LoadFromFile(*configFilePath)
+	err := conf.LoadFromFile(configFilePath)
 	if err != nil {
-		log.Fatalf("initialization: conf.LoadFromFile (%s) failed: %s", *configFilePath, err.Error())
+		return fmt.Errorf("conf.LoadFromFile (%s) failed: %w", configFilePath, err)
 	}
 
 	// create context that listens for interrupt and termination signals to allow for graceful shutdown
@@ -58,16 +61,13 @@ func main() {
 	// create non-specific app
 	app := cmd.NewApplication(&conf)
 
-	// create rRPC server app
+	// create gRPC server app
 	rpcApp := &gRpcServerApplication{
 		Application: app,
 
 		AuthedRateLimits:   lysauth.NewAppRateLimits(5, 20, 1*time.Hour),  // 5 rps with burst of 20. Buckets expire after 1 hour of inactivity
 		UnauthedRateLimits: lysauth.NewAppRateLimits(0.5, 3, 1*time.Hour), // ~1 every 2s with burst of 3
 	}
-
-	// start goroutine to periodically clean up expired rate limit buckets
-	go rpcApp.runRateLimitCleanup(ctx, 30*time.Minute)
 
 	// attach Get options
 	rpcApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
@@ -77,7 +77,7 @@ func main() {
 		SortParamName:    "sorts",
 	})
 	if err != nil {
-		log.Fatalf("initialization: failed to fill GetOptions: %s", err.Error())
+		return fmt.Errorf("lysapi.FillGetOptions failed: %w", err)
 	}
 
 	// attach auth
@@ -88,10 +88,10 @@ func main() {
 	rpcApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                                                     // block after 5 failed attempts
 	rpcApp.Sessions = lysauth.NewAppSessions(rpcApp.Validate, 10*time.Hour, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx) // allow 10 hour sessions
 
-	// connect to db and assign pool to rpcSrvApp
-	rpcApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, rpcApp.Config.General.AppName+" Rpc Srv", myapp.TypesToRegister)
+	// connect to db and assign pool to rpcApp
+	rpcApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, conf.General.AppName+" Rpc Srv", myapp.TypesToRegister)
 	if err != nil {
-		log.Fatalf("initialization: failed to create regular db connection pool: %s", err.Error())
+		return fmt.Errorf("lyspgdb.GetPoolWithTypes failed: %w", err)
 	}
 	defer rpcApp.Db.Close()
 
@@ -110,8 +110,9 @@ func main() {
 	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", conf.RpcApi.Port))
 	if err != nil {
-		log.Fatalf("initialization: net.Listen failed: %v", err)
+		return fmt.Errorf("net.Listen failed: %w", err)
 	}
+	defer lis.Close()
 
 	// create gRPC server
 	var opts []grpc.ServerOption
@@ -148,16 +149,22 @@ func main() {
 	// load persisted sessions and login attempts from db, if any
 	err = rpcApp.loadSessionsFromDb(ctx)
 	if err != nil {
-		log.Fatalf("initialization: rpcApp.loadSessionsFromDb failed: %s", err.Error())
+		return fmt.Errorf("rpcApp.loadSessionsFromDb failed: %w", err)
 	}
 	err = rpcApp.loadLoginAttemptsFromDb(ctx)
 	if err != nil {
-		log.Fatalf("initialization: rpcApp.loadLoginAttemptsFromDb failed: %s", err.Error())
+		return fmt.Errorf("rpcApp.loadLoginAttemptsFromDb failed: %w", err)
 	}
+
+	// create wait group for background goroutines that must exit before sessions are persisted
+	var bgWg sync.WaitGroup
 
 	// archive expired sessions immediately, and start goroutine to periodically archive them
 	rpcApp.archiveExpiredSessions(ctx)
-	go rpcApp.runExpiredSessionArchiver(ctx, 5*time.Minute)
+	bgWg.Go(func() { rpcApp.runExpiredSessionArchiver(ctx, 5*time.Minute) })
+
+	// start goroutine to periodically clean up expired rate limit buckets
+	bgWg.Go(func() { rpcApp.runRateLimitCleanup(ctx, 30*time.Minute) })
 
 	// display startup message with port and debug mode if enabled
 	startupMsg := fmt.Sprintf("starting rpcsrv on port: %s", conf.RpcApi.Port)
@@ -173,20 +180,26 @@ func main() {
 	}()
 
 	// wait for shutdown signal or server error
+	var serveErr error
 	select {
 	case err := <-srvErrCh:
 		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-			rpcApp.Logger.Error("grpcServer.Serve failed", "error", err)
+			serveErr = fmt.Errorf("grpcServer.Serve failed: %w", err)
 		}
 	case <-ctx.Done():
 		rpcApp.Logger.Info("shutdown signal received")
 	}
 
-	// --------------------------------
+	// stop background goroutines, restore default signal handling
+	stop()
 
-	// create context with timeout for server shutdown
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// wait for background goroutines to exit so none are mid-archive when sessions are persisted
+	bgWg.Wait()
+
+	// every shutdown step runs regardless of earlier failures; errors are collected and returned at the end
+	runErr := serveErr
+
+	// --------------------------------
 
 	stopped := make(chan struct{})
 	go func() {
@@ -196,18 +209,23 @@ func main() {
 	}()
 	select {
 	case <-stopped:
-	case <-shutdownCtx.Done():
-		rpcApp.Logger.Error("shutdown: graceful stop timed out, forcing stop")
+	case <-time.After(10 * time.Second):
 		grpcServer.Stop()
+		runErr = errors.Join(runErr, fmt.Errorf("shutdown: graceful stop timed out, forcing stop"))
 	}
 
+	persistCtx, persistCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer persistCancel()
+
 	// persist sessions and login attempts to db, for loading on restart
-	if err := rpcApp.persistSessions(context.Background()); err != nil {
-		rpcApp.Logger.Error("shutdown: rpcApp.persistSessions failed", "error", err)
+	if err := rpcApp.persistSessions(persistCtx); err != nil {
+		runErr = errors.Join(runErr, fmt.Errorf("shutdown: rpcApp.persistSessions failed: %w", err))
 	}
-	if err := rpcApp.persistLoginAttempts(context.Background()); err != nil {
-		rpcApp.Logger.Error("shutdown: rpcApp.persistLoginAttempts failed", "error", err)
+	if err := rpcApp.persistLoginAttempts(persistCtx); err != nil {
+		runErr = errors.Join(runErr, fmt.Errorf("shutdown: rpcApp.persistLoginAttempts failed: %w", err))
 	}
+
+	return runErr
 }
 
 func toPbMetadata(m lysapi.SelectMetadata, itemCount int) *pb.GetMetadata {

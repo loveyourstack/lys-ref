@@ -16,8 +16,6 @@ func ViewCmd(cliApp *cliapp.App) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
-			defer cliApp.Db.Close()
-
 			// connect as owner (for permission to view constraints)
 			dbOwnerUser := lyspgdb.User{
 				Name:     cliApp.Config.DbOwnerUser.Name,
