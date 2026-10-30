@@ -8,8 +8,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn prepend-icon="mdi-content-copy" @click="copySql">{{ $t('schema_designer.copy') }}</v-btn>
-        <v-btn @click="showSql = false">{{ $t('schema_designer.close') }}</v-btn>
+        <v-btn prepend-icon="mdi-content-copy" @click="copySql">{{ $t('actions.copy') }}</v-btn>
+        <v-btn @click="showSql = false">{{ $t('actions.close') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

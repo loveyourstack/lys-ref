@@ -5,6 +5,7 @@
         "archive": "Archivieren",
         "cancel": "Abbrechen",
         "close": "Schließen",
+        "copy": "Kopieren",
         "create": "Erstellen",
         "crop": "Zuschneiden",
         "delete": "Löschen",
@@ -359,7 +360,7 @@
     "schema_designer": {
         "nav": "Schema-Designer",
         "title": "Datenbankschema-Designer",
-        "p1": "Tabellen per Drag-and-drop anordnen, Spalten im Seitenpanel bearbeiten und von einem Spalten-Anschluss zum anderen ziehen, um einen Fremdschlüssel zu erstellen.",
+        "p1": "Tabellen per Drag-and-drop anordnen, Spalten im Seitenpanel bearbeiten und von einem Spalten-Anschluss zum anderen ziehen, um einen Fremdschlüssel zu erstellen. Demonstriert {VueFlow}.",
         "add_table": "Tabelle hinzufügen",
         "delete_table": "Tabelle löschen",
         "fit": "Ansicht anpassen",
@@ -379,8 +380,6 @@
         "none": "Keine",
         "select_table": "Tabelle zum Bearbeiten auswählen",
         "sql_title": "SQL",
-        "copy": "Kopieren",
-        "close": "Schließen",
         "invalid_file": "Ungültige Schemadatei"
     },
     "supplier_employees": {

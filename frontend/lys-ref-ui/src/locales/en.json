@@ -5,6 +5,7 @@
         "archive": "Archive",
         "cancel": "Cancel",
         "close": "Close",
+        "copy": "Copy",
         "create": "Create",
         "crop": "Crop",
         "delete": "Delete",
@@ -359,7 +360,7 @@
     "schema_designer": {
         "nav": "Schema designer",
         "title": "Database schema designer",
-        "p1": "Drag tables to arrange them, edit columns in the side panel, and drag from one column handle to another to create a foreign key.",
+        "p1": "Drag tables to arrange them, edit columns in the side panel, and drag from one column handle to another to create a foreign key. Demonstrates {VueFlow}.",
         "add_table": "Add table",
         "delete_table": "Delete table",
         "fit": "Fit view",
@@ -379,8 +380,6 @@
         "none": "None",
         "select_table": "Select a table to edit it",
         "sql_title": "SQL",
-        "copy": "Copy",
-        "close": "Close",
         "invalid_file": "Invalid schema file"
     },
     "supplier_employees": {
