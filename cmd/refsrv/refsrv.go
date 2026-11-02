@@ -122,7 +122,7 @@ func run(configFilePath string) error {
 	srvApp.UserStore = sysuser.Store{Db: srvApp.Db}
 
 	// make client for internal RPC server (doesn't actually connect until first request)
-	srvApp.rpcClient, err = grpc.NewClient("localhost:"+conf.RpcApi.Port,
+	srvApp.rpcClient, err = grpc.NewClient("127.0.0.1:"+conf.RpcApi.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),             // loopback connection only
 		grpc.WithPerRPCCredentials(rpcKeyCredentials{key: srvApp.RpcApiKey}), // attach API key to outgoing RPC requests
 		grpc.WithChainUnaryInterceptor(

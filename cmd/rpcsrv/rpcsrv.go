@@ -107,7 +107,7 @@ func run(configFilePath string) error {
 	rpcApp.UserStore = sysuser.Store{Db: rpcApp.Db}
 
 	// create TCP listener for the gRPC server (loopback: in prod, is behind nginx)
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", conf.RpcApi.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%s", conf.RpcApi.Port))
 	if err != nil {
 		return fmt.Errorf("net.Listen failed: %w", err)
 	}
