@@ -194,7 +194,7 @@ func (s *authSrv) Logout(ctx context.Context, req *pb.EmptyReq) (*emptypb.Empty,
 
 func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Addr, err error) {
 
-	remoteHostIp, err = getRemoteHostIp(ctx, s.UseXForwardedFor, s.XForwardedForIdx)
+	remoteHostIp, err = getRemoteHostIp(ctx, s.UseRealIpHeader)
 	if err != nil {
 		return netip.Addr{}, fmt.Errorf("getRemoteHostIp failed: %w", err)
 	}
@@ -268,7 +268,7 @@ func getRemoteAddr(ctx context.Context) (remoteAddr string, err error) {
 	return remoteAddr, nil
 }
 
-func getRemoteHostIp(ctx context.Context, useXForwardedFor bool, xForwardedForIdx int) (netip.Addr, error) {
+func getRemoteHostIp(ctx context.Context, useRealIpHeader bool) (netip.Addr, error) {
 
 	// get remote addr from peer context
 	remoteAddr, err := getRemoteAddr(ctx)
@@ -276,17 +276,17 @@ func getRemoteHostIp(ctx context.Context, useXForwardedFor bool, xForwardedForId
 		return netip.Addr{}, err
 	}
 
-	// get x-forwarded-for header from metadata if needed
-	xffVal := ""
-	if useXForwardedFor {
-		xffVal, err = getXForwardedFor(ctx)
+	// get x-real-ip header from metadata if needed
+	xrealIpVal := ""
+	if useRealIpHeader {
+		xrealIpVal, err = getXRealIp(ctx)
 		if err != nil {
 			return netip.Addr{}, err
 		}
 	}
 
 	// resolve remote ip
-	remoteHostIp, err := lysauth.GetIpAddr(remoteAddr, xffVal, useXForwardedFor, xForwardedForIdx)
+	remoteHostIp, err := lysauth.GetIpAddr(remoteAddr, xrealIpVal, useRealIpHeader)
 	if err != nil {
 		return netip.Addr{}, fmt.Errorf("lysauth.GetIpAddr failed: %w", err)
 	}
@@ -309,17 +309,17 @@ func getUserAgent(ctx context.Context) (userAgent string, err error) {
 	return strings.Join(userAgents, ","), nil
 }
 
-func getXForwardedFor(ctx context.Context) (xffVal string, err error) {
+func getXRealIp(ctx context.Context) (xrealIpVal string, err error) {
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", fmt.Errorf("failed to get metadata from context")
 	}
 
-	xffs := md.Get("x-forwarded-for")
-	if len(xffs) == 0 {
-		return "", fmt.Errorf("x-forwarded-for header not found")
+	xrealIp := md.Get("x-real-ip")
+	if len(xrealIp) == 0 {
+		return "", fmt.Errorf("x-real-ip header not found")
 	}
 
-	return strings.Join(xffs, ","), nil
+	return strings.Join(xrealIp, ","), nil
 }

@@ -37,10 +37,9 @@ type httpServerApplication struct {
 	PostOptions lysapi.PostOptions
 
 	// auth-related
-	LoginAttempts    *lysauth.AppLoginAttempts
-	Sessions         *lysauth.AppSessions
-	UseXForwardedFor bool // whether to use X-Forwarded-For header to determine IP
-	XForwardedForIdx int  // if using X-Forwarded-For, which index to use (0 for first, etc)
+	LoginAttempts   *lysauth.AppLoginAttempts
+	Sessions        *lysauth.AppSessions
+	UseRealIpHeader bool // whether to use Real-IP header to determine IP
 
 	// rate limits
 	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
@@ -95,7 +94,7 @@ func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handl
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// get remote IP
-		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 		if err != nil {
 			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
@@ -117,7 +116,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		ctx := r.Context()
 
 		// get remote ip and attach to context, to be forwarded on outgoing RPC calls
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 		if err != nil {
 			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
@@ -226,14 +225,14 @@ type clientIpCtxKeyType struct{}
 
 var clientIpCtxKey = clientIpCtxKeyType{}
 
-// rpcForwardIpUnaryInterceptor sets x-forwarded-for on outgoing RPCs to the end user's IP, which the RPC server requires in prod
+// rpcForwardIpUnaryInterceptor sets x-real-ip on outgoing RPCs to the end user's IP, which the RPC server requires in prod
 func rpcForwardIpUnaryInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
 		if !ok {
 			return fmt.Errorf("rpcForwardIpUnaryInterceptor: client IP missing from context")
 		}
-		ctx = metadata.AppendToOutgoingContext(ctx, "x-forwarded-for", ip.String())
+		ctx = metadata.AppendToOutgoingContext(ctx, "x-real-ip", ip.String())
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

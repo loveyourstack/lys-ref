@@ -82,11 +82,10 @@ func run(configFilePath string) error {
 
 	// attach auth
 	if rpcApp.Config.General.Env == appenv.Prod {
-		rpcApp.UseXForwardedFor = true
-		rpcApp.XForwardedForIdx = 0
+		rpcApp.UseRealIpHeader = true
 	}
-	rpcApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                                                     // block after 5 failed attempts
-	rpcApp.Sessions = lysauth.NewAppSessions(rpcApp.Validate, 10*time.Hour, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx) // allow 10 hour sessions
+	rpcApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                           // block after 5 failed attempts
+	rpcApp.Sessions = lysauth.NewAppSessions(rpcApp.Validate, 10*time.Hour, rpcApp.UseRealIpHeader) // allow 10 hour sessions
 
 	// connect to db and assign pool to rpcApp
 	rpcApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, conf.General.AppName+" Rpc Srv", myapp.TypesToRegister)

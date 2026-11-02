@@ -347,7 +347,7 @@ func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Han
 		ctx := r.Context()
 
 		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 		if err != nil {
 			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return

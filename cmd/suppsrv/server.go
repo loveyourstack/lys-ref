@@ -23,9 +23,8 @@ type httpServerApplication struct {
 
 	// add login attempts so that suppsrv can use rejectBlockedIp middleware
 	// at the moment, suppsrv restart is needed to refresh the internal blocked IPs. In real app, could add a db listener
-	LoginAttempts    *lysauth.AppLoginAttempts
-	UseXForwardedFor bool
-	XForwardedForIdx int
+	LoginAttempts   *lysauth.AppLoginAttempts
+	UseRealIpHeader bool
 
 	RateLimits *lysauth.AppRateLimits
 
@@ -38,7 +37,7 @@ func (srvApp *httpServerApplication) limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// get remote IP
-		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 		if err != nil {
 			lys.HandleInternalError(r.Context(), fmt.Errorf("limit: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return
@@ -65,7 +64,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
 
 		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 		if err != nil {
 			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
 			return

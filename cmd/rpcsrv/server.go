@@ -37,10 +37,9 @@ type gRpcServerApplication struct {
 	GetOptions lysapi.GetOptions
 
 	// auth-related
-	LoginAttempts    *lysauth.AppLoginAttempts
-	Sessions         *lysauth.AppSessions
-	UseXForwardedFor bool // whether to use X-Forwarded-For header to determine IP
-	XForwardedForIdx int  // if using X-Forwarded-For, which index to use (0 for first, etc)
+	LoginAttempts   *lysauth.AppLoginAttempts
+	Sessions        *lysauth.AppSessions
+	UseRealIpHeader bool // whether to use Real-IP header to determine IP
 
 	// rate limits
 	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
@@ -70,7 +69,7 @@ func (rpcApp *gRpcServerApplication) limitUnauthed(ctx context.Context, req any,
 		return handler(ctx, req)
 	}
 
-	ip, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	ip, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
 	if err != nil {
 		return nil, fmt.Errorf("limitUnauthed: getRemoteHostIp failed: %w", err)
 	}
@@ -122,7 +121,7 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 	code := status.Code(err)
 
 	// get remote ip
-	remoteHostIp, ipErr := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	remoteHostIp, ipErr := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
 	if ipErr != nil {
 		rpcApp.Logger.Error("logRequest: getRemoteHostIp failed", "error", ipErr)
 		return resp, err

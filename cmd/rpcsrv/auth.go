@@ -200,7 +200,7 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 	}
 
 	// get ip
-	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
 	if err != nil {
 		return lysauth.Session{}, fmt.Errorf("authGetSession: getRemoteHostIp failed: %w", err)
 	}
@@ -450,7 +450,7 @@ func (rpcApp *gRpcServerApplication) rejectBlockedIp(ctx context.Context, req an
 ) (any, error) {
 
 	// get remote ip
-	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseXForwardedFor, rpcApp.XForwardedForIdx)
+	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
 	if err != nil {
 		return nil, fmt.Errorf("getRemoteHostIp failed: %w", err)
 	}

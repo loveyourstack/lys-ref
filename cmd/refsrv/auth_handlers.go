@@ -395,7 +395,7 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, w http.ResponseWriter, r *http.Request, caller string) (remoteHostIP netip.Addr, ok bool) {
 
 	// get remote ip
-	remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx)
+	remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("%s: lysauth.GetIpAddrFromReq failed: %w", caller, err), srvApp.Logger, w)
 		return netip.Addr{}, false

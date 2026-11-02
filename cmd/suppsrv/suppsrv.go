@@ -63,8 +63,7 @@ func run(configFilePath string) error {
 
 	// attach auth
 	if srvApp.Config.General.Env == appenv.Prod {
-		srvApp.UseXForwardedFor = true
-		srvApp.XForwardedForIdx = 0
+		srvApp.UseRealIpHeader = true
 	}
 	srvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5) // block after 5 failed attempts
 
@@ -88,7 +87,7 @@ func run(configFilePath string) error {
 
 	// create HTTP server using srvApp's routes and handlers
 	srv := &http.Server{
-		Addr:              ":" + srvApp.Config.Api.Port,
+		Addr:              "127.0.0.1:" + srvApp.Config.Api.Port,
 		Handler:           http.TimeoutHandler(srvApp.getRouter(), 5*time.Second, "request timed out"),
 		IdleTimeout:       time.Second,
 		MaxHeaderBytes:    1024 * 1024, // 1 MB

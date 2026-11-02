@@ -97,11 +97,10 @@ func run(configFilePath string) error {
 
 	// attach auth
 	if conf.General.Env == appenv.Prod {
-		srvApp.UseXForwardedFor = true
-		srvApp.XForwardedForIdx = 0
+		srvApp.UseRealIpHeader = true
 	}
-	srvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                                                     // block after 5 failed attempts
-	srvApp.Sessions = lysauth.NewAppSessions(srvApp.Validate, 10*time.Hour, srvApp.UseXForwardedFor, srvApp.XForwardedForIdx) // allow 10 hour sessions
+	srvApp.LoginAttempts = lysauth.NewAppLoginAttempts(5)                                           // block after 5 failed attempts
+	srvApp.Sessions = lysauth.NewAppSessions(srvApp.Validate, 10*time.Hour, srvApp.UseRealIpHeader) // allow 10 hour sessions
 
 	// connect to db and assign pool to srvApp
 	srvApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbServerUser, conf.General.AppName+" Srv", myapp.TypesToRegister)
@@ -124,7 +123,7 @@ func run(configFilePath string) error {
 
 	// make client for internal RPC server (doesn't actually connect until first request)
 	srvApp.rpcClient, err = grpc.NewClient("localhost:"+conf.RpcApi.Port,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),             // loopback connection only
 		grpc.WithPerRPCCredentials(rpcKeyCredentials{key: srvApp.RpcApiKey}), // attach API key to outgoing RPC requests
 		grpc.WithChainUnaryInterceptor(
 			rpcForwardIpUnaryInterceptor(),                    // forward client IP to RPC server
@@ -196,7 +195,7 @@ func run(configFilePath string) error {
 	timedHttpHandler := http.TimeoutHandler(rawHandler, 5*time.Second, "request timed out")
 
 	srv := &http.Server{
-		Addr: ":" + conf.Api.Port,
+		Addr: "127.0.0.1:" + conf.Api.Port,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			// http.TimeoutHandler does not implement the http.Hijacker interface, which is needed for WebSocket upgrades
@@ -326,6 +325,7 @@ func run(configFilePath string) error {
 	case <-time.After(5 * time.Second):
 		runErr = errors.Join(runErr, fmt.Errorf("shutdown: timeout waiting for hub listener to exit"))
 	}
+
 	if err := srvApp.NotificationHub.Close(); err != nil {
 		runErr = errors.Join(runErr, fmt.Errorf("shutdown: srvApp.NotificationHub.Close failed: %w", err))
 	}

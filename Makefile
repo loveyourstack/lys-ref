@@ -35,8 +35,8 @@ srv:
 	go run ./cmd/refsrv
 
 # Supplier API server start
-.PHONY: suppsrv
-suppsrv:
+.PHONY: supp
+supp:
 	go run ./cmd/suppsrv
 
 # db listener start
@@ -56,8 +56,8 @@ genpb:
 		$(PROTO_FILES)
 
 # gRPC server start
-.PHONY: rpcsrv
-rpcsrv: genpb
+.PHONY: rpc
+rpc: genpb
 	go run ./cmd/rpcsrv
 
 ###########################################################
@@ -84,9 +84,9 @@ mcpb:
 srvb:
 	go build -o ./bin ./cmd/refsrv
 
-# build supplier server
-.PHONY: suppsrvb
-suppsrvb:
+# build supplier API server
+.PHONY: suppb
+suppb:
 	go build -o ./bin ./cmd/suppsrv
 
 # build db listener
@@ -101,7 +101,7 @@ rpcb: genpb
 
 # build all apps
 .PHONY: build
-build: clib mcpb srvb suppsrvb lisb rpcb
+build: clib mcpb srvb suppb lisb rpcb
 
 ###########################################################
 
@@ -120,9 +120,9 @@ copymcp: mcpb
 copysrv: srvb
 	rsync -az -e ssh ./bin/refsrv lysref:/home/ubuntu/bin
 
-# build and copy supplier server to remote
-.PHONY: copysuppsrv
-copysuppsrv: suppsrvb
+# build and copy supplier API server to remote
+.PHONY: copysupp
+copysupp: suppb
 	rsync -az -e ssh ./bin/suppsrv lysref:/home/ubuntu/bin
 
 # build and copy db listener to remote
