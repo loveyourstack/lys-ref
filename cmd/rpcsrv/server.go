@@ -45,6 +45,8 @@ type gRpcServerApplication struct {
 	AuthedRateLimits   *lysauth.AppRateLimits // more generous than unauthed
 	UnauthedRateLimits *lysauth.AppRateLimits
 
+	ShutdownTimeouts shutdownTimeouts
+
 	// stores
 	BlockedIPStore    sysblockedip.Store
 	CountryStore      geocountry.Store

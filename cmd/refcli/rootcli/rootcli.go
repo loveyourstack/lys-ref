@@ -7,15 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/loveyourstack/connectors/aws/awsapi"
-	"github.com/loveyourstack/connectors/aws/awssvc"
-	"github.com/loveyourstack/connectors/ecb/ecbapi"
-	"github.com/loveyourstack/connectors/ecb/ecbsvc"
-	"github.com/loveyourstack/connectors/maxmind/mmapi"
-	"github.com/loveyourstack/connectors/maxmind/mmsvc"
-	"github.com/loveyourstack/connectors/tedb/tedbapi"
-	"github.com/loveyourstack/connectors/tedb/tedbsvc"
-	appCmd "github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/cliapp"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/admincli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/awspcli"
@@ -28,9 +19,6 @@ import (
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/pubcli"
 	"github.com/loveyourstack/lys-ref/cmd/refcli/subcmds/tedbcli"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
-	"github.com/loveyourstack/lys-ref/internal/services/procsvc"
-	"github.com/loveyourstack/lys-ref/internal/stores/system/sysextdatasync"
-	"github.com/loveyourstack/lys/lyspgdb"
 	"github.com/spf13/cobra"
 )
 
@@ -45,9 +33,7 @@ var rootCmd = &cobra.Command{
 	// no Run function: a subcommand is always needed
 }
 
-var cliApp *cliapp.App
-
-func addSubCommands() {
+func addSubCommands(cliApp *cliapp.App) {
 	rootCmd.AddCommand(CreateDbCmd(cliApp))
 	rootCmd.AddCommand(GenHashCmd(cliApp))
 	rootCmd.AddCommand(GenKeyCmd(cliApp))
@@ -84,52 +70,15 @@ func Run() error {
 		return fmt.Errorf("conf.LoadFromFile (%s) failed: %w", configFileName, err)
 	}
 
-	// create non-specific app
-	app := appCmd.NewApplication(&conf)
-
-	// create cli app
-	cliApp = &cliapp.App{
-		Application: app,
-	}
-
-	// connect to db and assign pool to cliApp
-	cliApp.Db, err = lyspgdb.GetPool(ctx, conf.Db, conf.DbCliUser, conf.General.AppName+" Cli")
+	// build and wire up the CLI application
+	cliApp, err := newCliApplication(ctx, &conf)
 	if err != nil {
-		return fmt.Errorf("lyspgdb.GetPool failed: %w", err)
+		return err
 	}
 	defer cliApp.Db.Close()
 
-	// attach API clients
-	cliApp.AwsClient, err = awsapi.NewClient(conf.Aws, cliApp.Db, cliApp.Logger)
-	if err != nil {
-		return fmt.Errorf("awsapi.NewClient failed: %w", err)
-	}
-	cliApp.EcbClient = ecbapi.NewClient(cliApp.Db, cliApp.Logger)
-	cliApp.MaxMindClient, err = mmapi.NewClient(conf.MaxMind, cliApp.Db, cliApp.Logger)
-	if err != nil {
-		return fmt.Errorf("mmapi.NewClient failed: %w", err)
-	}
-	cliApp.TedbClient = tedbapi.NewClient(cliApp.Db, cliApp.Logger)
-
-	// attach services
-	syncStore := sysextdatasync.Store{Db: cliApp.Db}
-	cliApp.AwsSvc, err = awssvc.NewService(cliApp.Db, cliApp.AwsClient, cliApp.Logger)
-	if err != nil {
-		return fmt.Errorf("awssvc.NewService failed: %w", err)
-	}
-	cliApp.EcbSvc = ecbsvc.NewServiceWithSyncStore(cliApp.EcbClient, cliApp.Logger, syncStore)
-	cliApp.MaxMindSvc, err = mmsvc.NewServiceWithSyncStore(cliApp.MaxMindClient, cliApp.Config.General.DownloadsPath, cliApp.Logger, syncStore)
-	if err != nil {
-		return fmt.Errorf("mmsvc.NewServiceWithSyncStore failed: %w", err)
-	}
-	cliApp.ProcSvc, err = procsvc.NewService(conf.Process, cliApp.Logger)
-	if err != nil {
-		return fmt.Errorf("procsvc.NewService failed: %w", err)
-	}
-	cliApp.TedbSvc = tedbsvc.NewServiceWithSyncStore(cliApp.TedbClient, cliApp.Db, cliApp.Logger, syncStore)
-
-	// subcommands
-	addSubCommands()
+	// add subcommands
+	addSubCommands(cliApp)
 
 	// execute the root command, which runs the appropriate subcommand based on user input
 	return rootCmd.Execute()

@@ -52,6 +52,8 @@ type httpServerApplication struct {
 	// ws notifications
 	NotificationHub *lysws.NotificationHub
 
+	ShutdownTimeouts shutdownTimeouts
+
 	// stores
 	AwsUserSgRuleStore awsusersgrule.Store
 	BlockedIPStore     sysblockedip.Store
