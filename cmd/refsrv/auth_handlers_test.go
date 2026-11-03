@@ -339,9 +339,21 @@ func TestAuthLoginSessions(t *testing.T) {
 		allowMultipleSessions bool
 		wantSessions          int
 		wantArchived          int
+		wantFirstValid        bool
 	}{
-		{name: "single session user: first session is archived", allowMultipleSessions: false, wantSessions: 1, wantArchived: 1},
-		{name: "multiple session user: both sessions are kept", allowMultipleSessions: true, wantSessions: 2, wantArchived: 0},
+		{name: "single session user: first session is archived", allowMultipleSessions: false, wantSessions: 1, wantArchived: 1, wantFirstValid: false},
+		{name: "multiple session user: both sessions are kept", allowMultipleSessions: true, wantSessions: 2, wantArchived: 0, wantFirstValid: true},
+	}
+
+	sessionTokenStatus := func(env *authTestEnv, t *testing.T, token string) int {
+		t.Helper()
+
+		req, err := http.NewRequest(http.MethodPost, "/session-token-login", nil)
+		if err != nil {
+			t.Fatalf("http.NewRequest() error = %v", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+token)
+		return env.send(t, req).code
 	}
 
 	for _, tt := range tests {
@@ -360,6 +372,17 @@ func TestAuthLoginSessions(t *testing.T) {
 			}
 			if n := env.countHistory(t, u.id); n != tt.wantArchived {
 				t.Errorf("archived sessions = %d, want %d", n, tt.wantArchived)
+			}
+
+			if code := sessionTokenStatus(env, t, second); code != http.StatusOK {
+				t.Errorf("second token: status = %d, want 200", code)
+			}
+			wantFirstStatus := http.StatusForbidden
+			if tt.wantFirstValid {
+				wantFirstStatus = http.StatusOK
+			}
+			if code := sessionTokenStatus(env, t, first); code != wantFirstStatus {
+				t.Errorf("first token: status = %d, want %d", code, wantFirstStatus)
 			}
 		})
 	}
@@ -413,30 +436,53 @@ func TestAuthSessionTokenLogin(t *testing.T) {
 		{name: "different ip", token: token, remoteAddr: "192.0.2.99:5000", wantStatus: http.StatusForbidden},
 	}
 
+	tokenLogin := func(t *testing.T, token, userAgent, remoteAddr string) *testResponse {
+		t.Helper()
+
+		req, err := http.NewRequest(http.MethodPost, "/session-token-login", nil)
+		if err != nil {
+			t.Fatalf("http.NewRequest() error = %v", err)
+		}
+		if token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		if userAgent != "" {
+			req.Header.Set("User-Agent", userAgent)
+		}
+		req.RemoteAddr = remoteAddr
+
+		return env.send(t, req)
+	}
+
+	checkExistingSession := func(t *testing.T, resp *testResponse) {
+		t.Helper()
+
+		lr := resp.login(t)
+		if lr.SessionToken != token || lr.UserId != u.id || lr.UserName != u.name {
+			t.Errorf("response = token %q user %d %q, want the existing session of %d %q", lr.SessionToken, lr.UserId, lr.UserName, u.id, u.name)
+		}
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest(http.MethodPost, "/session-token-login", nil)
-			if err != nil {
-				t.Fatalf("http.NewRequest() error = %v", err)
-			}
-			if tt.token != "" {
-				req.Header.Set("Authorization", "Bearer "+tt.token)
-			}
-			if tt.userAgent != "" {
-				req.Header.Set("User-Agent", tt.userAgent)
-			}
-			req.RemoteAddr = tt.remoteAddr
-
-			resp := env.send(t, req)
+			resp := tokenLogin(t, tt.token, tt.userAgent, tt.remoteAddr)
 			if resp.code != tt.wantStatus {
 				t.Fatalf("status = %d (%s), want %d", resp.code, resp.body.ErrDescription, tt.wantStatus)
 			}
 
 			if tt.wantStatus == http.StatusOK {
-				lr := resp.login(t)
-				if lr.SessionToken != token || lr.UserId != u.id || lr.UserName != u.name {
-					t.Errorf("response = token %q user %d %q, want the existing session of %d %q", lr.SessionToken, lr.UserId, lr.UserName, u.id, u.name)
-				}
+				checkExistingSession(t, resp)
+				return
+			}
+
+			// a rejected attempt must not revoke the user's session
+			retry := tokenLogin(t, token, "", "")
+			if retry.code != http.StatusOK {
+				t.Fatalf("valid token after rejection: status = %d (%s), want 200", retry.code, retry.body.ErrDescription)
+			}
+			checkExistingSession(t, retry)
+			if n := env.srvApp.Sessions.Count(); n != 1 {
+				t.Errorf("sessions after rejection = %d, want 1", n)
 			}
 		})
 	}

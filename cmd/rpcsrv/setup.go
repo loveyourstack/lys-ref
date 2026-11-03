@@ -28,9 +28,8 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-// newGrpcServerApplication builds the application and connects everything it depends on.
-// On error, anything already opened is closed. On success, the caller must call Close.
-func newGrpcServerApplication(ctx context.Context, conf *myapp.Config) (rpcApp *gRpcServerApplication, err error) {
+// newBaseApplication builds the in-memory part of the application.
+func newBaseApplication(conf *myapp.Config) (rpcApp *gRpcServerApplication, err error) {
 
 	rpcApp = &gRpcServerApplication{
 		Application: cmd.NewApplication(conf),
@@ -43,13 +42,6 @@ func newGrpcServerApplication(ctx context.Context, conf *myapp.Config) (rpcApp *
 		ShutdownTimeouts: defaultShutdownTimeouts,
 	}
 
-	defer func() {
-		if err != nil {
-			rpcApp.Close()
-			rpcApp = nil
-		}
-	}()
-
 	rpcApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
 		FieldsParamName:  "fields",
 		PageParamName:    "page",
@@ -61,6 +53,26 @@ func newGrpcServerApplication(ctx context.Context, conf *myapp.Config) (rpcApp *
 	}
 
 	rpcApp.attachAuth()
+
+	return rpcApp, nil
+}
+
+// newGrpcServerApplication builds the application and connects everything it depends on.
+// On error, anything already opened is closed. On success, the caller must call Close.
+func newGrpcServerApplication(ctx context.Context, conf *myapp.Config) (rpcApp *gRpcServerApplication, err error) {
+
+	// build the in-memory part of the application first
+	rpcApp, err = newBaseApplication(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err != nil {
+			rpcApp.Close()
+			rpcApp = nil
+		}
+	}()
 
 	rpcApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbRpcUser, conf.General.AppName+" Rpc Srv", myapp.TypesToRegister)
 	if err != nil {

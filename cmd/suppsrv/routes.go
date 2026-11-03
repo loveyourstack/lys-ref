@@ -11,8 +11,25 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/supplier/suppproduct"
 )
 
-// getRouter returns a mux providing the HTTP server's routes
+// getRouter returns the HTTP server's routes wrapped in CORS middleware
 func (srvApp *httpServerApplication) getRouter() http.Handler {
+
+	// apply CORS middleware to allow access to Vue app
+	cors := handlers.CORS(
+		handlers.AllowedOrigins([]string{srvApp.Config.UI.Url}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+
+		// note use of Employee-Email for fake tenant auth
+		handlers.AllowedHeaders([]string{"Accept", "Accept-Encoding", "Authorization", "Content-Length", "Content-Type", "Employee-Email", "X-CSRF-Token"}),
+
+		handlers.ExposedHeaders([]string{"Content-Disposition", "Last-Sync-At"}),
+		handlers.AllowCredentials(),
+	)
+	return (cors)(srvApp.getMuxRouter())
+}
+
+// getRouter returns a mux providing the HTTP server's routes
+func (srvApp *httpServerApplication) getMuxRouter() http.Handler {
 
 	// define env struct needed for route handlers
 	apiEnv := lys.Env{
@@ -49,18 +66,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 		_ = subRoute.RouteAdder(subRouter)
 	}
 
-	// apply CORS middleware to allow access to Vue app
-	cors := handlers.CORS(
-		handlers.AllowedOrigins([]string{srvApp.Config.UI.Url}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
-
-		// note use of Employee-Email for fake tenant auth
-		handlers.AllowedHeaders([]string{"Accept", "Accept-Encoding", "Authorization", "Content-Length", "Content-Type", "Employee-Email", "X-CSRF-Token"}),
-
-		handlers.ExposedHeaders([]string{"Content-Disposition"}),
-		handlers.AllowCredentials(),
-	)
-	return (cors)(r)
+	return r
 }
 
 // getSubRoutes returns all subroutes used by the server
