@@ -9,7 +9,7 @@ cli:
 	sudo cp ref_config.toml /usr/local/etc
 	go install ./cmd/refcli
 
-# (re-)create database
+# (re-)create dev database
 .PHONY: db
 db: cli
 	refcli createDb
@@ -19,6 +19,15 @@ db: cli
 	refcli pub addFakeUpdates
 	refcli ecb sync currencies
 	refcli ecb sync xr $(ONE_MONTH_AGO) $(TODAY)
+
+# (re-)create test database
+.PHONY: testdb
+testdb: cli
+	refcli createDb test
+	refcli dm aggCampPerf
+	refcli admin installLysPgMon
+	refcli admin checkDb
+	refcli pub addFakeUpdates
 
 # reset db data
 .PHONY: resetdbdata
@@ -62,9 +71,9 @@ rpc: genpb
 
 ###########################################################
 
-# run all tests
+# create test database and run all tests
 .PHONY: tests
-tests: 
+tests: testdb
 	go test -race ./...
 
 ###########################################################

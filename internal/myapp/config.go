@@ -26,6 +26,10 @@ type general struct {
 	S3Bucket      string
 }
 
+type testDatabase struct {
+	Database string
+}
+
 // api contains the API config
 type api struct {
 	Port              string
@@ -98,6 +102,7 @@ func (d developer) GetReplacements() (fileReplacements []lyspgdb.FileReplacement
 type Config struct {
 	General      general
 	Db           lyspgdb.Database `toml:"database"`
+	TestDatabase testDatabase
 	DbSuperUser  lyspgdb.User
 	DbOwnerUser  lyspgdb.User
 	DbServerUser lyspgdb.User

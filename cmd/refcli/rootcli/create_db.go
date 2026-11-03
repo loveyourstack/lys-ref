@@ -14,14 +14,22 @@ import (
 
 func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 	return &cobra.Command{
-		Use:   "createDb",
+		Use:   "createDb [test]",
 		Short: "Creates database. Drops existing if present.",
-		Args:  cobra.NoArgs,
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
 			// only possible in dev env
 			if cliApp.Config.General.Env != appenv.Dev {
 				return fmt.Errorf("this command may only be used in dev environment")
+			}
+
+			// if there is a "test" argument, create the configured test database
+			if len(args) == 1 && args[0] == "test" {
+				if cliApp.Config.TestDatabase.Database == "" {
+					return fmt.Errorf("test database is not configured")
+				}
+				cliApp.Config.Db.Database = cliApp.Config.TestDatabase.Database
 			}
 
 			// get file replacements from configs where needed

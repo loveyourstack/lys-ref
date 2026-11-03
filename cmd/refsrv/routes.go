@@ -63,8 +63,22 @@ import (
 	"github.com/loveyourstack/lys/lyspgmon/stores/lyspgunusedidx"
 )
 
-// getRouter returns a mux providing the HTTP server's routes
+// getRouter returns the HTTP server's routes wrapped in CORS middleware
 func (srvApp *httpServerApplication) getRouter() http.Handler {
+
+	// apply CORS middleware to allow access to Vue app
+	cors := handlers.CORS(
+		handlers.AllowedOrigins([]string{srvApp.Config.UI.Url}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Accept", "Accept-Encoding", "Authorization", "Content-Length", "Content-Type", "X-CSRF-Token"}),
+		handlers.ExposedHeaders([]string{"Content-Disposition", "Last-Sync-At"}),
+		handlers.AllowCredentials(),
+	)
+	return (cors)(srvApp.getMuxRouter())
+}
+
+// getMuxRouter returns a mux providing the HTTP server's routes
+func (srvApp *httpServerApplication) getMuxRouter() *mux.Router {
 
 	// define env struct needed for route handlers
 	apiEnv := lys.Env{
@@ -109,15 +123,7 @@ func (srvApp *httpServerApplication) getRouter() http.Handler {
 		_ = subRoute.RouteAdder(subRouter)
 	}
 
-	// apply CORS middleware to allow access to Vue app
-	cors := handlers.CORS(
-		handlers.AllowedOrigins([]string{srvApp.Config.UI.Url}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Accept", "Accept-Encoding", "Authorization", "Content-Length", "Content-Type", "X-CSRF-Token"}),
-		handlers.ExposedHeaders([]string{"Content-Disposition", "Last-Sync-At"}),
-		handlers.AllowCredentials(),
-	)
-	return (cors)(r)
+	return r
 }
 
 // getSubRoutes returns all subroutes used by the server

@@ -15,6 +15,7 @@ import (
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysloginattempt"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/syssession"
 	"github.com/loveyourstack/lys/lysauth"
+	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmeta"
 	"github.com/loveyourstack/lys/lysset"
 	"github.com/loveyourstack/lys/lysslice"
@@ -133,7 +134,7 @@ func (srvApp *httpServerApplication) getCredentialsFromRequest(r *http.Request) 
 
 	// validate input
 	if err = lysmeta.Validate(srvApp.Validate, creds); err != nil {
-		return LoginInput{}, fmt.Errorf("lysmeta.Validate failed: %w", err)
+		return LoginInput{}, lyserr.User{Message: err.Error()}
 	}
 
 	return creds, nil
@@ -392,6 +393,7 @@ func appSessionsToInputs(appSessions []lysauth.Session) []syssession.Input {
 			Email:                 appSess.Email,
 			ExpiresAt:             appSess.ExpiresAt,
 			FamilyName:            appSess.FamilyName,
+			ForcePasswordChange:   appSess.ForcePasswordChange,
 			GivenName:             appSess.GivenName,
 			GeoIpCountryIsoCode:   appSess.GeoIpCountryIsoCode,
 			GeoIpLocation:         appSess.GeoIpLocation,

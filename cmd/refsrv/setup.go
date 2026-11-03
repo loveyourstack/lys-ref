@@ -38,9 +38,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// newHttpServerApplication builds the application and connects everything it depends on.
-// On error, anything already opened is closed. On success, the caller must call Close.
-func newHttpServerApplication(ctx context.Context, conf *myapp.Config) (srvApp *httpServerApplication, err error) {
+// newBaseApplication builds the in-memory part of the application.
+func newBaseApplication(conf *myapp.Config) (srvApp *httpServerApplication, err error) {
 
 	srvApp = &httpServerApplication{
 		Application: cmd.NewApplication(conf),
@@ -55,13 +54,6 @@ func newHttpServerApplication(ctx context.Context, conf *myapp.Config) (srvApp *
 		ShutdownTimeouts: defaultShutdownTimeouts,
 	}
 
-	defer func() {
-		if err != nil {
-			srvApp.Close()
-			srvApp = nil
-		}
-	}()
-
 	srvApp.GetOptions, err = lysapi.FillGetOptions(lysapi.GetOptions{
 		CsvDelimiter: '|',
 	}) // use defaults for others
@@ -70,6 +62,26 @@ func newHttpServerApplication(ctx context.Context, conf *myapp.Config) (srvApp *
 	}
 
 	srvApp.attachAuth()
+
+	return srvApp, nil
+}
+
+// newHttpServerApplication builds the application and connects everything it depends on.
+// On error, anything already opened is closed. On success, the caller must call Close.
+func newHttpServerApplication(ctx context.Context, conf *myapp.Config) (srvApp *httpServerApplication, err error) {
+
+	// build the in-memory part of the application first
+	srvApp, err = newBaseApplication(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err != nil {
+			srvApp.Close()
+			srvApp = nil
+		}
+	}()
 
 	srvApp.Db, err = lyspgdb.GetPoolWithTypes(ctx, conf.Db, conf.DbServerUser, conf.General.AppName+" Srv", myapp.TypesToRegister)
 	if err != nil {
