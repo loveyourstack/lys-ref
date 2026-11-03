@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys/lystime"
 	"google.golang.org/grpc"
 )
 
@@ -44,9 +46,16 @@ func (rpcApp *gRpcServerApplication) startBackground(ctx context.Context) *backg
 
 	bg := &background{}
 
+	// archive expired sessions immediately, and start goroutine to periodically archive them
 	rpcApp.archiveExpiredSessions(ctx)
-	bg.wg.Go(func() { rpcApp.runExpiredSessionArchiver(ctx, 5*time.Minute) })
-	bg.wg.Go(func() { rpcApp.runRateLimitCleanup(ctx, 30*time.Minute) })
+	bg.wg.Go(func() {
+		lystime.RunEvery(ctx, 5*time.Minute, func() { rpcApp.archiveExpiredSessions(ctx) })
+	})
+
+	// start goroutine to periodically clean up expired rate limit buckets
+	bg.wg.Go(func() {
+		lystime.RunEvery(ctx, 30*time.Minute, func() { rpcApp.AuthedRateLimits.CleanupExpired(); rpcApp.UnauthedRateLimits.CleanupExpired() })
+	})
 
 	return bg
 }
@@ -63,14 +72,9 @@ func (rpcApp *gRpcServerApplication) serve(ctx context.Context, stop context.Can
 
 	bg := rpcApp.startBackground(ctx)
 
-	startupMsg := fmt.Sprintf("starting rpcsrv on port: %s", rpcApp.Config.RpcApi.Port)
-	if rpcApp.Config.General.Debug {
-		startupMsg += ", debug: true"
-	}
-	rpcApp.Logger.Info(startupMsg)
-
 	srvErrCh := make(chan error, 1)
 	go func() {
+		cmd.StartupMsg("rpcsrv", rpcApp.Config.RpcApi.Port, rpcApp.Config.General.Debug, rpcApp.Logger)
 		srvErrCh <- grpcServer.Serve(ln)
 	}()
 
@@ -109,13 +113,12 @@ func (rpcApp *gRpcServerApplication) shutdownGrpc(grpcServer *grpc.Server) error
 		close(stopped)
 	}()
 
-	select {
-	case <-stopped:
-		return nil
-	case <-time.After(rpcApp.ShutdownTimeouts.Grpc):
+	err := lystime.WaitOrTimeout(stopped, rpcApp.ShutdownTimeouts.Grpc, "shutdown: graceful stop timed out, forcing stop")
+	if err != nil {
 		grpcServer.Stop()
-		return errors.New("shutdown: graceful stop timed out, forcing stop")
 	}
+
+	return err
 }
 
 // persistState persists sessions and login attempts to db, for loading on restart.

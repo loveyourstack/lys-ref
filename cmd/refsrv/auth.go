@@ -370,20 +370,6 @@ func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Han
 	})
 }
 
-func (srvApp *httpServerApplication) runExpiredSessionArchiver(ctx context.Context, every time.Duration) {
-	ticker := time.NewTicker(every)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			srvApp.archiveExpiredSessions(ctx)
-		}
-	}
-}
-
 func appLoginAttemptsToInputs(appLAs []lysauth.LoginAttempt) []sysloginattempt.Input {
 	inputs := make([]sysloginattempt.Input, len(appLAs))
 	for i, appAttempt := range appLAs {

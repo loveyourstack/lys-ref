@@ -469,20 +469,6 @@ func (rpcApp *gRpcServerApplication) rejectBlockedIp(ctx context.Context, req an
 	return handler(ctx, req)
 }
 
-func (rpcApp *gRpcServerApplication) runExpiredSessionArchiver(ctx context.Context, every time.Duration) {
-	ticker := time.NewTicker(every)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			rpcApp.archiveExpiredSessions(ctx)
-		}
-	}
-}
-
 func appLoginAttemptsToInputs(appLAs []lysauth.LoginAttempt) []sysrpcloginattempt.Input {
 	inputs := make([]sysrpcloginattempt.Input, len(appLAs))
 	for i, appAttempt := range appLAs {

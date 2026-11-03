@@ -9,8 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/stores/system/sysnotification"
-	"github.com/loveyourstack/lys/lysauth"
+	"github.com/loveyourstack/lys/lystime"
 	"github.com/loveyourstack/lys/lysws"
 )
 
@@ -34,33 +35,6 @@ var defaultShutdownTimeouts = shutdownTimeouts{
 type background struct {
 	wg      sync.WaitGroup // goroutines that must exit before sessions are persisted
 	hubDone chan struct{}  // closed when the notification hub listener exits
-}
-
-// newHttpServer wraps handler in a server with timeouts
-func newHttpServer(handler http.Handler, addr string) *http.Server {
-
-	timedHandler := http.TimeoutHandler(handler, 5*time.Second, "request timed out")
-
-	return &http.Server{
-		Addr: addr,
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			// http.TimeoutHandler does not implement the http.Hijacker interface, which is needed for WebSocket upgrades
-			// so allow websocket requests to skip the timeout handler
-			if lysauth.IsWebSocket(r.Header) {
-				handler.ServeHTTP(w, r)
-				return
-			}
-
-			// http requests
-			timedHandler.ServeHTTP(w, r)
-		}),
-		IdleTimeout:       time.Second,
-		MaxHeaderBytes:    1024 * 1024, // 1 MB
-		ReadHeaderTimeout: 500 * time.Millisecond,
-		ReadTimeout:       500 * time.Millisecond,
-		WriteTimeout:      10 * time.Second,
-	}
 }
 
 // loadState loads persisted sessions and login attempts from db, if any
@@ -99,10 +73,14 @@ func (srvApp *httpServerApplication) startBackground(ctx context.Context) (bg *b
 
 	// archive expired sessions immediately, and start goroutine to periodically archive them
 	srvApp.archiveExpiredSessions(ctx)
-	bg.wg.Go(func() { srvApp.runExpiredSessionArchiver(ctx, 5*time.Minute) })
+	bg.wg.Go(func() {
+		lystime.RunEvery(ctx, 5*time.Minute, func() { srvApp.archiveExpiredSessions(ctx) })
+	})
 
 	// start goroutine to periodically clean up expired rate limit buckets
-	bg.wg.Go(func() { srvApp.runRateLimitCleanup(ctx, 30*time.Minute) })
+	bg.wg.Go(func() {
+		lystime.RunEvery(ctx, 30*time.Minute, func() { srvApp.AuthedRateLimits.CleanupExpired(); srvApp.UnauthedRateLimits.CleanupExpired() })
+	})
 
 	return bg, nil
 }
@@ -122,16 +100,10 @@ func (srvApp *httpServerApplication) serve(ctx context.Context, stop context.Can
 		return err
 	}
 
-	// display startup message with port and debug mode if enabled
-	startupMsg := fmt.Sprintf("starting refsrv on port: %s", srvApp.Config.Api.Port)
-	if srvApp.Config.General.Debug {
-		startupMsg += ", debug: true"
-	}
-	srvApp.Logger.Info(startupMsg)
-
 	// serve in a goroutine so that it doesn't block the main thread, which is waiting for shutdown signals
 	srvErrCh := make(chan error, 1)
 	go func() {
+		cmd.StartupMsg("refsrv", srvApp.Config.Api.Port, srvApp.Config.General.Debug, srvApp.Logger)
 		srvErrCh <- srv.Serve(ln)
 	}()
 
@@ -160,29 +132,10 @@ func (srvApp *httpServerApplication) shutdown(srv *http.Server, bg *background) 
 	bg.wg.Wait()
 
 	return errors.Join(
-		srvApp.shutdownHttp(srv),
+		cmd.ShutdownHttp(srv, srvApp.ShutdownTimeouts.Http),
 		srvApp.persistState(),
 		srvApp.shutdownHub(bg.hubDone),
 	)
-}
-
-// shutdownHttp gracefully shuts down the server, waiting for active requests to finish or timeout before forcefully closing
-func (srvApp *httpServerApplication) shutdownHttp(srv *http.Server) error {
-
-	ctx, cancel := context.WithTimeout(context.Background(), srvApp.ShutdownTimeouts.Http)
-	defer cancel()
-
-	err := srv.Shutdown(ctx)
-	if err == nil || errors.Is(err, http.ErrServerClosed) {
-		return nil
-	}
-
-	// graceful shutdown failed (typically deadline exceeded): force-close remaining connections
-	if closeErr := srv.Close(); closeErr != nil {
-		err = errors.Join(err, fmt.Errorf("srv.Close failed: %w", closeErr))
-	}
-
-	return fmt.Errorf("shutdown: srv.Shutdown failed: %w", err)
 }
 
 // persistState persists sessions and login attempts to db, for loading on restart
@@ -207,11 +160,8 @@ func (srvApp *httpServerApplication) shutdownHub(hubDone <-chan struct{}) error 
 
 	var errs error
 
-	select {
-	case <-hubDone:
-		// hub already stopped or exited on its own
-	case <-time.After(srvApp.ShutdownTimeouts.Hub):
-		errs = errors.Join(errs, errors.New("shutdown: timeout waiting for hub listener to exit"))
+	if err := lystime.WaitOrTimeout(hubDone, srvApp.ShutdownTimeouts.Hub, "shutdown: timeout waiting for hub listener to exit"); err != nil {
+		errs = errors.Join(errs, err)
 	}
 
 	if err := srvApp.NotificationHub.Close(); err != nil {

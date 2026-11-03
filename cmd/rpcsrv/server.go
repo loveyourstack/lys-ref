@@ -250,20 +250,6 @@ func (rpcApp *gRpcServerApplication) mapError(ctx context.Context, req any,
 	}
 }
 
-func (rpcApp *gRpcServerApplication) runRateLimitCleanup(ctx context.Context, every time.Duration) {
-	ticker := time.NewTicker(every)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			rpcApp.AuthedRateLimits.CleanupExpired()
-			rpcApp.UnauthedRateLimits.CleanupExpired()
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
 // userErrCode maps HTTP status codes to gRPC codes.
 func userErrCode(httpStatus int) codes.Code {
 	switch httpStatus {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/loveyourstack/lys/lysexec"
+	"github.com/loveyourstack/lys/lystime"
 )
 
 func (lisApp *dbListenerApplication) serve(ctx context.Context, stop context.CancelFunc) error {
@@ -62,12 +63,9 @@ func (lisApp *dbListenerApplication) serve(ctx context.Context, stop context.Can
 		gadsProcessingRunner.Wait()
 	}()
 
-	runErr := listenErr
-	select {
-	case <-runnersDoneCh:
-	case <-time.After(10 * time.Second):
-		runErr = errors.Join(runErr, errors.New("shutdown: timeout waiting for runners to exit"))
-	}
+	// wait for runners to exit with a timeout and combine any errors with listenErr
+	runErr := errors.Join(listenErr,
+		lystime.WaitOrTimeout(runnersDoneCh, 10*time.Second, "shutdown: timeout waiting for runners to exit"))
 
 	if listenErr == nil {
 		lisApp.Logger.Info("shutdown signal received")

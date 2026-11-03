@@ -5,11 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
+	"github.com/loveyourstack/lys/lysauth"
 )
 
 func main() {
@@ -43,8 +46,14 @@ func run(configFilePath string) error {
 	}
 	defer srvApp.Close()
 
+	//srv := newHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port)
+
+	// create HTTP server with timeout bypass for WebSocket requests
+	srv := cmd.NewHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port, func(r *http.Request) bool {
+		return lysauth.IsWebSocket(r.Header)
+	})
+
 	// listen before starting anything else so that an unavailable port fails fast
-	srv := newHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port)
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return fmt.Errorf("net.Listen failed: %w", err)

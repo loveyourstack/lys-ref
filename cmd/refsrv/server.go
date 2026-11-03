@@ -195,21 +195,6 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 	})
 }
 
-func (srvApp *httpServerApplication) runRateLimitCleanup(ctx context.Context, every time.Duration) {
-	ticker := time.NewTicker(every)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			srvApp.AuthedRateLimits.CleanupExpired()
-			srvApp.UnauthedRateLimits.CleanupExpired()
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
 // rpcDefaultDeadlineUnaryInterceptor applies a timeout to RPC calls whose context has no deadline yet.
 // A deadline set by the caller is left alone.
 func rpcDefaultDeadlineUnaryInterceptor(timeout time.Duration) grpc.UnaryClientInterceptor {

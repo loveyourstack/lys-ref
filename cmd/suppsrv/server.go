@@ -84,20 +84,6 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 	})
 }
 
-func (srvApp *httpServerApplication) runRateLimitCleanup(ctx context.Context, every time.Duration) {
-	ticker := time.NewTicker(every)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			srvApp.RateLimits.CleanupExpired()
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
 // secureHeaders is middleware that add XSS protection headers to responses
 func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

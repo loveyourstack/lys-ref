@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/loveyourstack/lys-ref/cmd"
 	"github.com/loveyourstack/lys-ref/internal/myapp"
 )
 
@@ -42,8 +43,10 @@ func run(configFilePath string) error {
 	}
 	defer srvApp.Close()
 
+	// create HTTP server
+	srv := cmd.NewHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port, nil)
+
 	// listen before starting anything else so that an unavailable port fails fast
-	srv := newHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port)
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return fmt.Errorf("net.Listen failed: %w", err)

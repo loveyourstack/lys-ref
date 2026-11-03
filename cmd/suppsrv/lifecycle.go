@@ -8,23 +8,13 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/loveyourstack/lys-ref/cmd"
+	"github.com/loveyourstack/lys/lystime"
 )
 
 type background struct {
 	wg sync.WaitGroup
-}
-
-// newHttpServer wraps handler in a server with timeouts.
-func newHttpServer(handler http.Handler, addr string) *http.Server {
-	return &http.Server{
-		Addr:              addr,
-		Handler:           http.TimeoutHandler(handler, 5*time.Second, "request timed out"),
-		IdleTimeout:       time.Second,
-		MaxHeaderBytes:    1024 * 1024, // 1 MB
-		ReadHeaderTimeout: 500 * time.Millisecond,
-		ReadTimeout:       500 * time.Millisecond,
-		WriteTimeout:      10 * time.Second,
-	}
 }
 
 // loadState loads persisted blocked IPs from db, if any.
@@ -38,7 +28,11 @@ func (srvApp *httpServerApplication) loadState(ctx context.Context) error {
 // startBackground starts the periodic maintenance goroutines. They stop when ctx is canceled.
 func (srvApp *httpServerApplication) startBackground(ctx context.Context) *background {
 	bg := &background{}
-	bg.wg.Go(func() { srvApp.runRateLimitCleanup(ctx, 30*time.Minute) })
+
+	bg.wg.Go(func() {
+		lystime.RunEvery(ctx, 30*time.Minute, func() { srvApp.RateLimits.CleanupExpired() })
+	})
+
 	return bg
 }
 
@@ -53,14 +47,9 @@ func (srvApp *httpServerApplication) serve(ctx context.Context, stop context.Can
 
 	bg := srvApp.startBackground(ctx)
 
-	startupMsg := fmt.Sprintf("starting suppsrv on port: %s", srvApp.Config.Api.Port)
-	if srvApp.Config.General.Debug {
-		startupMsg += ", debug: true"
-	}
-	srvApp.Logger.Info(startupMsg)
-
 	srvErrCh := make(chan error, 1)
 	go func() {
+		cmd.StartupMsg("suppsrv", srvApp.Config.Api.Port, srvApp.Config.General.Debug, srvApp.Logger)
 		srvErrCh <- srv.Serve(ln)
 	}()
 
@@ -82,22 +71,5 @@ func (srvApp *httpServerApplication) serve(ctx context.Context, stop context.Can
 // shutdown stops everything started by serve. The context passed to startBackground must be canceled first.
 func (srvApp *httpServerApplication) shutdown(srv *http.Server, bg *background) error {
 	bg.wg.Wait()
-	return srvApp.shutdownHttp(srv)
-}
-
-// shutdownHttp gracefully shuts down the server, waiting for active requests to finish or timeout before forcefully closing.
-func (srvApp *httpServerApplication) shutdownHttp(srv *http.Server) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	err := srv.Shutdown(ctx)
-	if err == nil || errors.Is(err, http.ErrServerClosed) {
-		return nil
-	}
-
-	if closeErr := srv.Close(); closeErr != nil {
-		err = errors.Join(err, fmt.Errorf("srv.Close failed: %w", closeErr))
-	}
-
-	return fmt.Errorf("shutdown: srv.Shutdown failed: %w", err)
+	return cmd.ShutdownHttp(srv, 10*time.Second)
 }
