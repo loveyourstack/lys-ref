@@ -97,26 +97,32 @@ func techRpcItemsResponse[T proto.Message](ctx context.Context, items []T, metad
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-func (srvApp *httpServerApplication) techRpcLoginAttempts(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (srvApp *httpServerApplication) techRpcLoginAttempts(rpcAuthSvcClient pb.AuthSvcClient) http.HandlerFunc {
 
-	rpcResp, err := pb.NewAuthSvcClient(srvApp.rpcClient).ListLoginAttempts(ctx, &pb.EmptyReq{})
-	if err != nil {
-		srvApp.techHandleRpcError(ctx, fmt.Errorf("techRpcLoginAttempts: AuthSvc.ListLoginAttempts failed: %w", err), w)
-		return
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		rpcResp, err := rpcAuthSvcClient.ListLoginAttempts(ctx, &pb.EmptyReq{})
+		if err != nil {
+			srvApp.techHandleRpcError(ctx, fmt.Errorf("techRpcLoginAttempts: AuthSvc.ListLoginAttempts failed: %w", err), w)
+			return
+		}
+
+		techRpcItemsResponse(ctx, rpcResp.GetData(), rpcResp.GetMetadata(), srvApp.Logger, w)
 	}
-
-	techRpcItemsResponse(ctx, rpcResp.GetData(), rpcResp.GetMetadata(), srvApp.Logger, w)
 }
 
-func (srvApp *httpServerApplication) techRpcSessions(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (srvApp *httpServerApplication) techRpcSessions(rpcAuthSvcClient pb.AuthSvcClient) http.HandlerFunc {
 
-	rpcResp, err := pb.NewAuthSvcClient(srvApp.rpcClient).ListSessions(ctx, &pb.EmptyReq{})
-	if err != nil {
-		srvApp.techHandleRpcError(ctx, fmt.Errorf("techRpcSessions: AuthSvc.ListSessions failed: %w", err), w)
-		return
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		rpcResp, err := rpcAuthSvcClient.ListSessions(ctx, &pb.EmptyReq{})
+		if err != nil {
+			srvApp.techHandleRpcError(ctx, fmt.Errorf("techRpcSessions: AuthSvc.ListSessions failed: %w", err), w)
+			return
+		}
+
+		techRpcItemsResponse(ctx, rpcResp.GetData(), rpcResp.GetMetadata(), srvApp.Logger, w)
 	}
-
-	techRpcItemsResponse(ctx, rpcResp.GetData(), rpcResp.GetMetadata(), srvApp.Logger, w)
 }

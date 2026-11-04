@@ -15,6 +15,7 @@ import (
 	"github.com/loveyourstack/connectors/tedb/stores/tedbvatrate"
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/sysrole"
+	"github.com/loveyourstack/lys-ref/internal/pb"
 	"github.com/loveyourstack/lys-ref/internal/stores/core/corearraytype"
 	"github.com/loveyourstack/lys-ref/internal/stores/core/coredefaultvalue"
 	"github.com/loveyourstack/lys-ref/internal/stores/core/coremandatoryvalue"
@@ -277,7 +278,7 @@ func (srvApp *httpServerApplication) digmarkRoutes(apiEnv lys.Env) lys.RouteAdde
 		endpoint = "/campaign-optimizer"
 
 		campOptStore := dmcampaignopt.Store{Db: srvApp.Db}
-		r.HandleFunc(endpoint+"/aggregates", srvApp.dmGetCampaignOptAggregates).Methods("GET")
+		r.HandleFunc(endpoint+"/aggregates", srvApp.dmGetCampaignOptAggregates()).Methods("GET")
 		r.HandleFunc(endpoint, lys.Get(apiEnv, campOptStore, &lys.GetOpts[dmcampaignopt.Model]{
 			SetFuncUrlParamNames: campOptStore.GetSetFuncUrlParamNames(),
 		})).Methods("GET")
@@ -484,21 +485,6 @@ func (srvApp *httpServerApplication) geoRoutes(apiEnv lys.Env) lys.RouteAdderFun
 	}
 }
 
-func (srvApp *httpServerApplication) maxmindRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
-
-	return func(r *mux.Router) *mux.Router {
-		//schemaName := "maxmind"
-
-		endpoint := "/api-calls"
-
-		apiCallStore := mmapicall.Store{Db: srvApp.Db}
-		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
-		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
-
-		return r
-	}
-}
-
 func (srvApp *httpServerApplication) lysincRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
 
 	return func(r *mux.Router) *mux.Router {
@@ -523,6 +509,21 @@ func (srvApp *httpServerApplication) lysincRoutes(apiEnv lys.Env) lys.RouteAdder
 		r.HandleFunc(endpoint, lys.Get(apiEnv, eventsInMonthStore, &lys.GetOpts[lysinceventsinmonth.Model]{
 			SetFuncUrlParamNames: eventsInMonthStore.GetSetFuncUrlParamNames(),
 		})).Methods("GET")
+
+		return r
+	}
+}
+
+func (srvApp *httpServerApplication) maxmindRoutes(apiEnv lys.Env) lys.RouteAdderFunc {
+
+	return func(r *mux.Router) *mux.Router {
+		//schemaName := "maxmind"
+
+		endpoint := "/api-calls"
+
+		apiCallStore := mmapicall.Store{Db: srvApp.Db}
+		r.HandleFunc(endpoint, lys.Get(apiEnv, apiCallStore, nil)).Methods("GET")
+		r.HandleFunc(endpoint+"/{id}", lys.GetById(apiEnv, apiCallStore)).Methods("GET")
 
 		return r
 	}
@@ -797,7 +798,8 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 
 		endpoint = "/rpc-login-attempts"
 
-		r.HandleFunc(endpoint, srvApp.techRpcLoginAttempts).Methods("GET")
+		rpcAuthSvcClient := pb.NewAuthSvcClient(srvApp.rpcClient)
+		r.HandleFunc(endpoint, srvApp.techRpcLoginAttempts(rpcAuthSvcClient)).Methods("GET")
 
 		endpoint = "/rpc-requests"
 
@@ -806,7 +808,7 @@ func (srvApp *httpServerApplication) techRoutes(apiEnv lys.Env) lys.RouteAdderFu
 
 		endpoint = "/rpc-sessions"
 
-		r.HandleFunc(endpoint, srvApp.techRpcSessions).Methods("GET")
+		r.HandleFunc(endpoint, srvApp.techRpcSessions(rpcAuthSvcClient)).Methods("GET")
 
 		endpoint = "/server-requests"
 

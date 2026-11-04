@@ -154,6 +154,15 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 
 func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.HandlerFunc {
 
+	extractParams := lysformfile.ExtractParams{
+		AllowedMimeTypes: lysformfile.ImageMimeTypes,
+		ImgMaxHeightPx:   new(400),
+		ImgMaxWidthPx:    new(400),
+		ImgMinHeightPx:   new(400),
+		ImgMinWidthPx:    new(400),
+		MaxSizePerFile:   1 * 1024 * 1024, // 1 MB
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -165,14 +174,7 @@ func (srvApp *httpServerApplication) sysSetUserProfilePic(env lys.Env) http.Hand
 		}
 
 		// extract the image from the request
-		uploadFiles, err := lysformfile.ExtractFromRequest(r, lysformfile.ExtractParams{
-			AllowedMimeTypes: lysformfile.ImageMimeTypes,
-			ImgMaxHeightPx:   new(400),
-			ImgMaxWidthPx:    new(400),
-			ImgMinHeightPx:   new(400),
-			ImgMinWidthPx:    new(400),
-			MaxSizePerFile:   1 * 1024 * 1024, // 1 MB
-		})
+		uploadFiles, err := lysformfile.ExtractFromRequest(r, extractParams)
 		if err != nil {
 			lys.HandleError(ctx, fmt.Errorf("sysSetUserProfilePic: lysformfile.ExtractFromRequest failed: %w", err), env.Logger, w)
 			return

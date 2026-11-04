@@ -11,10 +11,9 @@ import (
 	"github.com/loveyourstack/lys/lysset"
 )
 
-func (srvApp *httpServerApplication) dmGetCampaignOptAggregates(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (srvApp *httpServerApplication) dmGetCampaignOptAggregates() http.HandlerFunc {
 
-	// get request modifiers from url params
+	// use campOptStore to form extract request modifier params
 	campOptStore := dmcampaignopt.Store{Db: srvApp.Db}
 	params := lys.ExtractGetRequestModifierParams{
 		AdditionalFilterParamNames: nil,
@@ -23,24 +22,29 @@ func (srvApp *httpServerApplication) dmGetCampaignOptAggregates(w http.ResponseW
 		JsonKeyDbNameMap:           campOptStore.GetPlan().JsonKeyDbNameMap(),
 		SetFuncUrlParamNames:       campOptStore.GetSetFuncUrlParamNames(),
 	}
-	getReqModifiers, err := lys.ExtractGetRequestModifiers(r, params)
-	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("lys.ExtractGetRequestModifiers failed: %w", err), srvApp.Logger, w)
-		return
-	}
 
-	aggItems, err := campOptStore.SelectAggregates(ctx, getReqModifiers.SetFuncParamValues, getReqModifiers.Conditions)
-	if err != nil {
-		lys.HandleError(ctx, fmt.Errorf("campOptStore.SelectAggregates failed: %w", err), srvApp.Logger, w)
-		return
-	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-	// return success
-	resp := lys.StdResponse{
-		Status: lys.ReqSucceeded,
-		Data:   aggItems,
+		getReqModifiers, err := lys.ExtractGetRequestModifiers(r, params)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("lys.ExtractGetRequestModifiers failed: %w", err), srvApp.Logger, w)
+			return
+		}
+
+		aggItems, err := campOptStore.SelectAggregates(ctx, getReqModifiers.SetFuncParamValues, getReqModifiers.Conditions)
+		if err != nil {
+			lys.HandleError(ctx, fmt.Errorf("campOptStore.SelectAggregates failed: %w", err), srvApp.Logger, w)
+			return
+		}
+
+		// return success
+		resp := lys.StdResponse{
+			Status: lys.ReqSucceeded,
+			Data:   aggItems,
+		}
+		lys.JsonResponse(resp, http.StatusOK, w)
 	}
-	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
 func (srvApp *httpServerApplication) dmPatchActiveByIds(w http.ResponseWriter, r *http.Request) {
