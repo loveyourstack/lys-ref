@@ -24,11 +24,13 @@ func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 				return fmt.Errorf("this command may only be used in dev environment")
 			}
 
-			// if there is a "test" argument, create the configured test database
+			// if there is a "test" argument, create the configured test database and add test data
+			addTestData := false
 			if len(args) == 1 && args[0] == "test" {
 				if cliApp.Config.TestDatabase.Database == "" {
 					return fmt.Errorf("test database is not configured")
 				}
+				addTestData = true
 				cliApp.Config.Db.Database = cliApp.Config.TestDatabase.Database
 			}
 
@@ -43,9 +45,19 @@ func CreateDbCmd(cliApp *cliapp.App) *cobra.Command {
 				Password: cliApp.Config.DbSuperUser.Password,
 			}
 
+			params := lyspgdb.CreateLocalDbParams{
+				SqlAssets:              ddl.SQLAssets,
+				DbConf:                 cliApp.Config.Db,
+				DbSuperUser:            dbSuperUser,
+				DbOwnerConf:            cliApp.Config.DbOwnerUser,
+				DropExisting:           true,
+				AddSecurityPermissions: false,
+				AddTestData:            addTestData,
+				Replacements:           fileReplacements,
+			}
+
 			// (re-)create test db
-			if err := lyspgdb.CreateLocalDb(cmd.Context(), ddl.SQLAssets, cliApp.Config.Db, dbSuperUser, cliApp.Config.DbOwnerUser, true, false,
-				fileReplacements, cliApp.Logger); err != nil {
+			if err := lyspgdb.CreateLocalDb(cmd.Context(), params, cliApp.Logger); err != nil {
 				return fmt.Errorf("lyspgdb.CreateLocalDb failed: %w", err)
 			}
 

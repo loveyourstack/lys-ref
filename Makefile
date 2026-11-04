@@ -74,7 +74,8 @@ rpc: genpb
 # create test database and run all tests
 .PHONY: tests
 tests: testdb
-	go test -race ./...
+	# -p 1: packages share one test database, and some tests empty tables that others read
+	go test -race -p 1 ./...
 
 ###########################################################
 

@@ -136,8 +136,15 @@ func TestServeShutdownPersistsState(t *testing.T) {
 	if sess.UserId != u.id || sess.UserName != u.name {
 		t.Errorf("restored session user = %d %q, want %d %q", sess.UserId, sess.UserName, u.id, u.name)
 	}
-	if got := restarted.LoginAttempts.Count(); got != 1 {
-		t.Errorf("restored login attempts = %d, want 1", got)
+	// other login attempts can be loaded too: system.blocked_ip is loaded as login attempts and may contain seed data
+	restoredAttempt := false
+	for _, la := range restarted.LoginAttempts.All() {
+		if la.Ip == attemptIp {
+			restoredAttempt = true
+		}
+	}
+	if !restoredAttempt {
+		t.Errorf("login attempt for %s was not restored", attemptIp)
 	}
 }
 
