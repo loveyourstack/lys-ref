@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"time"
 
 	"github.com/loveyourstack/lys"
@@ -32,19 +33,46 @@ type httpServerApplication struct {
 	SrvLogStore    syssrvreq.Store
 }
 
+type clientIpCtxKeyType struct{}
+
+var clientIpCtxKey = clientIpCtxKeyType{}
+
+// initClientIP resolves the client IP once for the rest of the request chain.
+func (srvApp *httpServerApplication) initClientIP(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		if err != nil {
+			lys.HandleInternalError(ctx, fmt.Errorf("initClientIP: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			return
+		}
+		ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func clientIPFromContext(ctx context.Context) (netip.Addr, error) {
+	ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
+	if !ok || !ip.IsValid() {
+		return netip.Addr{}, fmt.Errorf("client IP missing or invalid in context")
+	}
+	return ip, nil
+}
+
 // limit is middleware that applies rate limiting to all requests based on IP
 func (srvApp *httpServerApplication) limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-		// get remote IP
-		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		// get remote IP from context
+		remoteHostIP, err := clientIPFromContext(ctx)
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("limit: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: %w", err), srvApp.Logger, w)
 			return
 		}
 
 		// check rate limit
-		if !srvApp.RateLimits.Allow(ip.String()) {
+		if !srvApp.RateLimits.Allow(remoteHostIP.String()) {
 			lys.HandleUserError(lysauth.ErrTooManyRequests, w)
 			return
 		}
@@ -58,17 +86,17 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// get remote IP from context
+		remoteHostIP, err := clientIPFromContext(ctx)
+		if err != nil {
+			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: %w", err), srvApp.Logger, w)
+			return
+		}
+
 		// create user info and attach to context, to be filled in by authenticate and login later in the chain
 		// must be a pointer so that it can be overwritten
 		userInfo := &ReqUserInfo{}
 		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
-
-		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
-			return
-		}
 
 		// use a custom writer that captures the response status code
 		sw := &lys.StatusWriter{ResponseWriter: w}

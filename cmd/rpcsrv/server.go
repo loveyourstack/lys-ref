@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"strconv"
 	"time"
 
@@ -60,6 +61,34 @@ type gRpcServerApplication struct {
 	UserStore         sysuser.Store
 }
 
+type clientIpCtxKeyType struct{}
+
+var clientIpCtxKey = clientIpCtxKeyType{}
+
+// initClientIP resolves the client IP once for the rest of the request chain.
+func (srvApp *gRpcServerApplication) initClientIP(ctx context.Context, req any,
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (any, error) {
+	remoteHostIP, err := getRemoteHostIp(ctx, srvApp.UseRealIpHeader)
+	if err != nil {
+		srvApp.Logger.Error("initClientIP: getRemoteHostIp failed",
+			"method", info.FullMethod,
+			"error", err,
+		)
+		return nil, status.Error(codes.Internal, "internal server error")
+	}
+	ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
+	return handler(ctx, req)
+}
+
+func clientIPFromContext(ctx context.Context) (netip.Addr, error) {
+	ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
+	if !ok || !ip.IsValid() {
+		return netip.Addr{}, fmt.Errorf("client IP missing or invalid in context")
+	}
+	return ip, nil
+}
+
 // limitUnauthed rate limits public methods by IP. Authenticated methods are limited by user ID in limitAuthed
 func (rpcApp *gRpcServerApplication) limitUnauthed(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
@@ -71,12 +100,13 @@ func (rpcApp *gRpcServerApplication) limitUnauthed(ctx context.Context, req any,
 		return handler(ctx, req)
 	}
 
-	ip, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
+	// get remote IP from context
+	remoteHostIp, err := clientIPFromContext(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("limitUnauthed: getRemoteHostIp failed: %w", err)
+		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
 	}
 
-	if !rpcApp.UnauthedRateLimits.Allow(ip.String()) {
+	if !rpcApp.UnauthedRateLimits.Allow(remoteHostIp.String()) {
 		return nil, lysauth.ErrTooManyRequests
 	}
 
@@ -109,6 +139,12 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
+	// get remote IP from context
+	remoteHostIp, err := clientIPFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
+	}
+
 	// create user info and attach to context, to be filled in by authenticate and login later in the chain
 	// must be a pointer so that it can be overwritten
 	userInfo := &ReqUserInfo{}
@@ -121,13 +157,6 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 
 	// code as determined by mapError
 	code := status.Code(err)
-
-	// get remote ip
-	remoteHostIp, ipErr := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
-	if ipErr != nil {
-		rpcApp.Logger.Error("logRequest: getRemoteHostIp failed", "error", ipErr)
-		return resp, err
-	}
 
 	// log to file
 	rpcApp.Logger.Info(fmt.Sprintf("%s - %s - %s - %s - %dms",

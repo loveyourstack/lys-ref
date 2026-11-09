@@ -263,7 +263,7 @@ func TestRejectBlockedIp(t *testing.T) {
 			}
 
 			next := &nextRecorder{}
-			h := srvApp.rejectBlockedIp(next)
+			h := srvApp.initClientIP(srvApp.rejectBlockedIp(next))
 
 			req := newTestRequest(t)
 			req.RemoteAddr = tt.remoteAddr
@@ -310,7 +310,7 @@ func TestAuthenticateDevBypass(t *testing.T) {
 			srvApp.Config.Api.UseAuthentication = tt.useAuth
 
 			next := &nextRecorder{}
-			var h http.Handler = srvApp.authenticate(next)
+			var h http.Handler = srvApp.initClientIP(srvApp.authenticate(next))
 			if tt.withInfo {
 				h = withUserInfo(h)
 			}
@@ -381,7 +381,7 @@ func TestAuthenticateSession(t *testing.T) {
 			token := addTestSession(t, srvApp, 42, "alice", tt.roles)
 
 			next := &nextRecorder{}
-			var h http.Handler = srvApp.authenticate(next)
+			var h http.Handler = srvApp.initClientIP(srvApp.authenticate(next))
 			if tt.withInfo {
 				h = withUserInfo(h)
 			}

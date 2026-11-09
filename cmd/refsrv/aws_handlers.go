@@ -77,20 +77,27 @@ func (srvApp *httpServerApplication) awsBedrockListImageModels(w http.ResponseWr
 func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	// user IP is only correct in prod, so exit if not in prod
+	if srvApp.Config.General.Env != appenv.Prod {
+		lys.HandleUserError(lyserr.User{Message: "only call this endpoint in prod env"}, w)
+		return
+	}
+
+	// get remote IP from context
+	remoteHostIP, err := clientIPFromContext(ctx)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("awsUpdateUserSecurityGroupRules: failed to get client IP: %w", err), srvApp.Logger, w)
+		return
+	}
+
 	// get session associated with this request, if any, and validate it
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
+	sess, err := srvApp.Sessions.FromRequest(r, remoteHostIP, srvApp.Logger)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
 	}
 	if sess.Email == "" {
 		lys.HandleUserError(lyserr.User{Message: "email missing in session"}, w)
-		return
-	}
-
-	// user IP is only correct in prod, so exit if not in prod
-	if srvApp.Config.General.Env != appenv.Prod {
-		lys.HandleUserError(lyserr.User{Message: "only call this endpoint in prod env"}, w)
 		return
 	}
 

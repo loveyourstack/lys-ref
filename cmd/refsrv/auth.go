@@ -69,6 +69,13 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// get remote IP from context
+		remoteHostIP, err := clientIPFromContext(ctx)
+		if err != nil {
+			lys.HandleInternalError(ctx, fmt.Errorf("authenticate: failed to get client IP: %w", err), srvApp.Logger, w)
+			return
+		}
+
 		// allow skipping auth in dev env by using a dummy user
 		if srvApp.Config.General.Env == appenv.Dev && !srvApp.Config.Api.UseAuthentication {
 
@@ -90,16 +97,16 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		// auth required
 
 		// get session associated with this request, if any
-		sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
+		sess, err := srvApp.Sessions.FromRequest(r, remoteHostIP, srvApp.Logger)
 		if err != nil {
-			lys.HandleError(r.Context(), fmt.Errorf("authenticate: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
+			lys.HandleError(ctx, fmt.Errorf("authenticate: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
 		// convert session roles from string to enum
 		sysRoles, err := sysrole.FromStringSlice(sess.Roles)
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("authenticate: sysrole.FromStringSlice failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("authenticate: sysrole.FromStringSlice failed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -347,10 +354,9 @@ func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Han
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// get remote ip
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		remoteHostIP, err := clientIPFromContext(ctx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: %w", err), srvApp.Logger, w)
 			return
 		}
 

@@ -45,7 +45,8 @@ func (srvApp *httpServerApplication) getMuxRouter() http.Handler {
 	r := mux.NewRouter()
 
 	// define middleware for all routes
-	r.Use(srvApp.logRequest) // log all requests and initialize user info in ctx
+	r.Use(srvApp.initClientIP)
+	r.Use(srvApp.logRequest)
 	r.Use(secureHeaders)
 	r.Use(srvApp.rejectBlockedIp)
 	r.Use(srvApp.limit) // global rate limit based on IP

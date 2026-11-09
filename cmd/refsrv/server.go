@@ -70,6 +70,32 @@ type httpServerApplication struct {
 	AwsBedrockClient *awsbedrockapi.Client
 }
 
+type clientIpCtxKeyType struct{}
+
+var clientIpCtxKey = clientIpCtxKeyType{}
+
+// initClientIP resolves the client IP once for the rest of the request chain.
+func (srvApp *httpServerApplication) initClientIP(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		if err != nil {
+			lys.HandleInternalError(ctx, fmt.Errorf("initClientIP: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			return
+		}
+		ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func clientIPFromContext(ctx context.Context) (netip.Addr, error) {
+	ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
+	if !ok || !ip.IsValid() {
+		return netip.Addr{}, fmt.Errorf("client IP missing or invalid in context")
+	}
+	return ip, nil
+}
+
 // limitAuthed is middleware that applies rate limiting to authenticated users based on user ID
 func (srvApp *httpServerApplication) limitAuthed(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,10 +121,9 @@ func (srvApp *httpServerApplication) limitAuthed(next http.Handler) http.Handler
 func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// get remote IP
-		ip, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		ip, err := clientIPFromContext(r.Context())
 		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -113,17 +138,15 @@ func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handl
 
 // logRequest is middleware that logs requests in the app's info log and the database for activity monitoring.
 func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// get remote ip and attach to context, to be forwarded on outgoing RPC calls
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
+		// get remote IP from context
+		remoteHostIP, err := clientIPFromContext(ctx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: %w", err), srvApp.Logger, w)
 			return
 		}
-		ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
 
 		// create user info and attach to context, to be filled in by authenticate and login later in the chain
 		// must be a pointer so that it can be overwritten
@@ -208,16 +231,12 @@ func rpcDefaultDeadlineUnaryInterceptor(timeout time.Duration) grpc.UnaryClientI
 	}
 }
 
-type clientIpCtxKeyType struct{}
-
-var clientIpCtxKey = clientIpCtxKeyType{}
-
 // rpcForwardIpUnaryInterceptor sets x-real-ip on outgoing RPCs to the end user's IP, which the RPC server requires in prod
 func rpcForwardIpUnaryInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
-		if !ok {
-			return fmt.Errorf("rpcForwardIpUnaryInterceptor: client IP missing from context")
+		ip, err := clientIPFromContext(ctx)
+		if err != nil {
+			return fmt.Errorf("rpcForwardIpUnaryInterceptor: %w", err)
 		}
 		ctx = metadata.AppendToOutgoingContext(ctx, "x-real-ip", ip.String())
 		return invoker(ctx, method, req, reply, cc, opts...)

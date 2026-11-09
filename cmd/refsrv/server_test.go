@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/netip"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -146,7 +149,7 @@ func TestLimitUnauthed(t *testing.T) {
 			srvApp.UnauthedRateLimits = lysauth.NewAppRateLimits(0, tt.burst, time.Hour) // no refill: only the burst is allowed
 
 			next := &nextRecorder{}
-			h := srvApp.limitUnauthed(next)
+			h := srvApp.initClientIP(srvApp.limitUnauthed(next))
 
 			for i, r := range tt.requests {
 				req := newTestRequest(t)
@@ -164,6 +167,150 @@ func TestLimitUnauthed(t *testing.T) {
 				if wantReached := r.want == http.StatusNoContent; next.called != wantReached {
 					t.Errorf("request %d: next called = %v, want %v", i, next.called, wantReached)
 				}
+			}
+		})
+	}
+}
+
+func TestInitClientIP(t *testing.T) {
+	tests := []struct {
+		name            string
+		useRealIpHeader bool
+		remoteAddr      string
+		realIpHeader    string
+		wantIP          string
+		wantStatus      int
+	}{
+		{name: "remote address", remoteAddr: "192.0.2.10:5000", wantIP: "192.0.2.10", wantStatus: http.StatusNoContent},
+		{name: "ipv6", remoteAddr: "[2001:db8::1]:5000", wantIP: "2001:db8::1", wantStatus: http.StatusNoContent},
+		{name: "trusted proxy", useRealIpHeader: true, remoteAddr: "127.0.0.1:5000", realIpHeader: "198.51.100.7", wantIP: "198.51.100.7", wantStatus: http.StatusNoContent},
+		{name: "invalid address", remoteAddr: "bogus", wantStatus: http.StatusInternalServerError},
+		{name: "missing header", useRealIpHeader: true, remoteAddr: "127.0.0.1:5000", wantStatus: http.StatusInternalServerError},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srvApp := newTestAppNoDb(t)
+			srvApp.UseRealIpHeader = tt.useRealIpHeader
+			called := false
+			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				called = true
+				ip, err := clientIPFromContext(r.Context())
+				if err != nil || ip.String() != tt.wantIP {
+					t.Errorf("clientIPFromContext() = %v, %v, want %s", ip, err, tt.wantIP)
+				}
+				w.WriteHeader(http.StatusNoContent)
+			})
+			req := newTestRequest(t)
+			req.RemoteAddr = tt.remoteAddr
+			req.Header.Set("X-Real-IP", tt.realIpHeader)
+			rec := testServe(t, srvApp.initClientIP(next), req)
+			if rec.Code != tt.wantStatus || called != (tt.wantStatus == http.StatusNoContent) {
+				t.Errorf("status = %d, called = %t; want %d, %t", rec.Code, called, tt.wantStatus, tt.wantStatus == http.StatusNoContent)
+			}
+		})
+	}
+}
+
+func TestClientIPConsumersRejectInvalidContext(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  context.Context
+	}{
+		{name: "missing", ctx: context.Background()},
+		{name: "wrong type", ctx: context.WithValue(context.Background(), clientIpCtxKey, "192.0.2.10")},
+		{name: "invalid address", ctx: context.WithValue(context.Background(), clientIpCtxKey, netip.Addr{})},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srvApp := newTestAppNoDb(t)
+			handlers := map[string]func(http.Handler) http.Handler{
+				"logRequest":      srvApp.logRequest,
+				"rejectBlockedIp": srvApp.rejectBlockedIp,
+				"limitUnauthed":   srvApp.limitUnauthed,
+			}
+			for name, middleware := range handlers {
+				t.Run(name, func(t *testing.T) {
+					next := &nextRecorder{}
+					rec := testServe(t, middleware(next), newTestRequest(t).WithContext(tt.ctx))
+					if rec.Code != http.StatusInternalServerError || next.called {
+						t.Errorf("status = %d, next called = %t; want 500, false", rec.Code, next.called)
+					}
+				})
+			}
+			t.Run("authTrackLoginAttempt", func(t *testing.T) {
+				req := newTestRequest(t).WithContext(tt.ctx)
+				rec := testServe(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					ok := srvApp.authTrackLoginAttempt(r.Context(), w, r, netip.MustParseAddr("192.0.2.10"), "test")
+					if ok {
+						t.Error("authTrackLoginAttempt succeeded")
+					}
+				}), req)
+				if rec.Code != http.StatusInternalServerError || srvApp.LoginAttempts.Count() != 0 {
+					t.Errorf("status = %d, attempts = %d; want 500, 0", rec.Code, srvApp.LoginAttempts.Count())
+				}
+			})
+		})
+	}
+}
+
+func TestClientIPUsedThroughoutChain(t *testing.T) {
+	srvApp := newTestAppNoDb(t)
+	srvApp.UnauthedRateLimits = lysauth.NewAppRateLimits(0, 1, time.Hour)
+	var logs bytes.Buffer
+	srvApp.Logger = slog.New(slog.NewTextHandler(&logs, nil))
+	wantIP := netip.MustParseAddr("192.0.2.10")
+
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !srvApp.authTrackLoginAttempt(r.Context(), w, r, wantIP, "test") {
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+	chain := srvApp.logRequest(srvApp.rejectBlockedIp(srvApp.limitUnauthed(next)))
+	mutateRequest := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.RemoteAddr = "198.51.100.7:1234"
+		r.Header.Set("X-Real-IP", "198.51.100.7")
+		chain.ServeHTTP(w, r)
+	})
+	h := srvApp.initClientIP(mutateRequest)
+	for _, want := range []int{http.StatusNoContent, http.StatusTooManyRequests} {
+		req := newTestRequest(t)
+		req.RemoteAddr = "192.0.2.10:5000"
+		if rec := testServe(t, h, req); rec.Code != want {
+			t.Errorf("status = %d, want %d", rec.Code, want)
+		}
+	}
+	attempts := srvApp.LoginAttempts.All()
+	if len(attempts) != 1 || attempts[0].Ip != wantIP {
+		t.Errorf("login attempts = %v, want one for %v", attempts, wantIP)
+	}
+	if !strings.Contains(logs.String(), wantIP.String()+" - ") {
+		t.Errorf("logs do not contain client IP %v: %s", wantIP, logs.String())
+	}
+}
+
+func TestRejectBlockedIpUsesContext(t *testing.T) {
+	tests := []struct {
+		name       string
+		blockedIP  string
+		wantStatus int
+	}{
+		{name: "context IP blocked", blockedIP: "192.0.2.10", wantStatus: http.StatusForbidden},
+		{name: "request IP blocked", blockedIP: "198.51.100.7", wantStatus: http.StatusNoContent},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srvApp := newTestAppNoDb(t)
+			if err := srvApp.LoginAttempts.Block(netip.MustParseAddr(tt.blockedIP)); err != nil {
+				t.Fatal(err)
+			}
+			req := newTestRequest(t)
+			req.RemoteAddr = "198.51.100.7:1234"
+			ctx := context.WithValue(req.Context(), clientIpCtxKey, netip.MustParseAddr("192.0.2.10"))
+			next := &nextRecorder{}
+			rec := testServe(t, srvApp.rejectBlockedIp(next), req.WithContext(ctx))
+			if rec.Code != tt.wantStatus || next.called != (tt.wantStatus == http.StatusNoContent) {
+				t.Errorf("status = %d, next called = %t; want %d", rec.Code, next.called, tt.wantStatus)
 			}
 		})
 	}
@@ -280,6 +427,11 @@ func TestRpcForwardIpUnaryInterceptor(t *testing.T) {
 		{
 			name:    "client ip has wrong type",
 			ctx:     context.WithValue(context.Background(), clientIpCtxKey, "192.0.2.10"),
+			wantErr: true,
+		},
+		{
+			name:    "client ip is invalid",
+			ctx:     context.WithValue(context.Background(), clientIpCtxKey, netip.Addr{}),
 			wantErr: true,
 		},
 		{

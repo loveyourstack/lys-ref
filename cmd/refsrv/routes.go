@@ -95,7 +95,8 @@ func (srvApp *httpServerApplication) getMuxRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	// define middleware for all routes
-	r.Use(srvApp.logRequest) // log all requests and initialize user info in ctx
+	r.Use(srvApp.initClientIP) // add client IP to ctx, for use later in the chain
+	r.Use(srvApp.logRequest)   // log all requests and initialize user info in ctx
 	r.Use(secureHeaders)
 	r.Use(srvApp.rejectBlockedIp)
 

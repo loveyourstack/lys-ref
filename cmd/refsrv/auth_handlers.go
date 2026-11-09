@@ -135,8 +135,15 @@ func authGetSignInResponse(
 func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// track login attempt and get remote IP
-	remoteHostIP, ok := srvApp.authTrackLoginAttempt(ctx, w, r, "authLogin")
+	// get remote IP from context
+	remoteHostIP, err := clientIPFromContext(ctx)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: failed to get client IP: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// track login attempt
+	ok := srvApp.authTrackLoginAttempt(ctx, w, r, remoteHostIP, "authLogin")
 	if !ok {
 		return
 	}
@@ -281,8 +288,15 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	// get remote IP from context
+	remoteHostIP, err := clientIPFromContext(ctx)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authLogout: failed to get client IP: %w", err), srvApp.Logger, w)
+		return
+	}
+
 	// get session
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
+	sess, err := srvApp.Sessions.FromRequest(r, remoteHostIP, srvApp.Logger)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("authLogout: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
@@ -320,14 +334,21 @@ func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.R
 func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// track login attempt and get remote IP
-	remoteHostIP, ok := srvApp.authTrackLoginAttempt(ctx, w, r, "authSessionTokenLogin")
+	// get remote IP from context
+	remoteHostIP, err := clientIPFromContext(ctx)
+	if err != nil {
+		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: failed to get client IP: %w", err), srvApp.Logger, w)
+		return
+	}
+
+	// track login attempt
+	ok := srvApp.authTrackLoginAttempt(ctx, w, r, remoteHostIP, "authSessionTokenLogin")
 	if !ok {
 		return
 	}
 
 	// get session associated with this request, if any
-	sess, err := srvApp.Sessions.FromRequest(r, srvApp.Logger)
+	sess, err := srvApp.Sessions.FromRequest(r, remoteHostIP, srvApp.Logger)
 	if err != nil {
 		lys.HandleError(ctx, fmt.Errorf("authSessionTokenLogin: srvApp.Sessions.FromRequest failed: %w", err), srvApp.Logger, w)
 		return
@@ -391,25 +412,18 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 	lys.JsonResponse(resp, http.StatusOK, w)
 }
 
-// authTrackLoginAttempt gets the remote IP, logs the attempt, and records a login attempt.
-func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, w http.ResponseWriter, r *http.Request, caller string) (remoteHostIP netip.Addr, ok bool) {
-
-	// get remote ip
-	remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
-	if err != nil {
-		lys.HandleInternalError(ctx, fmt.Errorf("%s: lysauth.GetIpAddrFromReq failed: %w", caller, err), srvApp.Logger, w)
-		return netip.Addr{}, false
-	}
+// authTrackLoginAttempt tracks a login attempt from the remote IP and handles blocking logic.
+func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, w http.ResponseWriter, r *http.Request, remoteHostIP netip.Addr, caller string) (ok bool) {
 
 	// add login attempt from this IP
-	err = srvApp.LoginAttempts.Add(remoteHostIP)
+	err := srvApp.LoginAttempts.Add(remoteHostIP)
 	if err != nil {
 
 		// reject if blocked (should be caught by the rejectBlockedIp middleware, but just in case)
 		if errors.Is(err, lysauth.ErrBlocked) {
 			lys.HandleUserError(lysauth.ErrBlocked, w)
 			srvApp.Logger.Debug(fmt.Sprintf("authTrackLoginAttempt: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
-			return netip.Addr{}, false
+			return false
 		}
 
 		// if max attempts exceeded
@@ -424,15 +438,15 @@ func (srvApp *httpServerApplication) authTrackLoginAttempt(ctx context.Context, 
 			if err != nil {
 				lys.HandleError(ctx, fmt.Errorf("%s: srvApp.BlockedIPStore.Insert failed: %w", caller, err), srvApp.Logger, w)
 			}
-			return netip.Addr{}, false
+			return false
 		}
 
 		// other error: shouldn't happen
 		lys.HandleError(ctx, fmt.Errorf("%s: srvApp.LoginAttempts.Add failed: %w", caller, err), srvApp.Logger, w)
-		return netip.Addr{}, false
+		return false
 	}
 
-	return remoteHostIP, true
+	return true
 }
 
 func (srvApp *httpServerApplication) authUnblockIp(w http.ResponseWriter, r *http.Request) {

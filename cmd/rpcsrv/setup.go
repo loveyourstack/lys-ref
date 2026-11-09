@@ -112,6 +112,7 @@ func (rpcApp *gRpcServerApplication) attachStores() {
 
 func newGrpcServer(rpcApp *gRpcServerApplication) *grpc.Server {
 	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
+		rpcApp.initClientIP,    // add client IP to ctx, for use later in the chain
 		rpcApp.logRequest,      // initialize userInfo in context and record final status and duration
 		rpcApp.mapError,        // convert errors to gRPC status codes
 		rpcApp.rejectBlockedIp, // check if the request comes from a blocked IP

@@ -50,8 +50,14 @@ func (s *authSrv) ListSessions(ctx context.Context, req *pb.EmptyReq) (*pb.ListS
 
 func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, error) {
 
-	// track login attempt and get remote IP
-	remoteHostIp, err := s.trackLoginAttempt(ctx)
+	// get remote IP from context
+	remoteHostIp, err := clientIPFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
+	}
+
+	// track login attempt
+	err = s.trackLoginAttempt(ctx, remoteHostIp)
 	if err != nil {
 		if errors.Is(err, lysauth.ErrBlocked) {
 			return nil, status.Error(codes.PermissionDenied, "IP blocked")
@@ -192,12 +198,7 @@ func (s *authSrv) Logout(ctx context.Context, req *pb.EmptyReq) (*emptypb.Empty,
 	return &emptypb.Empty{}, nil
 }
 
-func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Addr, err error) {
-
-	remoteHostIp, err = getRemoteHostIp(ctx, s.UseRealIpHeader)
-	if err != nil {
-		return netip.Addr{}, fmt.Errorf("getRemoteHostIp failed: %w", err)
-	}
+func (s *authSrv) trackLoginAttempt(ctx context.Context, remoteHostIp netip.Addr) (err error) {
 
 	// add login attempt from this IP and block if necessary
 	err = s.recordFailedAttempt(ctx, remoteHostIp)
@@ -206,20 +207,20 @@ func (s *authSrv) trackLoginAttempt(ctx context.Context) (remoteHostIp netip.Add
 		// ip blocked
 		if errors.Is(err, lysauth.ErrBlocked) {
 			s.Logger.Debug(fmt.Sprintf("trackLoginAttempt: blocked request from IP %s", remoteHostIp))
-			return netip.Addr{}, lysauth.ErrBlocked
+			return lysauth.ErrBlocked
 		}
 
 		// max attempts exceeded
 		if errors.Is(err, lysauth.ErrMaxAttemptsExceeded) {
 			s.Logger.Debug(fmt.Sprintf("trackLoginAttempt: max attempts exceeded for IP %s", remoteHostIp))
-			return netip.Addr{}, lysauth.ErrMaxAttemptsExceeded
+			return lysauth.ErrMaxAttemptsExceeded
 		}
 
 		// other error: shouldn't happen
-		return netip.Addr{}, fmt.Errorf("s.recordFailedAttempt failed: %w", err)
+		return fmt.Errorf("s.recordFailedAttempt failed: %w", err)
 	}
 
-	return remoteHostIp, err
+	return err
 }
 
 // getApiKeyIfPresent returns the raw API key if it was sent. If not, returns empty string with no errror.

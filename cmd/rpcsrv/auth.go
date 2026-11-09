@@ -199,10 +199,10 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 		return lysauth.Session{}, lyserr.User{Message: "Metadata missing or empty", StatusCode: http.StatusUnauthorized}
 	}
 
-	// get ip
-	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
+	// get remote IP from context
+	remoteHostIp, err := clientIPFromContext(ctx)
 	if err != nil {
-		return lysauth.Session{}, fmt.Errorf("authGetSession: getRemoteHostIp failed: %w", err)
+		return lysauth.Session{}, fmt.Errorf("authGetSession: clientIPFromContext failed: %w", err)
 	}
 
 	// check for service account access via API key
@@ -449,10 +449,10 @@ func (rpcApp *gRpcServerApplication) rejectBlockedIp(ctx context.Context, req an
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
-	// get remote ip
-	remoteHostIp, err := getRemoteHostIp(ctx, rpcApp.UseRealIpHeader)
+	// get remote IP from context
+	remoteHostIp, err := clientIPFromContext(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("getRemoteHostIp failed: %w", err)
+		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
 	}
 
 	isBlocked, err := rpcApp.LoginAttempts.IsBlocked(remoteHostIp)

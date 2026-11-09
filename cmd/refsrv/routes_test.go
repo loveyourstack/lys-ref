@@ -66,6 +66,50 @@ func isRejected(status int) bool {
 	return status == http.StatusUnauthorized || status == http.StatusForbidden
 }
 
+func TestRouterInitializesClientIPBeforeBlocking(t *testing.T) {
+	srvApp := newTestAppNoDb(t)
+	srvApp.UseRealIpHeader = true
+	ip := netip.MustParseAddr("198.51.100.7")
+	if err := srvApp.LoginAttempts.Block(ip); err != nil {
+		t.Fatalf("LoginAttempts.Block() error = %v", err)
+	}
+	req, err := http.NewRequest(http.MethodPost, "/login", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.RemoteAddr = "127.0.0.1:5000"
+	req.Header.Set("X-Real-IP", ip.String())
+	rec := testServe(t, srvApp.getMuxRouter(), req)
+	if rec.Code != http.StatusForbidden {
+		t.Errorf("status = %d, want %d", rec.Code, http.StatusForbidden)
+	}
+}
+
+func TestRouterTracksAndLimitsLoginByClientIP(t *testing.T) {
+	srvApp := newTestAppNoDb(t)
+	srvApp.UseRealIpHeader = true
+	srvApp.UnauthedRateLimits = lysauth.NewAppRateLimits(0, 1, time.Hour)
+	router := srvApp.getMuxRouter()
+	ip := netip.MustParseAddr("198.51.100.7")
+
+	for _, want := range []int{http.StatusBadRequest, http.StatusTooManyRequests} {
+		req, err := http.NewRequest(http.MethodPost, "/login", strings.NewReader("{"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.RemoteAddr = "127.0.0.1:5000"
+		req.Header.Set("X-Real-IP", ip.String())
+		rec := testServe(t, router, req)
+		if rec.Code != want {
+			t.Errorf("status = %d, want %d", rec.Code, want)
+		}
+	}
+	attempts := srvApp.LoginAttempts.All()
+	if len(attempts) != 1 || attempts[0].Ip != ip {
+		t.Errorf("login attempts = %v, want one for %v", attempts, ip)
+	}
+}
+
 // Every route outside the public allowlist must be behind the authenticated subrouter.
 func TestRoutesRequireAuth(t *testing.T) {
 	srvApp := newTestAppNoDb(t)
