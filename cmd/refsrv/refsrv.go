@@ -46,8 +46,6 @@ func run(configFilePath string) error {
 	}
 	defer srvApp.Close()
 
-	//srv := newHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port)
-
 	// create HTTP server with timeout bypass for WebSocket requests
 	srv := cmd.NewHttpServer(srvApp.getRouter(), "127.0.0.1:"+conf.Api.Port, func(r *http.Request) bool {
 		return lysauth.IsWebSocket(r.Header)

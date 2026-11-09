@@ -125,6 +125,42 @@ const (
 	smokeLoginAttempt = "198.51.100.1" // TEST-NET-2: not used by the refsrv tests
 )
 
+func sysLoginAttemptTestInsertFn(loginAttemptStore sysloginattempt.Store) func(ctx context.Context, tx pgx.Tx) error {
+	return func(ctx context.Context, tx pgx.Tx) error {
+		_, err := loginAttemptStore.BulkInsertTx(ctx, tx, []sysloginattempt.Input{{
+			CreatedAt:   lystype.Datetime(time.Now()),
+			Ip:          netip.MustParseAddr(smokeLoginAttempt),
+			IsBlocked:   true,
+			NumAttempts: 5,
+		}})
+		return err
+	}
+}
+
+func sysSessionTestInsertFn(sessionStore syssession.Store) func(ctx context.Context, tx pgx.Tx) error {
+	return func(ctx context.Context, tx pgx.Tx) error {
+		now := lystype.Datetime(time.Now())
+		_, err := sessionStore.BulkInsertTx(ctx, tx, []syssession.Input{{
+			AllowMultipleSessions: true,
+			CreatedAt:             now,
+			Email:                 "test@example.com",
+			ExpiresAt:             lystype.Datetime(time.Now().Add(24 * time.Hour)),
+			FamilyName:            "Doe",
+			GivenName:             "John",
+			GeoIpCountryIsoCode:   "US",
+			GeoIpLocation:         "Test Location",
+			Ip:                    netip.MustParseAddr("198.51.100.1"),
+			LastAccessAt:          now,
+			Roles:                 []string{"Viewer"},
+			Token:                 smokeSessionToken,
+			UserAgent:             "ua",
+			UserFk:                1,
+			UserName:              "test_user",
+		}})
+		return err
+	}
+}
+
 // TestStoresSelect runs each store's Select method with a smoke test.
 // This checks the store's columns against the Postgres table or view as defined in /sql/ddl.
 func TestStoresSelect(t *testing.T) {
@@ -186,15 +222,7 @@ func TestStoresSelect(t *testing.T) {
 		{"sysextdatasync", smoke(sysextdatasync.Store{Db: pool}.Select)},
 		// session and login attempt rows are inserted by the test rather than seeded: see withRows
 		{"sysloginattempt", withRows(pool,
-			func(ctx context.Context, tx pgx.Tx) error {
-				_, err := loginAttemptStore.BulkInsertTx(ctx, tx, []sysloginattempt.Input{{
-					CreatedAt:   lystype.Datetime(time.Now()),
-					Ip:          netip.MustParseAddr(smokeLoginAttempt),
-					IsBlocked:   true,
-					NumAttempts: 5,
-				}})
-				return err
-			},
+			sysLoginAttemptTestInsertFn(loginAttemptStore),
 			fmt.Sprintf("DELETE FROM system.login_attempt WHERE ip = '%s'", smokeLoginAttempt),
 			smoke(loginAttemptStore.Select))},
 		{"sysnotification", smoke(sysnotification.Store{Db: pool}.Select)},
@@ -203,27 +231,7 @@ func TestStoresSelect(t *testing.T) {
 		{"sysrpcsession", smoke(sysrpcsession.Store{Db: pool}.Select)},
 		{"sysrpcsessionhist", smoke(sysrpcsessionhist.Store{Db: pool}.Select)},
 		{"syssession", withRows(pool,
-			func(ctx context.Context, tx pgx.Tx) error {
-				now := lystype.Datetime(time.Now())
-				_, err := sessionStore.BulkInsertTx(ctx, tx, []syssession.Input{{
-					AllowMultipleSessions: true,
-					CreatedAt:             now,
-					Email:                 "test@example.com",
-					ExpiresAt:             lystype.Datetime(time.Now().Add(24 * time.Hour)),
-					FamilyName:            "Doe",
-					GivenName:             "John",
-					GeoIpCountryIsoCode:   "US",
-					GeoIpLocation:         "Test Location",
-					Ip:                    netip.MustParseAddr("198.51.100.1"),
-					LastAccessAt:          now,
-					Roles:                 []string{"Viewer"},
-					Token:                 smokeSessionToken,
-					UserAgent:             "ua",
-					UserFk:                1,
-					UserName:              "test_user",
-				}})
-				return err
-			},
+			sysSessionTestInsertFn(sessionStore),
 			fmt.Sprintf("DELETE FROM system.session WHERE token = '%s'", smokeSessionToken),
 			smoke(sessionStore.Select))},
 		{"syssessionhist", smoke(syssessionhist.Store{Db: pool}.Select)},
