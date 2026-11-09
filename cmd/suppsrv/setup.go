@@ -55,7 +55,7 @@ func newHttpServerApplication(ctx context.Context, conf *myapp.Config) (srvApp *
 	}()
 
 	// RLS connection (main connection for queries, with company_id setting applied for RLS)
-	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, conf.General.AppName, "app.company_id", CompanyCtxKey, srvApp.Logger)
+	srvApp.Db, err = lyspgdb.GetPoolWithCtxSetting[int64](ctx, conf.Db, conf.DbServerUser, conf.General.AppName, "app.company_id", srvApp.Logger)
 	if err != nil {
 		return nil, fmt.Errorf("lyspgdb.GetPoolWithCtxSetting failed: %w", err)
 	}

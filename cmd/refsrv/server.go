@@ -99,9 +99,10 @@ func clientIPFromContext(ctx context.Context) (netip.Addr, error) {
 // limitAuthed is middleware that applies rate limiting to authenticated users based on user ID
 func (srvApp *httpServerApplication) limitAuthed(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
 		// get user info from context (set by authenticate middleware)
-		userInfo, ok := r.Context().Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+		userInfo, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo)
 		if !ok {
 			lys.HandleUserError(lys.ErrUserInfoMissing, w)
 			return
@@ -151,7 +152,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		// create user info and attach to context, to be filled in by authenticate and login later in the chain
 		// must be a pointer so that it can be overwritten
 		userInfo := &ReqUserInfo{}
-		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
+		ctx = lys.WithUserInfo(ctx, userInfo)
 
 		// exclude websocket registration: request is long-lived
 		if r.URL.Path == "/a/ws/notifications/register" {

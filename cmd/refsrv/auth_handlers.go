@@ -187,7 +187,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 
 	// update the user info in the context with the authenticated session details
 	// so that logRequest middleware can show the user name
-	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+	if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 		ui.Roles = nil // not needed
 		ui.UserId = sysUser.Id
 		ui.UserName = sysUser.Name
@@ -381,7 +381,7 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 
 	// update the user info in the context with the authenticated session details
 	// so that logRequest middleware can show the user name
-	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+	if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 		ui.Roles = nil // not needed
 		ui.UserId = sess.UserId
 		ui.UserName = sess.UserName

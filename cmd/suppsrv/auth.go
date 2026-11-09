@@ -14,8 +14,6 @@ import (
 	"github.com/loveyourstack/lys/lyspgdb"
 )
 
-const CompanyCtxKey lyspgdb.ContextKey = "CompanyKey"
-
 // authenticate is middleware that authenticates the user and adds his information to request context
 func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handler {
 
@@ -31,7 +29,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 
 		// update the user info in the context with the employee details
 		// so that logRequest middleware can show the user name
-		if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 			ui.UserId = employee.Id
 			ui.UserName = employee.GivenName + " " + employee.FamilyName
 		} else {
@@ -40,7 +38,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		}
 
 		// add the company id under a separate ctx key for use by lyspgdb.GetPoolWithCtxSetting (for RLS)
-		ctx = context.WithValue(ctx, CompanyCtxKey, employee.CompanyFk)
+		ctx = lyspgdb.WithPoolSetting(ctx, employee.CompanyFk)
 
 		// continue
 		next.ServeHTTP(w, r.WithContext(ctx))

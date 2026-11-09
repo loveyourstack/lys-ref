@@ -126,6 +126,8 @@ github.com/loveyourstack/connectors v0.3.23 h1:Tb1Ak002A1WrNjy6+iJGwkRPXKg5N1aC5
 github.com/loveyourstack/connectors v0.3.23/go.mod h1:rKs40TS1YlYMouCIVDpIVU0qeExFxx27GkXk9Y5xpHU=
 github.com/loveyourstack/connectors v0.3.24 h1:OTGfWXlP5mbbYX8UMnPzmzNI1H5fVsjoxhCcG6TUS8k=
 github.com/loveyourstack/connectors v0.3.24/go.mod h1:rKs40TS1YlYMouCIVDpIVU0qeExFxx27GkXk9Y5xpHU=
+github.com/loveyourstack/connectors v0.3.25 h1:QUwnXUReCg2GLo+0wVP08cLoqPa9MJOV2izGaxJBAxk=
+github.com/loveyourstack/connectors v0.3.25/go.mod h1:b/32OFV+4Rmb/0X7zNmauImnSSvTs9Gomv+TFgDG7sE=
 github.com/loveyourstack/lys v0.3.64 h1:V5r0nyp/HgiT7CTPBGp2VQ1/0IrvJtVmoPt9nHPC/d4=
 github.com/loveyourstack/lys v0.3.64/go.mod h1:SMnTurVkM72x3NjrOqFTtsNQ6dNlS15JE7cAv7WwPdc=
 github.com/loveyourstack/lys v0.3.65 h1:IC3jBYQaYTNWtszdNUqCH2H4MjLAFKk2fNRhpZUupUU=
@@ -144,6 +146,10 @@ github.com/loveyourstack/lys v0.3.71 h1:r7GLIOcxKBVuxxQyfSayh1ZGpgThxQ2bnyxO5WnY
 github.com/loveyourstack/lys v0.3.71/go.mod h1:Hfuz7A5rRXvChX3x0rCKvxVcgLY7ktd2sFOvsCaongI=
 github.com/loveyourstack/lys v0.3.72 h1:Zc+aOj5msWyAgxgAwQ1YnIqYMiqa8qBT/BWL9i7ioeU=
 github.com/loveyourstack/lys v0.3.72/go.mod h1:Hfuz7A5rRXvChX3x0rCKvxVcgLY7ktd2sFOvsCaongI=
+github.com/loveyourstack/lys v0.3.73 h1:EExvSZwy2iXhvTjwTTt+dyX11E1jV0nXK6u79a5qHDw=
+github.com/loveyourstack/lys v0.3.73/go.mod h1:Hfuz7A5rRXvChX3x0rCKvxVcgLY7ktd2sFOvsCaongI=
+github.com/loveyourstack/lys v0.3.74 h1:V+ZDgP8NbP0zvHInYxJsaNDNqgw3DD+stPZ0DRaW82c=
+github.com/loveyourstack/lys v0.3.74/go.mod h1:Hfuz7A5rRXvChX3x0rCKvxVcgLY7ktd2sFOvsCaongI=
 github.com/mark3labs/mcp-go v0.55.0 h1:lJfz2aoctiwK+sI991+uIYwmKNIBciI+O7zsyDsa4U8=
 github.com/mark3labs/mcp-go v0.55.0/go.mod h1:+8WclSK1ZUweCP3hvktSji8n8ABG/95QaEkeVE/Uwas=
 github.com/peterbourgon/diskv/v3 v3.0.1 h1:x06SQA46+PKIUftmEujdwSEpIx8kR+M9eLYsUxeYveU=

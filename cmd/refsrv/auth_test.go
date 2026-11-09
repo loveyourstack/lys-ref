@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"net/netip"
 	"reflect"
@@ -20,7 +19,7 @@ import (
 // withUserInfo mimics logRequest: it puts an empty *ReqUserInfo in the request context for the middleware under test to fill in.
 func withUserInfo(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), lys.UserInfoCtxKey, &ReqUserInfo{})
+		ctx := lys.WithUserInfo(r.Context(), &ReqUserInfo{})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -33,7 +32,7 @@ type nextRecorder struct {
 
 func (n *nextRecorder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	n.called = true
-	n.userInfo, _ = r.Context().Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+	n.userInfo, _ = lys.GetUserInfoFromCtx(r.Context()).(*ReqUserInfo)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -203,7 +202,7 @@ func TestAuthorizeRole(t *testing.T) {
 
 			req := newTestRequest(t)
 			if tt.userInfo != nil {
-				req = req.WithContext(context.WithValue(req.Context(), lys.UserInfoCtxKey, tt.userInfo))
+				req = req.WithContext(lys.WithUserInfo(req.Context(), tt.userInfo))
 			}
 
 			rec := testServe(t, h, req)

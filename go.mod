@@ -14,8 +14,8 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
-	github.com/loveyourstack/connectors v0.3.24
-	github.com/loveyourstack/lys v0.3.72
+	github.com/loveyourstack/connectors v0.3.25
+	github.com/loveyourstack/lys v0.3.74
 	github.com/mark3labs/mcp-go v0.55.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1

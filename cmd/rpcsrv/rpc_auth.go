@@ -100,7 +100,7 @@ func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, e
 
 	// update the user info in the context with the authenticated session details
 	// so that logRequest middleware can show the user name
-	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+	if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 		ui.Roles = nil // not needed
 		ui.UserId = sysUser.Id
 		ui.UserName = sysUser.Name

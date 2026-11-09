@@ -118,7 +118,7 @@ func (rpcApp *gRpcServerApplication) limitAuthed(ctx context.Context, req any,
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (any, error) {
 
-	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+	userInfo, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo)
 	if !ok {
 		return nil, lys.ErrUserInfoMissing
 	}
@@ -148,7 +148,7 @@ func (rpcApp *gRpcServerApplication) logRequest(ctx context.Context, req any,
 	// create user info and attach to context, to be filled in by authenticate and login later in the chain
 	// must be a pointer so that it can be overwritten
 	userInfo := &ReqUserInfo{}
-	ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
+	ctx = lys.WithUserInfo(ctx, userInfo)
 
 	// run handler with timing
 	start := time.Now()

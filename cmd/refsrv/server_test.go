@@ -78,7 +78,7 @@ func TestLimitAuthed(t *testing.T) {
 			for i, userInfo := range tt.requests {
 				req := newTestRequest(t)
 				if userInfo != nil {
-					req = req.WithContext(context.WithValue(req.Context(), lys.UserInfoCtxKey, userInfo))
+					req = req.WithContext(lys.WithUserInfo(req.Context(), userInfo))
 				}
 
 				next.called = false

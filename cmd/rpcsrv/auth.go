@@ -125,7 +125,7 @@ func (rpcApp *gRpcServerApplication) authenticate(ctx context.Context, req any,
 	}
 
 	// update the user info in the context (defined in logRequest) with the authenticated session details
-	if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+	if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 		ui.Roles = sysRoles
 		ui.UserId = sess.UserId
 		ui.UserName = sess.UserName

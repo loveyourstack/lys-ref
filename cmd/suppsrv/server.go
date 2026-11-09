@@ -67,7 +67,7 @@ func (srvApp *httpServerApplication) limit(next http.Handler) http.Handler {
 		// get remote IP from context
 		remoteHostIP, err := clientIPFromContext(ctx)
 		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: %w", err), srvApp.Logger, w)
+			lys.HandleInternalError(ctx, fmt.Errorf("limit: %w", err), srvApp.Logger, w)
 			return
 		}
 
@@ -96,7 +96,7 @@ func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler 
 		// create user info and attach to context, to be filled in by authenticate and login later in the chain
 		// must be a pointer so that it can be overwritten
 		userInfo := &ReqUserInfo{}
-		ctx = context.WithValue(ctx, lys.UserInfoCtxKey, userInfo)
+		ctx = lys.WithUserInfo(ctx, userInfo)
 
 		// use a custom writer that captures the response status code
 		sw := &lys.StatusWriter{ResponseWriter: w}

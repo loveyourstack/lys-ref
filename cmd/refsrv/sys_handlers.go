@@ -16,7 +16,7 @@ func (srvApp *httpServerApplication) sysAddFakeNotification(w http.ResponseWrite
 	ctx := r.Context()
 
 	// get user from request
-	userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+	userInfo, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo)
 	if !ok {
 		lys.HandleInternalError(ctx, fmt.Errorf("sysAddFakeNotification: user not authenticated"), srvApp.Logger, w)
 		return
@@ -139,7 +139,7 @@ func (srvApp *httpServerApplication) sysSetNotificationsToRead(env lys.Env) http
 		notsStore := sysnotification.Store{Db: srvApp.Db}
 		err = notsStore.SetUsersToRead(ctx, inp.Ids)
 		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), srvApp.Logger, w)
+			lys.HandleError(ctx, fmt.Errorf("notsStore.SetUsersToRead failed: %w", err), env.Logger, w)
 			return
 		}
 

@@ -80,7 +80,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		if srvApp.Config.General.Env == appenv.Dev && !srvApp.Config.Api.UseAuthentication {
 
 			// update the user info in the context (defined in logRequest) with the authenticated session details
-			if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+			if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 				ui.Roles = []sysrole.Enum{sysrole.Tech}
 				ui.UserId = 1
 				ui.UserName = "Unauthed Dev"
@@ -111,7 +111,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		}
 
 		// update the user info in the context (defined in logRequest) with the authenticated session details
-		if ui, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo); ok {
+		if ui, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo); ok {
 			ui.Roles = sysRoles
 			ui.UserId = sess.UserId
 			ui.UserName = sess.UserName
@@ -425,7 +425,7 @@ func authorizeRole(allowedRoles []sysrole.Enum) func(http.Handler) http.Handler 
 			ctx := r.Context()
 
 			// get the user info from context
-			userInfo, ok := ctx.Value(lys.UserInfoCtxKey).(*ReqUserInfo)
+			userInfo, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo)
 			if !ok {
 				lys.HandleUserError(lys.ErrUserInfoMissing, w)
 				return
