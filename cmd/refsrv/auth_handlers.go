@@ -136,7 +136,7 @@ func (srvApp *httpServerApplication) authLogin(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 
 	// get remote IP from context
-	remoteHostIP, err := clientIPFromContext(ctx)
+	remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("authLogin: failed to get client IP: %w", err), srvApp.Logger, w)
 		return
@@ -289,7 +289,7 @@ func (srvApp *httpServerApplication) authLogout(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 
 	// get remote IP from context
-	remoteHostIP, err := clientIPFromContext(ctx)
+	remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("authLogout: failed to get client IP: %w", err), srvApp.Logger, w)
 		return
@@ -335,7 +335,7 @@ func (srvApp *httpServerApplication) authSessionTokenLogin(w http.ResponseWriter
 	ctx := r.Context()
 
 	// get remote IP from context
-	remoteHostIP, err := clientIPFromContext(ctx)
+	remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("authSessionTokenLogin: failed to get client IP: %w", err), srvApp.Logger, w)
 		return

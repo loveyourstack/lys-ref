@@ -217,71 +217,6 @@ func TestAuthorizeRole(t *testing.T) {
 	}
 }
 
-func TestRejectBlockedIp(t *testing.T) {
-	blockedIp := netip.MustParseAddr(testRemoteIp())
-	realIp := netip.MustParseAddr("198.51.100.7")
-
-	tests := []struct {
-		name            string
-		useRealIpHeader bool
-		blocked         []netip.Addr
-		remoteAddr      string // default: the test client
-		realIpHeader    string
-		wantStatus      int
-	}{
-		{name: "not blocked", wantStatus: http.StatusNoContent},
-		{name: "blocked", blocked: []netip.Addr{blockedIp}, wantStatus: http.StatusForbidden},
-		{name: "another ip is blocked", blocked: []netip.Addr{realIp}, wantStatus: http.StatusNoContent},
-		{name: "invalid remote addr", remoteAddr: "bogus", wantStatus: http.StatusInternalServerError},
-		{
-			name: "real ip header: blocked client behind proxy", useRealIpHeader: true, blocked: []netip.Addr{realIp},
-			remoteAddr: "127.0.0.1:4000", realIpHeader: realIp.String(), wantStatus: http.StatusForbidden,
-		},
-		{
-			name: "real ip header: proxy ip is not what is checked", useRealIpHeader: true, blocked: []netip.Addr{netip.MustParseAddr("127.0.0.1")},
-			remoteAddr: "127.0.0.1:4000", realIpHeader: realIp.String(), wantStatus: http.StatusNoContent,
-		},
-		{
-			name: "real ip header: header missing", useRealIpHeader: true,
-			remoteAddr: "127.0.0.1:4000", wantStatus: http.StatusInternalServerError,
-		},
-		{
-			name: "real ip header: remote addr is not loopback", useRealIpHeader: true,
-			realIpHeader: realIp.String(), wantStatus: http.StatusInternalServerError,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			srvApp := newTestAppNoDb(t)
-			srvApp.UseRealIpHeader = tt.useRealIpHeader
-			for _, ip := range tt.blocked {
-				if err := srvApp.LoginAttempts.Block(ip); err != nil {
-					t.Fatalf("LoginAttempts.Block() error = %v", err)
-				}
-			}
-
-			next := &nextRecorder{}
-			h := srvApp.initClientIP(srvApp.rejectBlockedIp(next))
-
-			req := newTestRequest(t)
-			req.RemoteAddr = tt.remoteAddr
-			if tt.realIpHeader != "" {
-				req.Header.Set("X-Real-IP", tt.realIpHeader)
-			}
-
-			rec := testServe(t, h, req)
-
-			if rec.Code != tt.wantStatus {
-				t.Errorf("status = %d, want %d", rec.Code, tt.wantStatus)
-			}
-			if wantReached := tt.wantStatus == http.StatusNoContent; next.called != wantReached {
-				t.Errorf("next called = %v, want %v", next.called, wantReached)
-			}
-		})
-	}
-}
-
 func TestAuthenticateDevBypass(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -309,7 +244,7 @@ func TestAuthenticateDevBypass(t *testing.T) {
 			srvApp.Config.Api.UseAuthentication = tt.useAuth
 
 			next := &nextRecorder{}
-			var h http.Handler = srvApp.initClientIP(srvApp.authenticate(next))
+			var h http.Handler = lys.SetClientIp(srvApp.UseRealIpHeader, srvApp.Logger)(srvApp.authenticate(next))
 			if tt.withInfo {
 				h = withUserInfo(h)
 			}
@@ -380,7 +315,7 @@ func TestAuthenticateSession(t *testing.T) {
 			token := addTestSession(t, srvApp, 42, "alice", tt.roles)
 
 			next := &nextRecorder{}
-			var h http.Handler = srvApp.initClientIP(srvApp.authenticate(next))
+			var h http.Handler = lys.SetClientIp(srvApp.UseRealIpHeader, srvApp.Logger)(srvApp.authenticate(next))
 			if tt.withInfo {
 				h = withUserInfo(h)
 			}

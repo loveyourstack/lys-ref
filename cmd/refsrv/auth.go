@@ -70,7 +70,7 @@ func (srvApp *httpServerApplication) authenticate(next http.Handler) http.Handle
 		ctx := r.Context()
 
 		// get remote IP from context
-		remoteHostIP, err := clientIPFromContext(ctx)
+		remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 		if err != nil {
 			lys.HandleInternalError(ctx, fmt.Errorf("authenticate: failed to get client IP: %w", err), srvApp.Logger, w)
 			return
@@ -347,34 +347,6 @@ func (srvApp *httpServerApplication) persistSessions(ctx context.Context) (err e
 	}
 
 	return nil
-}
-
-// rejectBlockedIp is middleware that rejects requests from blocked IPs
-func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		remoteHostIP, err := clientIPFromContext(ctx)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: %w", err), srvApp.Logger, w)
-			return
-		}
-
-		isBlocked, err := srvApp.LoginAttempts.IsBlocked(remoteHostIP)
-		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.Logger, w)
-			return
-		}
-
-		// reject if blocked
-		if isBlocked {
-			lys.HandleUserError(lysauth.ErrBlocked, w)
-			srvApp.Logger.Debug(fmt.Sprintf("rejectBlockedIp: blocked request from IP %s - %s %s %s", remoteHostIP, r.Proto, r.Method, r.URL.RequestURI()))
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 func appLoginAttemptsToInputs(appLAs []lysauth.LoginAttempt) []sysloginattempt.Input {

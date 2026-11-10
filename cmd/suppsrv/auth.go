@@ -114,30 +114,3 @@ func (srvApp *httpServerApplication) loadBlockedIPsFromDb(ctx context.Context) (
 
 	return nil
 }
-
-// rejectBlockedIp is middleware that rejects requests from blocked IPs
-func (srvApp *httpServerApplication) rejectBlockedIp(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		remoteHostIP, err := clientIPFromContext(ctx)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("rejectBlockedIp: %w", err), srvApp.Logger, w)
-			return
-		}
-
-		isBlocked, err := srvApp.LoginAttempts.IsBlocked(remoteHostIP)
-		if err != nil {
-			lys.HandleError(ctx, fmt.Errorf("rejectBlockedIp: srvApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIP, err), srvApp.Logger, w)
-			return
-		}
-
-		// reject if blocked
-		if isBlocked {
-			lys.HandleUserError(lysauth.ErrBlocked, w)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}

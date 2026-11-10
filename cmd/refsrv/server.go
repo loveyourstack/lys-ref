@@ -5,9 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/netip"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/loveyourstack/connectors/aws/stores/awsusersgrule"
@@ -70,80 +68,13 @@ type httpServerApplication struct {
 	AwsBedrockClient *awsbedrockapi.Client
 }
 
-type clientIpCtxKeyType struct{}
-
-var clientIpCtxKey = clientIpCtxKeyType{}
-
-// initClientIP resolves the client IP once for the rest of the request chain.
-func (srvApp *httpServerApplication) initClientIP(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		remoteHostIP, err := lysauth.GetIpAddrFromReq(r, srvApp.UseRealIpHeader)
-		if err != nil {
-			lys.HandleInternalError(ctx, fmt.Errorf("initClientIP: lysauth.GetIpAddrFromReq failed: %w", err), srvApp.Logger, w)
-			return
-		}
-		ctx = context.WithValue(ctx, clientIpCtxKey, remoteHostIP)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-func clientIPFromContext(ctx context.Context) (netip.Addr, error) {
-	ip, ok := ctx.Value(clientIpCtxKey).(netip.Addr)
-	if !ok || !ip.IsValid() {
-		return netip.Addr{}, fmt.Errorf("client IP missing or invalid in context")
-	}
-	return ip, nil
-}
-
-// limitAuthed is middleware that applies rate limiting to authenticated users based on user ID
-func (srvApp *httpServerApplication) limitAuthed(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		// get user info from context (set by authenticate middleware)
-		userInfo, ok := lys.GetUserInfoFromCtx(ctx).(*ReqUserInfo)
-		if !ok {
-			lys.HandleUserError(lys.ErrUserInfoMissing, w)
-			return
-		}
-		key := strconv.FormatInt(userInfo.UserId, 10)
-
-		// check rate limit
-		if !srvApp.AuthedRateLimits.Allow(key) {
-			lys.HandleUserError(lysauth.ErrTooManyRequests, w)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-// limitUnauthed is middleware that applies rate limiting to unauthenticated users based on IP
-func (srvApp *httpServerApplication) limitUnauthed(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		ip, err := clientIPFromContext(r.Context())
-		if err != nil {
-			lys.HandleInternalError(r.Context(), fmt.Errorf("limitUnauthed: %w", err), srvApp.Logger, w)
-			return
-		}
-
-		// check rate limit
-		if !srvApp.UnauthedRateLimits.Allow(ip.String()) {
-			lys.HandleUserError(lysauth.ErrTooManyRequests, w)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 // logRequest is middleware that logs requests in the app's info log and the database for activity monitoring.
 func (srvApp *httpServerApplication) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		// get remote IP from context
-		remoteHostIP, err := clientIPFromContext(ctx)
+		remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 		if err != nil {
 			lys.HandleInternalError(ctx, fmt.Errorf("logRequest: %w", err), srvApp.Logger, w)
 			return
@@ -235,7 +166,7 @@ func rpcDefaultDeadlineUnaryInterceptor(timeout time.Duration) grpc.UnaryClientI
 // rpcForwardIpUnaryInterceptor sets x-real-ip on outgoing RPCs to the end user's IP, which the RPC server requires in prod
 func rpcForwardIpUnaryInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ip, err := clientIPFromContext(ctx)
+		ip, err := lysauth.ClientIpFromCtx(ctx)
 		if err != nil {
 			return fmt.Errorf("rpcForwardIpUnaryInterceptor: %w", err)
 		}
@@ -253,14 +184,3 @@ func (c rpcKeyCredentials) GetRequestMetadata(ctx context.Context, uri ...string
 
 // RequireTransportSecurity is false because the RPC server is only reached over loopback.
 func (c rpcKeyCredentials) RequireTransportSecurity() bool { return false }
-
-// secureHeaders is middleware that add XSS protection headers to responses
-func secureHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
-		w.Header().Set("X-Frame-Options", "deny")
-
-		next.ServeHTTP(w, r)
-	})
-}

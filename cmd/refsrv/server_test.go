@@ -18,215 +18,21 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func TestSecureHeaders(t *testing.T) {
-	next := &nextRecorder{}
-	rec := testServe(t, secureHeaders(next), newTestRequest(t))
-
-	if !next.called {
-		t.Fatal("next handler was not called")
-	}
-	if rec.Code != http.StatusNoContent {
-		t.Errorf("status = %d, want %d", rec.Code, http.StatusNoContent)
-	}
-	for header, want := range map[string]string{
-		"X-XSS-Protection": "1; mode=block",
-		"X-Frame-Options":  "deny",
-	} {
-		if got := rec.Header().Get(header); got != want {
-			t.Errorf("%s = %q, want %q", header, got, want)
-		}
-	}
-}
-
-func TestLimitAuthed(t *testing.T) {
-	tests := []struct {
-		name     string
-		burst    int
-		requests []*ReqUserInfo // one request each, in order; nil: no user info in context
-		want     []int
-	}{
-		{
-			name: "user info missing", burst: 2,
-			requests: []*ReqUserInfo{nil},
-			want:     []int{http.StatusUnauthorized},
-		},
-		{
-			name: "within burst", burst: 2,
-			requests: []*ReqUserInfo{{UserId: 1}, {UserId: 1}},
-			want:     []int{http.StatusNoContent, http.StatusNoContent},
-		},
-		{
-			name: "burst exceeded", burst: 2,
-			requests: []*ReqUserInfo{{UserId: 1}, {UserId: 1}, {UserId: 1}},
-			want:     []int{http.StatusNoContent, http.StatusNoContent, http.StatusTooManyRequests},
-		},
-		{
-			name: "limit is per user", burst: 1,
-			requests: []*ReqUserInfo{{UserId: 1}, {UserId: 2}, {UserId: 1}, {UserId: 2}},
-			want:     []int{http.StatusNoContent, http.StatusNoContent, http.StatusTooManyRequests, http.StatusTooManyRequests},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			srvApp := newTestAppNoDb(t)
-			srvApp.AuthedRateLimits = lysauth.NewAppRateLimits(0, tt.burst, time.Hour) // no refill: only the burst is allowed
-
-			next := &nextRecorder{}
-			h := srvApp.limitAuthed(next)
-
-			for i, userInfo := range tt.requests {
-				req := newTestRequest(t)
-				if userInfo != nil {
-					req = req.WithContext(lys.WithUserInfo(req.Context(), userInfo))
-				}
-
-				next.called = false
-				rec := testServe(t, h, req)
-
-				if rec.Code != tt.want[i] {
-					t.Errorf("request %d: status = %d, want %d", i, rec.Code, tt.want[i])
-				}
-				if wantReached := tt.want[i] == http.StatusNoContent; next.called != wantReached {
-					t.Errorf("request %d: next called = %v, want %v", i, next.called, wantReached)
-				}
-			}
-		})
-	}
-}
-
-func TestLimitUnauthed(t *testing.T) {
-	type request struct {
-		remoteAddr   string // default: the test client
-		realIpHeader string
-		want         int
-	}
-
-	tests := []struct {
-		name            string
-		useRealIpHeader bool
-		burst           int
-		requests        []request
-	}{
-		{
-			name: "within burst", burst: 2,
-			requests: []request{{want: http.StatusNoContent}, {want: http.StatusNoContent}},
-		},
-		{
-			name: "burst exceeded", burst: 2,
-			requests: []request{{want: http.StatusNoContent}, {want: http.StatusNoContent}, {want: http.StatusTooManyRequests}},
-		},
-		{
-			name: "limit is per ip", burst: 1,
-			requests: []request{
-				{remoteAddr: "192.0.2.10:1000", want: http.StatusNoContent},
-				{remoteAddr: "192.0.2.11:1000", want: http.StatusNoContent},
-				{remoteAddr: "192.0.2.10:2000", want: http.StatusTooManyRequests}, // same ip, different port
-			},
-		},
-		{
-			name: "invalid remote addr", burst: 1,
-			requests: []request{{remoteAddr: "bogus", want: http.StatusInternalServerError}},
-		},
-		{
-			name: "real ip header: limit is per client behind the proxy", useRealIpHeader: true, burst: 1,
-			requests: []request{
-				{remoteAddr: "127.0.0.1:4000", realIpHeader: "198.51.100.1", want: http.StatusNoContent},
-				{remoteAddr: "127.0.0.1:4000", realIpHeader: "198.51.100.2", want: http.StatusNoContent},
-				{remoteAddr: "127.0.0.1:4001", realIpHeader: "198.51.100.1", want: http.StatusTooManyRequests},
-			},
-		},
-		{
-			name: "real ip header: missing header", useRealIpHeader: true, burst: 1,
-			requests: []request{{remoteAddr: "127.0.0.1:4000", want: http.StatusInternalServerError}},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			srvApp := newTestAppNoDb(t)
-			srvApp.UseRealIpHeader = tt.useRealIpHeader
-			srvApp.UnauthedRateLimits = lysauth.NewAppRateLimits(0, tt.burst, time.Hour) // no refill: only the burst is allowed
-
-			next := &nextRecorder{}
-			h := srvApp.initClientIP(srvApp.limitUnauthed(next))
-
-			for i, r := range tt.requests {
-				req := newTestRequest(t)
-				req.RemoteAddr = r.remoteAddr
-				if r.realIpHeader != "" {
-					req.Header.Set("X-Real-IP", r.realIpHeader)
-				}
-
-				next.called = false
-				rec := testServe(t, h, req)
-
-				if rec.Code != r.want {
-					t.Errorf("request %d: status = %d, want %d", i, rec.Code, r.want)
-				}
-				if wantReached := r.want == http.StatusNoContent; next.called != wantReached {
-					t.Errorf("request %d: next called = %v, want %v", i, next.called, wantReached)
-				}
-			}
-		})
-	}
-}
-
-func TestInitClientIP(t *testing.T) {
-	tests := []struct {
-		name            string
-		useRealIpHeader bool
-		remoteAddr      string
-		realIpHeader    string
-		wantIP          string
-		wantStatus      int
-	}{
-		{name: "remote address", remoteAddr: "192.0.2.10:5000", wantIP: "192.0.2.10", wantStatus: http.StatusNoContent},
-		{name: "ipv6", remoteAddr: "[2001:db8::1]:5000", wantIP: "2001:db8::1", wantStatus: http.StatusNoContent},
-		{name: "trusted proxy", useRealIpHeader: true, remoteAddr: "127.0.0.1:5000", realIpHeader: "198.51.100.7", wantIP: "198.51.100.7", wantStatus: http.StatusNoContent},
-		{name: "invalid address", remoteAddr: "bogus", wantStatus: http.StatusInternalServerError},
-		{name: "missing header", useRealIpHeader: true, remoteAddr: "127.0.0.1:5000", wantStatus: http.StatusInternalServerError},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			srvApp := newTestAppNoDb(t)
-			srvApp.UseRealIpHeader = tt.useRealIpHeader
-			called := false
-			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				called = true
-				ip, err := clientIPFromContext(r.Context())
-				if err != nil || ip.String() != tt.wantIP {
-					t.Errorf("clientIPFromContext() = %v, %v, want %s", ip, err, tt.wantIP)
-				}
-				w.WriteHeader(http.StatusNoContent)
-			})
-			req := newTestRequest(t)
-			req.RemoteAddr = tt.remoteAddr
-			req.Header.Set("X-Real-IP", tt.realIpHeader)
-			rec := testServe(t, srvApp.initClientIP(next), req)
-			if rec.Code != tt.wantStatus || called != (tt.wantStatus == http.StatusNoContent) {
-				t.Errorf("status = %d, called = %t; want %d, %t", rec.Code, called, tt.wantStatus, tt.wantStatus == http.StatusNoContent)
-			}
-		})
-	}
-}
-
 func TestClientIPConsumersRejectInvalidContext(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  context.Context
 	}{
 		{name: "missing", ctx: context.Background()},
-		{name: "wrong type", ctx: context.WithValue(context.Background(), clientIpCtxKey, "192.0.2.10")},
-		{name: "invalid address", ctx: context.WithValue(context.Background(), clientIpCtxKey, netip.Addr{})},
+		{name: "invalid address", ctx: lysauth.WithClientIp(context.Background(), netip.Addr{})},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			srvApp := newTestAppNoDb(t)
 			handlers := map[string]func(http.Handler) http.Handler{
 				"logRequest":      srvApp.logRequest,
-				"rejectBlockedIp": srvApp.rejectBlockedIp,
-				"limitUnauthed":   srvApp.limitUnauthed,
+				"rejectBlockedIp": lys.RejectBlockedIp(srvApp.LoginAttempts, srvApp.Logger),
+				"limitUnauthed":   lys.LimitUnauthed(srvApp.UnauthedRateLimits, srvApp.Logger),
 			}
 			for name, middleware := range handlers {
 				t.Run(name, func(t *testing.T) {
@@ -237,18 +43,6 @@ func TestClientIPConsumersRejectInvalidContext(t *testing.T) {
 					}
 				})
 			}
-			t.Run("authTrackLoginAttempt", func(t *testing.T) {
-				req := newTestRequest(t).WithContext(tt.ctx)
-				rec := testServe(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					ok := srvApp.authTrackLoginAttempt(r.Context(), w, r, netip.MustParseAddr("192.0.2.10"), "test")
-					if ok {
-						t.Error("authTrackLoginAttempt succeeded")
-					}
-				}), req)
-				if rec.Code != http.StatusInternalServerError || srvApp.LoginAttempts.Count() != 0 {
-					t.Errorf("status = %d, attempts = %d; want 500, 0", rec.Code, srvApp.LoginAttempts.Count())
-				}
-			})
 		})
 	}
 }
@@ -266,13 +60,15 @@ func TestClientIPUsedThroughoutChain(t *testing.T) {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
-	chain := srvApp.logRequest(srvApp.rejectBlockedIp(srvApp.limitUnauthed(next)))
+	chain := srvApp.logRequest(lys.RejectBlockedIp(srvApp.LoginAttempts, srvApp.Logger)(
+		lys.LimitUnauthed(srvApp.UnauthedRateLimits, srvApp.Logger)(next),
+	))
 	mutateRequest := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.RemoteAddr = "198.51.100.7:1234"
 		r.Header.Set("X-Real-IP", "198.51.100.7")
 		chain.ServeHTTP(w, r)
 	})
-	h := srvApp.initClientIP(mutateRequest)
+	h := lys.SetClientIp(srvApp.UseRealIpHeader, srvApp.Logger)(mutateRequest)
 	for _, want := range []int{http.StatusNoContent, http.StatusTooManyRequests} {
 		req := newTestRequest(t)
 		req.RemoteAddr = "192.0.2.10:5000"
@@ -306,9 +102,9 @@ func TestRejectBlockedIpUsesContext(t *testing.T) {
 			}
 			req := newTestRequest(t)
 			req.RemoteAddr = "198.51.100.7:1234"
-			ctx := context.WithValue(req.Context(), clientIpCtxKey, netip.MustParseAddr("192.0.2.10"))
+			ctx := lysauth.WithClientIp(req.Context(), netip.MustParseAddr("192.0.2.10"))
 			next := &nextRecorder{}
-			rec := testServe(t, srvApp.rejectBlockedIp(next), req.WithContext(ctx))
+			rec := testServe(t, lys.RejectBlockedIp(srvApp.LoginAttempts, srvApp.Logger)(next), req.WithContext(ctx))
 			if rec.Code != tt.wantStatus || next.called != (tt.wantStatus == http.StatusNoContent) {
 				t.Errorf("status = %d, next called = %t; want %d", rec.Code, next.called, tt.wantStatus)
 			}
@@ -389,7 +185,7 @@ func TestRpcDefaultDeadlineUnaryInterceptor(t *testing.T) {
 
 func TestRpcForwardIpUnaryInterceptor(t *testing.T) {
 	ipCtx := func(ip string) context.Context {
-		return context.WithValue(context.Background(), clientIpCtxKey, netip.MustParseAddr(ip))
+		return lysauth.WithClientIp(context.Background(), netip.MustParseAddr(ip))
 	}
 
 	tests := []struct {
@@ -414,8 +210,8 @@ func TestRpcForwardIpUnaryInterceptor(t *testing.T) {
 		},
 		{
 			name: "existing metadata kept",
-			ctx: context.WithValue(metadata.AppendToOutgoingContext(context.Background(), "x-other", "v"),
-				clientIpCtxKey, netip.MustParseAddr("192.0.2.10")),
+			ctx: lysauth.WithClientIp(metadata.AppendToOutgoingContext(context.Background(), "x-other", "v"),
+				netip.MustParseAddr("192.0.2.10")),
 			wantCalled: true,
 			wantMd:     map[string][]string{"x-real-ip": {"192.0.2.10"}, "x-other": {"v"}},
 		},
@@ -425,13 +221,8 @@ func TestRpcForwardIpUnaryInterceptor(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "client ip has wrong type",
-			ctx:     context.WithValue(context.Background(), clientIpCtxKey, "192.0.2.10"),
-			wantErr: true,
-		},
-		{
 			name:    "client ip is invalid",
-			ctx:     context.WithValue(context.Background(), clientIpCtxKey, netip.Addr{}),
+			ctx:     lysauth.WithClientIp(context.Background(), netip.Addr{}),
 			wantErr: true,
 		},
 		{

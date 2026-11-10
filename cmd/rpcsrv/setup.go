@@ -24,6 +24,7 @@ import (
 	"github.com/loveyourstack/lys/lysapi"
 	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyspgdb"
+	"github.com/loveyourstack/lys/lysrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -112,13 +113,13 @@ func (rpcApp *gRpcServerApplication) attachStores() {
 
 func newGrpcServer(rpcApp *gRpcServerApplication) *grpc.Server {
 	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-		rpcApp.initClientIP,    // add client IP to ctx, for use later in the chain
-		rpcApp.logRequest,      // initialize userInfo in context and record final status and duration
-		rpcApp.mapError,        // convert errors to gRPC status codes
-		rpcApp.rejectBlockedIp, // check if the request comes from a blocked IP
-		rpcApp.limitUnauthed,   // rate limit public methods by IP
-		rpcApp.authenticate,    // authenticate requests and update userInfo in context
-		rpcApp.limitAuthed,     // rate limit authenticated methods by user ID
+		lysrpc.SetClientIp(rpcApp.UseRealIpHeader, rpcApp.Logger), // add client IP to ctx, for use later in the chain
+		rpcApp.logRequest,              // initialize userInfo in context and record final status and duration
+		lysrpc.MapError(rpcApp.Logger), // convert errors to gRPC status codes
+		lysrpc.RejectBlockedIp(rpcApp.LoginAttempts, rpcApp.Logger), // check if the request comes from a blocked IP
+		rpcApp.limitUnauthed, // rate limit public methods by IP
+		rpcApp.authenticate,  // authenticate requests and update userInfo in context
+		rpcApp.limitAuthed,   // rate limit authenticated methods by user ID
 	))
 
 	pb.RegisterAuthSvcServer(grpcServer, &authSrv{gRpcServerApplication: rpcApp,

@@ -200,9 +200,9 @@ func (rpcApp *gRpcServerApplication) authGetSession(ctx context.Context) (sess l
 	}
 
 	// get remote IP from context
-	remoteHostIp, err := clientIPFromContext(ctx)
+	remoteHostIp, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
-		return lysauth.Session{}, fmt.Errorf("authGetSession: clientIPFromContext failed: %w", err)
+		return lysauth.Session{}, fmt.Errorf("authGetSession: lysauth.ClientIpFromCtx failed: %w", err)
 	}
 
 	// check for service account access via API key
@@ -443,30 +443,6 @@ func (rpcApp *gRpcServerApplication) recordFailedAttempt(ctx context.Context, ip
 	}
 
 	return err // includes ErrBlocked
-}
-
-func (rpcApp *gRpcServerApplication) rejectBlockedIp(ctx context.Context, req any,
-	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
-) (any, error) {
-
-	// get remote IP from context
-	remoteHostIp, err := clientIPFromContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
-	}
-
-	isBlocked, err := rpcApp.LoginAttempts.IsBlocked(remoteHostIp)
-	if err != nil {
-		return nil, fmt.Errorf("rpcApp.LoginAttempts.IsBlocked failed for IP %s: %w", remoteHostIp, err)
-	}
-
-	// reject if blocked
-	if isBlocked {
-		rpcApp.Logger.Debug(fmt.Sprintf("rejectBlockedIp: blocked request from IP %s", remoteHostIp))
-		return nil, status.Error(codes.PermissionDenied, "blocked IP")
-	}
-
-	return handler(ctx, req)
 }
 
 func appLoginAttemptsToInputs(appLAs []lysauth.LoginAttempt) []sysrpcloginattempt.Input {

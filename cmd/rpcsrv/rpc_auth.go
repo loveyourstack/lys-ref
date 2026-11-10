@@ -20,7 +20,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -51,9 +50,9 @@ func (s *authSrv) ListSessions(ctx context.Context, req *pb.EmptyReq) (*pb.ListS
 func (s *authSrv) Login(ctx context.Context, req *pb.LoginReq) (*pb.LoginResp, error) {
 
 	// get remote IP from context
-	remoteHostIp, err := clientIPFromContext(ctx)
+	remoteHostIp, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("clientIPFromContext failed: %w", err)
+		return nil, fmt.Errorf("lysauth.ClientIpFromCtx failed: %w", err)
 	}
 
 	// track login attempt
@@ -253,48 +252,6 @@ func getBearerToken(md metadata.MD) (string, error) {
 	return lysauth.GetBearerToken(authVals[0])
 }
 
-func getRemoteAddr(ctx context.Context) (remoteAddr string, err error) {
-
-	p, ok := peer.FromContext(ctx)
-	if ok {
-		remoteAddr = p.Addr.String()
-	} else {
-		return "", fmt.Errorf("failed to get remote address from peer context")
-	}
-
-	if remoteAddr == "" {
-		return "", fmt.Errorf("remote address is empty")
-	}
-
-	return remoteAddr, nil
-}
-
-func getRemoteHostIp(ctx context.Context, useRealIpHeader bool) (netip.Addr, error) {
-
-	// get remote addr from peer context
-	remoteAddr, err := getRemoteAddr(ctx)
-	if err != nil {
-		return netip.Addr{}, err
-	}
-
-	// get x-real-ip header from metadata if needed
-	xrealIpVal := ""
-	if useRealIpHeader {
-		xrealIpVal, err = getXRealIp(ctx)
-		if err != nil {
-			return netip.Addr{}, err
-		}
-	}
-
-	// resolve remote ip
-	remoteHostIp, err := lysauth.GetIpAddr(remoteAddr, xrealIpVal, useRealIpHeader)
-	if err != nil {
-		return netip.Addr{}, fmt.Errorf("lysauth.GetIpAddr failed: %w", err)
-	}
-
-	return remoteHostIp, nil
-}
-
 func getUserAgent(ctx context.Context) (userAgent string, err error) {
 
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -308,19 +265,4 @@ func getUserAgent(ctx context.Context) (userAgent string, err error) {
 	}
 
 	return strings.Join(userAgents, ","), nil
-}
-
-func getXRealIp(ctx context.Context) (xrealIpVal string, err error) {
-
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return "", fmt.Errorf("failed to get metadata from context")
-	}
-
-	xrealIp := md.Get("x-real-ip")
-	if len(xrealIp) == 0 {
-		return "", fmt.Errorf("x-real-ip header not found")
-	}
-
-	return strings.Join(xrealIp, ","), nil
 }

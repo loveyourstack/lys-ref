@@ -8,6 +8,7 @@ import (
 	"github.com/loveyourstack/lys"
 	"github.com/loveyourstack/lys-ref/internal/enums/appenv"
 	"github.com/loveyourstack/lys-ref/templates"
+	"github.com/loveyourstack/lys/lysauth"
 	"github.com/loveyourstack/lys/lyserr"
 	"github.com/loveyourstack/lys/lysmail"
 )
@@ -84,7 +85,7 @@ func (srvApp *httpServerApplication) awsUpdateUserSecurityGroupRules(w http.Resp
 	}
 
 	// get remote IP from context
-	remoteHostIP, err := clientIPFromContext(ctx)
+	remoteHostIP, err := lysauth.ClientIpFromCtx(ctx)
 	if err != nil {
 		lys.HandleInternalError(ctx, fmt.Errorf("awsUpdateUserSecurityGroupRules: failed to get client IP: %w", err), srvApp.Logger, w)
 		return
